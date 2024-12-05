@@ -1,6 +1,6 @@
-# karynos-app
+# karynos-ai
 
-karynosのai-module以外のサーバー・フロントエンド部分のソースコードです．
+karynosのAPIサーバーのソースコード
 
 ## 言語・環境
 
@@ -8,28 +8,20 @@ karynosのai-module以外のサーバー・フロントエンド部分のソー�
 
 ## フォルダ構成
 
-```
-root
-│  docker-compose.yml
-│  Dockerfile
-│  README.md
-│
-└─app
-    │  package.json
-    │
-    ├─src
-    │  ├─config
-    │  ├─controllers
-    │  ├─middlewares
-    │  ├─models
-    │  ├─routes
-    │  ├─services
-    │  ├─tests
-    │  └─utils
-    └─static
+## 開発環境の構築方法
 
 ```
+git clone -b develop https://github.com/Propositio-admin/karynos-api.git
+cd karynos-api
+docker-compose build
+docker-compose up -d
 
-## インストール方法
+# dokcer内に入る
+docker-compose exec python bash
 
+# docker内から出る方法
+exit
+```
 ## テストコード
+
+## デプロイ方法
