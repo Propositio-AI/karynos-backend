@@ -1,18 +1,66 @@
 import uuid
 
 class User:
+    """
+    
+    接続中のユーザーの情報を管理するクラス
+
+    Methods
+    ----------
+        open_user(userID)
+            接続ユーザーの追加
+        
+        open_request(rcv_data)
+            ユーザからの新規メッセージ
+    """
+
     def __init__(self):
        self.userID_list = []
        self.request_list = {}
 
-    def open_user(self, userID):
-        self.userID_list.append(userID)
+    def open_user(self, id:str):
+        """
+
+        接続ユーザーの追加
+
+        Parameters
+        ----------
+            userID : str
+                ユーザーID
+
+        Returns
+        ----------
+            返り値１：返り値の型    
+                返り値の内容
+            
+        """
+
+        self.userID_list.append(id)
         return "success"
     
     def open_request(self, rcv_data):
+
+        """
+
+        ユーザーからの新規メッセージ
+
+        Parameters
+        ----------
+            rcv_data : dict
+                ユーザーから送られてきたデータ
+
+        Returns
+        ----------
+            返り値１：返り値の型    
+                返り値の内容
+            
+        """
+
         userID = rcv_data["id"]
+
         if userID in self.userID_list:
             request_ID = uuid.uuid1()
+
             self.request_list[request_ID] = {
                 "userID":userID,
                 "request_message":rcv_data["message"],
@@ -22,6 +70,7 @@ class User:
                     "response":[]
                 }
             }
+
             ai_send_data = {
                 "type":"message",
                 "request_ID":request_ID,
@@ -29,15 +78,19 @@ class User:
                     "message":rcv_data["message"]
                     }
                 }
+            
             return ai_send_data
+        
         else:
             return "error"
         
     def response_save(self, rcv_data):
         request_ID = rcv_data["request_ID"]
+
         match rcv_data["type"]:
             case "respons":
                 self.request_list[request_ID]["data"]["response"].append(rcv_data["data"])
+
                 web_send_data = {
                     "type":"response",
                     "status":"success",
@@ -45,9 +98,11 @@ class User:
                     "message":"",
                     "data":rcv_data["data"]
                 }
+
                 return web_send_data
             case "archiDraft":
                 self.request_list[request_ID]["data"]["archiDraft"] = rcv_data["data"]
+
                 web_send_data = {
                     "type":"archiDraft",
                     "status":"success",
@@ -55,13 +110,16 @@ class User:
                     "message":"",
                     "data":rcv_data["data"]
                 }
+
                 return web_send_data
             case "endResponse":
                 self.request_list[request_ID]["execution"] = "done"
+
                 web_send_data = {
                     "type":"endResponse",
                     "status":"success",
                     "id":self.request_list[request_ID]["userID"],
                     "message":"",
                 }
+                
                 return web_send_data

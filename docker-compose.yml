@@ -1,13 +1,11 @@
 services:
-  python:
+  app:
     build: .
     volumes:
       - './app:/app'
+    environment: 
+      AI_SERVER_IP: ""
+    ports:
+      - 8000:8000
     tty: true
     stdin_open: true
-    ports:
-      - 8001:8001
-      - 8002:8002
-      - 8003:8003
-      - 8004:8004
-      - 8005:8005
