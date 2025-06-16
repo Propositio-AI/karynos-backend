@@ -1,1 +1,3 @@
-# karynos-app
+# karynos-backend
+
+## フォルダ構成
