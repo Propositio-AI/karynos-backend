@@ -4,7 +4,7 @@ from uuid6 import uuid7
 
 from sqlalchemy.schema import Column
 from sqlalchemy import Index
-from sqlalchemy.types import DateTime, VARCHAR, UUID, JSON
+from sqlalchemy.types import DateTime, VARCHAR, INTEGER
 
 from models import Base
 
@@ -14,10 +14,9 @@ class UserTypeTable(Base):
     __tablename__ = "user_type"
 
     id = Column(
-        UUID(as_uuid=True),
+        INTEGER,
         primary_key=True,
         nullable=False,
-        default=uuid7
     )
     type = Column(
         VARCHAR,

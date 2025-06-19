@@ -4,7 +4,11 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Service Name
-    PROJECT_NAME:str = "Auth Service"
+    SERVICE_NAME:str
+
+    # API Setting
+    PREFIX:str
+    TAG:str
 
     # Auth Setting
     TOKEN_TOKEN_EXPIRES_MINUTES:int = 15
@@ -25,10 +29,10 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        # Production
+        # ProducStion
         # env_file = ".env"    
 
         # Developing
-        env_file = ".env_dev"
+        env_file = ".env_dev"   
 
 settings = Settings()

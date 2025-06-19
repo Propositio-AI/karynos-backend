@@ -24,10 +24,6 @@ class RefreshTable(Base):
         nullable=False,
         default=uuid7
     )
-    email = Column(
-        VARCHAR,
-        nullable=False
-    )
     token = Column(
         VARCHAR,
         unique=True,
@@ -40,7 +36,8 @@ class RefreshTable(Base):
     )
     expires_at = Column(
         DateTime,
-        nullable=False
+        nullable=False,
+        default=default_expires_at
     )
     used_at = Column(
         DateTime,
@@ -48,7 +45,7 @@ class RefreshTable(Base):
     )
 
     __table_args__ = (
-        Index("idx_email_expires_at", email, expires_at),
+        Index("token", token),
         CheckConstraint(expires_at > created_at, name="expires_after_created"),
         CheckConstraint(used_at > expires_at, name="used_before_expires"),
     )

@@ -3,16 +3,6 @@ from models.AuthTable import AuthTable
 from schemas.AuthSchema import AuthSchema
 from datetime import datetime
 
-"""
-
-get_*	取得（1件またはリスト）
-create_*	新規作成
-update_*	更新
-delete_*	削除
-exists_*, is_*	真偽判定や存在チェックなど
-
-"""
-
 def create_token(db: Session, data: AuthSchema):
     new_token = AuthTable(**data.model_dump())
     db.add(new_token)

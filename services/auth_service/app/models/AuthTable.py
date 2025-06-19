@@ -6,7 +6,7 @@ from sqlalchemy.schema import Column
 from sqlalchemy import Index, CheckConstraint
 from sqlalchemy.types import DateTime, VARCHAR, UUID
 from datetime import timedelta
-from models import Base
+from models.AuthTable import Base
 
 from core.config import settings
 from utils.time import get_utc_time

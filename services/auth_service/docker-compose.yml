@@ -3,7 +3,7 @@ services:
     container_name: "auth-service"
     build: .
     ports:
-      - 8000:8000
+      - "${APP_PORT}:8000"
     depends_on:
       - auth-db
     volumes:
@@ -17,8 +17,6 @@ services:
     image: postgres:17.5
     environment:
       - TZ=Asia/Tokyo
-    ports:
-      - 15432:5432
     env_file:
       - .env_dev
     volumes:

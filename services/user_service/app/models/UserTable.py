@@ -3,8 +3,8 @@
 from uuid6 import uuid7
 
 from sqlalchemy.schema import Column
-from sqlalchemy import Index
-from sqlalchemy.types import DateTime, VARCHAR, UUID, Integer
+from sqlalchemy import Index, ForeignKey
+from sqlalchemy.types import DateTime, VARCHAR, UUID, INTEGER
 
 from models import Base
 
@@ -33,19 +33,20 @@ class UserTable(Base):
         unique=True
     )
     user_type = Column(
-        UUID(as_uuid=True),
-        nullable=True
+        INTEGER,
+        ForeignKey("user_type.id"),
+        nullable=True,
     )
     grade = Column(
-        Integer,
+        INTEGER,
         nullable=True
     )
     class_no = Column(
-        Integer,
+        INTEGER,
         nullable=True
     )
     student_no = Column(
-        Integer,
+        INTEGER,
         nullable=True
     )
     school = Column(
