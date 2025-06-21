@@ -7,15 +7,13 @@ from pydantic import BaseModel
 
 class ArchiveSchema(BaseModel):
     id: uuid.UUID = None
-    query_id: uuid.UUID 
-    user_id: uuid.UUID
-    drawing_data: Dict[str, str]
-    canvas_w: float
-    canvas_h: float
+    type: int 
+    share_type: int
+    contents: Dict[str, str]
+    contents_metadata: Dict[str, str]
     created_at: datetime = None
-    updated_at: datetime = None
 
 class newArchiveModel(BaseModel):
     type: int
     contents: Dict[str, str]
-    metadata: Dict[str, str]
+    contents_metadata: Dict[str, str]

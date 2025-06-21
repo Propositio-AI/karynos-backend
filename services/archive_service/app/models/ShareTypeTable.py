@@ -2,7 +2,7 @@ from sqlalchemy.schema import Column
 from sqlalchemy import Index
 from sqlalchemy.types import DateTime, INTEGER, VARCHAR
 
-from models import Base
+from models.base import Base
 
 from utils.time import get_utc_time
 

@@ -4,7 +4,7 @@ from sqlalchemy.schema import Column
 from sqlalchemy import Index
 from sqlalchemy.types import DateTime, UUID, INTEGER, JSON
 
-from models import Base
+from models.base import Base
 
 from utils.time import get_utc_time
 
@@ -23,13 +23,14 @@ class ArchiveTable(Base):
     )
     share_type = Column(
         INTEGER,
-        nullable=False
+        nullable=False,
+        default=0
     )
-    contens = Column(
+    contents = Column(
         JSON,
         nullable=False
     )
-    metadata = Column(
+    contents_metadata = Column(
         JSON,
         nullable=False
     )

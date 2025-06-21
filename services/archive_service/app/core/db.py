@@ -1,5 +1,7 @@
 # Create SQLAlchemy Session
 
+from models.ArchiveTable import ArchiveTable
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from core.config import settings
