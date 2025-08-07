@@ -6,7 +6,7 @@ from sqlalchemy.types import DateTime, UUID, INTEGER, BOOLEAN, VARCHAR
 
 from models import Base
 
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 class MailTable(Base):
     __tablename__ = "mail"

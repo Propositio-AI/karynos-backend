@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from pydantic import BaseModel
 
-class AuthSchema(BaseModel):
+class AuthTableSchema(BaseModel):
     id: uuid.UUID = None
     email:str
     token: uuid.UUID = None
@@ -10,5 +10,5 @@ class AuthSchema(BaseModel):
     expires_at: datetime = None
     used_at: datetime = None
 
-class MailModel(BaseModel):
+class MailSchema(BaseModel):
     email: str

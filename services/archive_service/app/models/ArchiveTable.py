@@ -1,12 +1,12 @@
 from uuid6 import uuid7
 
 from sqlalchemy.schema import Column
-from sqlalchemy import Index
+from sqlalchemy import Index, ForeignKey
 from sqlalchemy.types import DateTime, UUID, INTEGER, JSON
 
 from models.base import Base
 
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 class ArchiveTable(Base):
     __tablename__ = "archive"
@@ -19,20 +19,22 @@ class ArchiveTable(Base):
     )
     type = Column(
         INTEGER,
+        ForeignKey("archive_type.id"),
         nullable=False
     )
     share_type = Column(
         INTEGER,
+        ForeignKey("share_type.id"),
         nullable=False,
         default=0
     )
     contents = Column(
         JSON,
-        nullable=False
+        nullable=True
     )
     contents_metadata = Column(
         JSON,
-        nullable=False
+        nullable=True
     )
     created_at = Column(
         DateTime,
@@ -41,5 +43,5 @@ class ArchiveTable(Base):
     )
 
     __table_args__ = (
-        Index("id", id),
+        Index("archive_id", id),
     )

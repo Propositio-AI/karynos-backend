@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 # TODO:set default value 
-class UserSchema(BaseModel):
+class UserTableSchema(BaseModel):
     id: uuid.UUID= None
     last_name: str= None
     first_name: str
@@ -17,9 +17,9 @@ class UserSchema(BaseModel):
     updated_at: datetime = None
     last_login_at: datetime = None
 
-class newUserModel(BaseModel):
+class newUserSchema(BaseModel):
     last_name: str= None
-    first_name: str
+    first_name: str = None
     email: str
     user_type:int = 1  
     grade: int= None

@@ -1,13 +1,13 @@
 import uuid
 from fastapi import APIRouter
-from schemas.ArchiveSchema import newArchiveModel
 
-from api.v1.endpoints.archive import get_archive, create_archive
+from schemas.ArchiveSchema import newArchiveSchema
+from api.v1.endpoints.archive import get_archive, add_archive
 
 router = APIRouter()
 
 @router.get("/{archive_id}")
-async def getArchive(archive_id: uuid.UUID):
+async def _(archive_id: uuid.UUID):
     archive = get_archive(archive_id)
     
     return {
@@ -21,6 +21,14 @@ async def getArchive(archive_id: uuid.UUID):
     
 
 @router.post("/")
-async def newArchive(data: newArchiveModel):
-    create_archive(data)
+async def _(data: newArchiveSchema):
+    new_archive =  add_archive(data)
 
+    return {
+        "id": new_archive.id,
+        "type": new_archive.type, 
+        "share_type": new_archive.share_type,
+        "contents": new_archive.contents,
+        "metadata": new_archive.contents_metadata,
+        "created_at": new_archive.created_at,
+    }

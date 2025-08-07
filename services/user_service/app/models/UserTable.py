@@ -6,12 +6,12 @@ from sqlalchemy.schema import Column
 from sqlalchemy import Index, ForeignKey
 from sqlalchemy.types import DateTime, VARCHAR, UUID, INTEGER
 
-from models import Base
+from models.base import Base
 
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 class UserTable(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(
         UUID(as_uuid=True),
@@ -61,14 +61,15 @@ class UserTable(Base):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_onupdate=get_utc_time
+        default = get_utc_time,
+        onupdate=get_utc_time
     )
     last_login_at = Column(
         DateTime,
         nullable=True
     )
 
-    __table_args__ = (
-        Index("id", id),
-        Index("email", email),
-    )
+    # __table_args__ = (
+    #     Index("user_id", id),
+    #     Index("email", email),
+    # )

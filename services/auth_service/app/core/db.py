@@ -2,6 +2,9 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from models.AuthTable import AuthTable
+from models.RefreshTable import RefreshTable
 from core.config import settings
 from models.base import Base
 

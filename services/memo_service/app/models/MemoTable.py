@@ -8,7 +8,7 @@ from sqlalchemy.types import DateTime, JSON, UUID, FLOAT
 
 from models import Base
 
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 class MemoTable(Base):
     __tablename__ = "memo"

@@ -4,7 +4,7 @@ from sqlalchemy.types import DateTime, INTEGER, VARCHAR
 
 from models.base import Base
 
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 class ShareTable(Base):
     __tablename__ = "share_type"
@@ -18,10 +18,6 @@ class ShareTable(Base):
         VARCHAR,
         nullable=False
     )
-    share_type = Column(
-        INTEGER,
-        nullable=False
-    )
     created_at = Column(
         DateTime,
         nullable=False,
@@ -30,9 +26,10 @@ class ShareTable(Base):
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_onupdate=get_utc_time
+        default = get_utc_time,
+        onupdate=get_utc_time
     )
 
     __table_args__ = (
-        Index("id", id),
+        Index("sahre_id", id),
     )

@@ -1,0 +1,32 @@
+import requests
+
+class HTTP_APIClient:
+    def __init__(self, key: str = None):
+        self.session = requests.Session()
+        self.session.headers.update({
+            "Content-Type" : "application/json",
+            "Accept": "application/json"
+        })
+        if key:
+            self.session.headers.update({
+                "Authorization": f"Bearer {key}"
+            })
+
+    def get(self, url:str, params:dict = None) -> dict:
+        response = self.session.get(url, params=params)
+
+        return self._handle_response(response)
+    
+    def post(self, url: str, data: dict = None) -> dict:
+        response = self.session.post(url, json=data)
+
+        return self._handle_response(response)
+    
+    def _handle_response(self, response: requests.Response) -> dict:
+        try:
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"API Error {response.status_code}: {response.text}") from e
+        except ValueError:
+            raise RuntimeError("Invalid JSON response")

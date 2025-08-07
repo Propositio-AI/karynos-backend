@@ -7,10 +7,10 @@ from sqlalchemy import Index, CheckConstraint
 from sqlalchemy.types import DateTime, VARCHAR, UUID
 from dateutil.relativedelta import relativedelta
 
-from models import Base
+from models.base import Base
 
 from core.config import settings
-from utils.time import get_utc_time
+from shared.utils.time import get_utc_time
 
 def default_expires_at():
     return get_utc_time() + relativedelta(month=settings.REFRESH_TOKEN_EXPIRES_MONTH)
@@ -45,7 +45,7 @@ class RefreshTable(Base):
     )
 
     __table_args__ = (
-        Index("token", token),
+        Index("refresh_token", token),
         CheckConstraint(expires_at > created_at, name="expires_after_created"),
         CheckConstraint(used_at > expires_at, name="used_before_expires"),
     )

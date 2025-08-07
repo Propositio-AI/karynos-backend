@@ -1,30 +1,42 @@
 # Routing file
 
-from fastapi import APIRouter
-from schemas.AuthSchema import MailModel
-from api.v1.endpoints.magic_link import SendMail
-from api.v1.endpoints.vertify import Vertify
+from fastapi import APIRouter, Cookie
+
+from schemas.AuthSchema import MailSchema
+from api.v1.endpoints.send import send
+from api.v1.endpoints.verify import verify, verify_login
+from api.v1.endpoints.refresh import refrsh_access_token
 
 router = APIRouter()
 
+# verify JWT
+@router.get("/verify")
+async def _(token:str):
+    return verify(token)
+
+# Refresh Access Token
+@router.post("/refresh")
+async def _(refresh_token: str = Cookie(None)):
+    return refrsh_access_token(refresh_token)
+
 # Sending mail
-@router.post("/send")
-async def send(data: MailModel):    
-    send_mail = SendMail(data.email)
-    db_response = send_mail.add_token()
-    send_mail.send()
+@router.post("/mail")
+async def _(data: MailSchema):    
+    auth = send(data.email)
 
     return {
-            "email": db_response.email,
-            "created_at": db_response.created_at,
-            "expires_at": db_response.expires_at
-           }
+        "email": auth.email,
+        "created_at": auth.created_at,
+        "expires_at": auth.expires_at
+        }
 
 
-# Vertify
-@router.get("/vertify")
-async def vertify(token:str):
-    vertify = Vertify(token)
-    valid_token =vertify.vertify_token()
+# verify Login
+@router.get("/login")
+async def _(token:str):
+    is_new_user, token = verify_login(token)
 
-    print(valid_token)
+    return {
+        "is_new": is_new_user,
+        "access_token": token
+    }

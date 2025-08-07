@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     TAG:str
 
     # Auth Setting
-    TOKEN_TOKEN_EXPIRES_MINUTES:int = 15
+    TOKEN_TOKEN_EXPIRES_MINUTES:int = 60
     REFRESH_TOKEN_EXPIRES_MONTH:int = 1
 
     # Database
@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str
     POSTGRES_PORT: str
 
+    # Security
+    PRIVATE_KEY_FOLDER_PATH: str
+    CURRENT_JWT_KEY_ID: str
+
     @property
     def db_url(self) -> tuple:
         return (
@@ -29,10 +33,6 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        # ProducStion
-        # env_file = ".env"    
-
-        # Developing
-        env_file = ".env_dev"   
+        env_file = ".env"   
 
 settings = Settings()

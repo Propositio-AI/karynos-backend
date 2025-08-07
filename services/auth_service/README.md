@@ -49,7 +49,7 @@ app/
 │   ├── v1/
 │   │   ├── endpoints/
 │   │   │   ├── magic_link.py      # /send関連エンドポイント
-│   │   │   └── vertify.py        # /vertify関連エンドポイント
+│   │   │   └── verify.py        # /verify関連エンドポイント
 │   │   └── *api_router.py        # V1全体のルーター統括
 │   └── **main_router.py          # バージョン統括ルーター（/api/v1）
 │

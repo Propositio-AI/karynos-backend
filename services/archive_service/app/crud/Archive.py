@@ -2,7 +2,7 @@ import uuid
 from core.db import session
 from sqlalchemy.orm import Session
 from models.ArchiveTable import ArchiveTable
-from schemas.ArchiveSchema import ArchiveSchema
+from schemas.ArchiveSchema import ArchiveTableSchema
 
 def read_by_id(id: uuid.UUID, db:Session = session):
     archives = db.query(ArchiveTable).filter(
@@ -11,7 +11,7 @@ def read_by_id(id: uuid.UUID, db:Session = session):
 
     return archives
 
-def create_archive(data: ArchiveSchema, db:Session = session):
+def create_archive(data: ArchiveTableSchema, db:Session = session):
     new_arvhie = ArchiveTable(**data.model_dump())
     db.add(new_arvhie)
     db.commit()
