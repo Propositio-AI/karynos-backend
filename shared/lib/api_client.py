@@ -1,5 +1,6 @@
 import requests
 
+# TODO: エラーハンドリング
 class HTTP_APIClient:
     def __init__(self, key: str = None):
         self.session = requests.Session()

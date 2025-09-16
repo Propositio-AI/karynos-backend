@@ -1,18 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.main_router import router as main_router
+from route.main_router import router as main_router
 from core.config import settings
-from core import db
-# from core.init_db import init_query_type_data
-
-# init_query_type_data()
 
 app = FastAPI(title = settings.SERVICE_NAME)
 
 origins = [
-    "http://localhost:3000",  # dev用
-    # "https://your-app.com",  # prod用
+    "http://localhost:3000",
 ]
 
 # CORS設定

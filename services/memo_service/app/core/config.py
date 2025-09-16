@@ -23,11 +23,4 @@ class Settings(BaseSettings):
             f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 
-    class Config:
-        # Production
-        # env_file = ".env"    
-
-        # Developing
-        env_file = ".env_dev"
-
 settings = Settings()

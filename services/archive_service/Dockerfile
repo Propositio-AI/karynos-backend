@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM karynos/be-python-base:latest
 
 WORKDIR /app
 

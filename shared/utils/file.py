@@ -1,3 +1,5 @@
+import json
+
 def read_file(filepath: str):
     #TODO : エラー処理
     
@@ -5,3 +7,9 @@ def read_file(filepath: str):
         contents = f.read()
 
     return contents
+
+def readJson(file_path: str):
+    with open(file_path, "r") as f:
+        dict_data = json.load(f)
+    
+    return dict_data

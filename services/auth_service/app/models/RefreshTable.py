@@ -1,51 +1,21 @@
 # Refresh Table
 
-from uuid6 import uuid7
-
 from sqlalchemy.schema import Column
-from sqlalchemy import Index, CheckConstraint
 from sqlalchemy.types import DateTime, VARCHAR, UUID
-from dateutil.relativedelta import relativedelta
+from pydantic import BaseModel
 
+from shared.utils.time import get_utc_time, get_expires_time
+from shared.utils.security import gen_uuid7
+from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
-
-from core.config import settings
-from shared.utils.time import get_utc_time
-
-def default_expires_at():
-    return get_utc_time() + relativedelta(month=settings.REFRESH_TOKEN_EXPIRES_MONTH)
 
 class RefreshTable(Base):
     __tablename__ = "refresh"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        nullable=False,
-        default=uuid7
-    )
-    token = Column(
-        VARCHAR,
-        unique=True,
-        nullable=False
-    )
-    created_at = Column(
-        DateTime,
-        nullable=False,
-        default=get_utc_time
-    )
-    expires_at = Column(
-        DateTime,
-        nullable=False,
-        default=default_expires_at
-    )
-    used_at = Column(
-        DateTime,
-        nullable=True
-    )
+    id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
+    token = Column(VARCHAR)
+    created_at = Column(DateTime, default=get_utc_time)
+    expires_at = Column(DateTime, default=get_expires_time(month=3))
+    used_at = Column(DateTime)
 
-    __table_args__ = (
-        Index("refresh_token", token),
-        CheckConstraint(expires_at > created_at, name="expires_after_created"),
-        CheckConstraint(used_at > expires_at, name="used_before_expires"),
-    )
+RefreshTableSchema: BaseModel = sqlalchemy_to_pydantic(RefreshTable)

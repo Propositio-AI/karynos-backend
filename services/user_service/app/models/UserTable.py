@@ -1,75 +1,28 @@
 # User Table
 
-from uuid6 import uuid7
-
 from sqlalchemy.schema import Column
-from sqlalchemy import Index, ForeignKey
 from sqlalchemy.types import DateTime, VARCHAR, UUID, INTEGER
-
-from models.base import Base
+from pydantic import BaseModel
 
 from shared.utils.time import get_utc_time
+from shared.utils.security import gen_uuid7
+from shared.utils.shema import sqlalchemy_to_pydantic
+from models.base import Base
 
 class UserTable(Base):
     __tablename__ = "users"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        nullable=False,
-        default=uuid7
-    )
-    last_name = Column(
-        VARCHAR,
-        nullable=True
-    )
-    first_name = Column(
-        VARCHAR,
-        nullable=False
-    )
-    email = Column(
-        VARCHAR,
-        nullable=False,
-        unique=True
-    )
-    user_type = Column(
-        INTEGER,
-        ForeignKey("user_type.id"),
-        nullable=True,
-    )
-    grade = Column(
-        INTEGER,
-        nullable=True
-    )
-    class_no = Column(
-        INTEGER,
-        nullable=True
-    )
-    student_no = Column(
-        INTEGER,
-        nullable=True
-    )
-    school = Column(
-        UUID(as_uuid=True),
-        nullable=True
-    )
-    created_at = Column(
-        DateTime,
-        nullable=False,
-        default=get_utc_time
-    )
-    updated_at = Column(
-        DateTime,
-        nullable=False,
-        default = get_utc_time,
-        onupdate=get_utc_time
-    )
-    last_login_at = Column(
-        DateTime,
-        nullable=True
-    )
+    id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
+    last_name = Column(VARCHAR)
+    first_name = Column(VARCHAR)
+    email = Column(VARCHAR)
+    user_type = Column(INTEGER)
+    grade = Column(INTEGER)
+    class_no = Column(INTEGER)
+    student_no = Column(INTEGER)
+    school = Column(UUID(as_uuid=True))
+    created_at = Column(DateTime, default=get_utc_time)
+    updated_at = Column(DateTime, default=get_utc_time, onupdate=get_utc_time)
+    last_login_at = Column(DateTime)
 
-    # __table_args__ = (
-    #     Index("user_id", id),
-    #     Index("email", email),
-    # )
+UserTableSchema: BaseModel = sqlalchemy_to_pydantic(UserTable)

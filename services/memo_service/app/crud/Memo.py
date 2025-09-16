@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
-from models.MemoTable import UserTable
-from schemas.MemoSchema import MemoSchema
+from models.MemoTable import MemoTable
+from core.db import session
+from shared.lib.crud import CRUD
 
+memo_crud = CRUD(session, MemoTable)

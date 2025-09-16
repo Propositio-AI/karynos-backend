@@ -1,20 +1,28 @@
-from sqlalchemy.orm import Session
-
-from core.db import session
 from models.UserTable import UserTable
-from schemas.UserSchema import UserTableSchema
+from core.db import session
+from shared.lib.crud import CRUD
 
-def create_user(data: UserTableSchema, db: Session = session):
-    new_user = UserTable(**data.model_dump())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+user_crud = CRUD(session, UserTable)
 
-    return new_user
 
-def read_user_by_email(email: str, db: Session = session):
-    user = db.query(UserTable).filter(
-                UserTable.email == email,
-            ).first()
+
+# from sqlalchemy.orm import Session
+
+# from core.db import session
+# from models.UserTable import UserTable
+# from schemas.models import UserTableSchema
+
+# def create_user(data: UserTableSchema, db: Session = session):
+#     new_user = UserTable(**data.model_dump())
+#     db.add(new_user)
+#     db.commit()
+#     db.refresh(new_user)
+
+#     return new_user
+
+# def read_user_by_email(email: str, db: Session = session):
+#     user = db.query(UserTable).filter(
+#                 UserTable.email == email,
+#             ).first()
         
-    return user
+#     return user

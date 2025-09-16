@@ -1,13 +1,198 @@
 services:
-  python:
-    build: .
+  archive-db:
+    container_name: "${ARCHIVE_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/archive_service/.env
     volumes:
-      - './app:/app'
-    tty: true
-    stdin_open: true
+      - ./services/archive_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/archive_service/db-data:/var/lib/postgresql/data
+
+  auth-db:
+    container_name: "${AUTH_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/auth_service/.env
+    volumes:
+      - ./services/auth_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/auth_service/db-data:/var/lib/postgresql/data
+
+  memo-db:
+    container_name: "${MEMO_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/memo_service/.env
+    volumes:
+      - ./services/memo_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/memo_service/db-data:/var/lib/postgresql/data
+
+  notification-db:
+    container_name: "${NOTIFICATION_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/notification_service/.env
+    volumes:
+      - ./services/notification_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/notification_service/db-data:/var/lib/postgresql/data
+
+  query-db:
+    container_name: "${QUERY_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/query_service/.env
+    volumes:
+      - ./services/query_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/query_service/db-data:/var/lib/postgresql/data
+
+  user-db:
+    container_name: "${USER_DB_SERVER_NAME}"  
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ./services/user_service/.env
+    volumes:
+      - ./services/user_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./services/user_service/db-data:/var/lib/postgresql/data
+
+  archive-service:
+    container_name: "archive-service"
+    build:
+      context: ./services/archive_service
     ports:
-      - 8001:8001
-      - 8002:8002
-      - 8003:8003
-      - 8004:8004
-      - 8005:8005
+      - "${ARCHIVE_SERVICE_HOST_PORT}:${ARCHIVE_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - archive-db
+    env_file:
+      - ./services/archive_service/.env
+    environment:
+      - "POSTGRES_SERVER=${ARCHIVE_DB_SERVER_NAME}"
+    volumes:
+      - ./services/archive_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${ARCHIVE_SERVICE_DOCKER_PORT}", "--reload"]
+
+  auth-service:
+    container_name: "auth-service"
+    build:
+      context: ./services/auth_service
+    ports:
+      - "${AUTH_SERVICE_HOST_PORT}:${AUTH_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - auth-db
+    env_file:
+      - ./services/auth_service/.env
+    environment:
+      - "POSTGRES_SERVER=${AUTH_DB_SERVER_NAME}"
+    volumes:
+      - ./services/auth_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${AUTH_SERVICE_DOCKER_PORT}", "--reload"]
+
+  dashboard-service:
+    container_name: "dashboard-service"
+    build:
+      context: ./services/dashboard_service
+    ports:
+      - "${DASHBOARD_SERVICE_HOST_PORT}:${DASHBOARD_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    volumes:
+      - ./services/dashboard_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${DASHBOARD_SERVICE_DOCKER_PORT}", "--reload"]
+
+  memo-service:
+    container_name: "memo-service"
+    build:
+      context: ./services/memo_service
+    ports:
+      - "${MEMO_SERVICE_HOST_PORT}:${MEMO_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - memo-db
+    env_file:
+      - ./services/memo_service/.env
+    environment:
+      - "POSTGRES_SERVER=${MEMO_DB_SERVER_NAME}"
+    volumes:
+      - ./services/memo_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${MEMO_SERVICE_DOCKER_PORT}", "--reload"]
+
+  notification-service:
+    container_name: "notification-service"
+    build:
+      context: ./services/notification_service
+    ports:
+      - "${NOTIFICATION_SERVICE_HOST_PORT}:${NOTIFICATION_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - notification-db
+    env_file:
+      - ./services/notification_service/.env
+    environment:
+      - "POSTGRES_SERVER=${NOTIFICATION_DB_SERVER_NAME}"
+    volumes:
+      - ./services/notification_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${NOTIFICATION_SERVICE_DOCKER_PORT}", "--reload"]
+
+  query-service:
+    container_name: "query-service"
+    build:
+      context: ./services/query_service
+    ports:
+      - "${QUERY_SERVICE_HOST_PORT}:${QUERY_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - query-db
+    env_file:
+      - ./services/query_service/.env
+    environment:
+      - "POSTGRES_SERVER=${QUERY_DB_SERVER_NAME}"
+    volumes:
+      - ./services/query_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${QUERY_SERVICE_DOCKER_PORT}", "--reload"]
+
+  user-service:
+    container_name: "user-service"
+    build:
+      context: ./services/user_service
+    ports:
+      - "${USER_SERVICE_HOST_PORT}:${USER_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - user-db
+    env_file:
+      - ./services/user_service/.env
+    environment:
+      - "POSTGRES_SERVER=${USER_DB_SERVER_NAME}"
+    volumes:
+      - ./services/user_service/app:/app
+      - ./shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${USER_SERVICE_DOCKER_PORT}", "--reload"]
+
+
+networks:
+  karynos-network:
+    external: true

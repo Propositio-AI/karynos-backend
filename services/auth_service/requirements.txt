@@ -1,10 +1,2 @@
-fastapi
-uvicorn
-pydantic-settings
-sqlalchemy
-uuid6
-psycopg2-binary
-requests
-python-dateutil
 PyJWT
 cryptography
