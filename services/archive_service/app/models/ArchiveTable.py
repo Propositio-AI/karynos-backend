@@ -15,6 +15,7 @@ class ArchiveTable(Base):
     parent_id = Column(UUID(as_uuid=True))
     archive_type = Column(VARCHAR, default="CHAT")
     share_type = Column(VARCHAR, default="PRIVATE")
+    archive_status = Column(VARCHAR, default="PENDING")
     contents = Column(JSON)
     contents_metadata = Column(JSON)
     created_at = Column(DateTime, default=get_utc_time)

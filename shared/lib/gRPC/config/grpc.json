@@ -10,113 +10,102 @@
                 }
             ]
         },
-        "Column": {
-            "Service_name": "Column",
-            "Methods": ["GenerateColumn"],
-            "server": [
-                {
-                    "HostName": "column_service_1",
-                    "Port": 50010
-                }
-            ]
-        },
-        "Definition": {
-            "Service_name": "Definition",
-            "Methods": ["GenerateDefinition"],
-            "server": [
-                {
-                    "HostName": "definition_service_1",
-                    "Port": 50020
-                }
-            ]
-        },
+
         "Exercise": {
             "Service_name": "Exercise",
             "Methods": ["GenerateExercise"],
             "server": [
                 {
-                    "HostName": "exercise_service_1",
-                    "Port": 50030
+                    "HostName": "133.125.86.231",
+                    "Port": 50010
                 }
             ]
         },
-        "Formula": {
-            "Service_name": "Formula",
-            "Methods": ["GenerateFormula"],
+
+        "Element": {
+            "Service_name": "Element",
+            "Methods": ["GenerateDefinition", "GenerateColumn", "GenerateFormula", "GenerateSummary", "GenerateTheorem", "GenerateText"],
             "server": [
                 {
-                    "HostName": "formula_service_1",
-                    "Port": 50040
+                    "HostName": "133.125.86.231",
+                    "Port": 50020
                 }
             ]
         },
+
         "Search": {
             "Service_name": "Search",
             "Methods": ["search"],
             "server": [
                 {
-                    "HostName": "search_service_1",
-                    "Port": 50050
+                    "HostName": "133.125.86.231",
+                    "Port": 50030
                 }
             ]
         },
-        "LLM": {
-            "Service_name": "LLM",
-            "Methods": ["ChatInvoke", "GeneralInvoke", "StructInvoke", "ToolInvoke"],
+
+        "Solve": {
+            "Service_name": "Solve",
+            "Methods": ["solveMath"],
             "server": [
                 {
                     "HostName": "133.125.86.231",
-                    "Port": 50100
+                    "Port": 50040
                 }
             ]
         },
-        "Solve": {
-            "Service_name": "Solve",
-            "Methods": ["solve_math"],
-            "server": [
-                {
-                    "HostName": "solve_service_1",
-                    "Port": 50060
-                }
-            ]
-        },
-        "Summary": {
-            "Service_name": "Summary",
-            "Methods": ["GenerateSummary"],
-            "server": [
-                {
-                    "HostName": "summary_service_1",
-                    "Port": 50070
-                }
-            ]
-        },
-        "Theorem": {
-            "Service_name": "Theorem",
-            "Methods": ["GenerateTheorem"],
-            "server": [
-                {
-                    "HostName": "theorem_service_1",
-                    "Port": 50080
-                }
-            ]
-        },
+
         "Vision": {
             "Service_name": "Vision",
             "Methods": ["GenerateVision"],
             "server": [
                 {
-                    "HostName": "vision_service_1",
-                    "Port": 50090
+                    "HostName": "133.125.86.231",
+                    "Port": 50050
                 }
             ]
         },
+
+        "LLM": {
+            "Service_name": "LLM",
+            "Methods": ["GeneralInvoke", "StructInvoke"],
+            "server": [
+                {
+                    "HostName": "133.125.86.231",
+                    "Port": 50060
+                }
+            ]
+        },
+
         "Code": {
             "Service_name": "Code",
             "Methods": ["GenerateCode", "ExecCode", "GenExecCode"],
             "server": [
                 {
-                    "HostName": "code_service_1",
-                    "Port": 50110
+                    "HostName": "133.125.86.231",
+                    "Port": 50070
+                }
+            ]
+        },
+
+        "Chat": {
+            "Service_name": "Chat",
+            "Methods": ["ChatInvoke"],
+            "server": [
+                {
+                    "HostName": "133.125.86.231",
+                    "Port": 50080
+                }
+            ]
+        },       
+
+        "Persona": {
+            "Service_name": "Persona",
+            "Methods": ["CreatePersona"],
+            "server": [
+                {
+                    "HostName": "133.125.86.231",
+                    "Port": 50090
                 }
             ]
         }

@@ -21,6 +21,14 @@ class HTTP_APIClient:
     def post(self, url: str, data: dict = None) -> dict:
         response = self.session.post(url, json=data)
 
+    def put(self, url:str, data:dict = None) -> dict:
+        response = self.session.put(url, json=data)
+
+        return self._handle_response(response)
+    
+    def delete(self, url: str, data: dict = None) -> dict:
+        response = self.session.delete(url, json=data)
+
         return self._handle_response(response)
     
     def _handle_response(self, response: requests.Response) -> dict:

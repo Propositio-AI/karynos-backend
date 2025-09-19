@@ -8,30 +8,23 @@ from functools import partial
 from pydantic import BaseModel
 from typing import Callable, Awaitable, Generator, Any
 
-class WebSocketManager:
-    def __init__(self, router: APIRouter, path: str, schema: BaseModel): 
-        """
-        
-        fastAPI用のWebSocketクラス
+class WebSocketManager: 
+    def __init__(self, router: APIRouter):
+        self.router = router
 
-        """
-        
-        self.ws: WebSocket = None
-        self.router: APIRouter = router
-        self.path: str = path
-        self._handlers: dict[str, Callable] = {}
-        self.schema: BaseModel = schema
-
-    def websocket(self):
+    def websocket(self, path: str, schema: BaseModel):
         """
         
 
         
         """
+        self.path = path
+        self.schema = schema
 
         def decorator(func: Callable[[BaseModel, WebSocketManager], Awaitable[None]]):
             async def endpoint(ws: WebSocket):
                 self.ws = ws
+                self.index = 0
                 await ws.accept()
                 manager = self
                 try:
@@ -44,28 +37,44 @@ class WebSocketManager:
 
             self.router.websocket(self.path)(endpoint)
         return decorator
-
-    async def send_update(self, id: str, update, is_end: bool = False):
+    
+    async def send_start(self, data):
+        self.index = 0
         await self.ws.send_text(json.dumps({
-            "id": id,
-            "data": update,
-            "isEnd": is_end
-        }))
-
-    async def send_end(self, id: str, data = None):
-        await self.ws.send_text(json.dumps({
-            "id": id,
+            "success": True,
             "data": data,
-            "isEnd": True
+            "index": self.index
         }))
+
+        self.index += 1
+
+
+    async def send_data(self, data):
+        if(self.index == 0): self.index = 1
+        await self.ws.send_text(json.dumps({
+            "success": True,
+            "data": data,
+            "index": self.index
+        }))
+
+        self.index += 1
+
+    async def send_end(self, data = None):
+        await self.ws.send_text(json.dumps({
+            "success": True,
+            "data": data,
+            "last_index": self.index,
+            "index": -1
+        }))
+        self.index = 0
 
     async def send_error(self, message: str):
+        self.index = 0
         await self.ws.send_text(json.dumps({
-            "id": None,
-            "update": {"error": message},
-            "isEnd": True
+            "success": True,
+            "data": {"error": message},
+            "index": -1
         }))
-
 
 
 async def streamer(
@@ -77,8 +86,8 @@ async def streamer(
 
     def sync(queue, loop):    
         for res in generator_func(): 
-            print(res, flush=True)
             asyncio.run_coroutine_threadsafe(queue.put(res), loop)
+        
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)
 
     asyncio.get_running_loop().run_in_executor(None, partial(sync, queue, loop))
