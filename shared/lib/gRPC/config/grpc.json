@@ -2,7 +2,7 @@
     "services": {
         "TextBook": {
             "Service_name": "TextBook",
-            "Methods": ["GenerateTextbook", "GeneratePlan"],
+            "Methods": ["GenerateElement", "GeneratePlan", "GenerateStructure"],
             "server": [
                 {
                     "HostName": "133.125.86.231",

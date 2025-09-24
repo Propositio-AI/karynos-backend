@@ -21,6 +21,8 @@ class HTTP_APIClient:
     def post(self, url: str, data: dict = None) -> dict:
         response = self.session.post(url, json=data)
 
+        return self._handle_response(response)
+
     def put(self, url:str, data:dict = None) -> dict:
         response = self.session.put(url, json=data)
 

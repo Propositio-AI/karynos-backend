@@ -4,6 +4,8 @@ from typing import Type, TypeVar
 from sqlalchemy.orm import DeclarativeMeta
 from pydantic import BaseModel
 
+from shared.lib.error import errorWrapper, BaseError
+
 T = TypeVar("T", bound=BaseModel)
 M = TypeVar("M", bound=DeclarativeMeta)
 
@@ -39,6 +41,7 @@ class CRUD:
         self.table: Type[M] = tableModel
 
     # TODO: dataの型定義を設定
+    @errorWrapper("QueryError")
     def create(self, data):
         """
         
@@ -62,6 +65,7 @@ class CRUD:
 
         return new_data
 
+    @errorWrapper("QueryError")
     def read(self, filters: list[list] = []):
         """
         
@@ -87,8 +91,13 @@ class CRUD:
             query = query.order_by(getattr(self.table, "created_at"))
         
         results = query.all()
+
+        if results is None:
+            raise BaseError("RecordNotFound")
+        
         return results
-    
+
+    @errorWrapper("QueryError")
     def update(self, filters: list[list], update_data: dict):
         """
         
@@ -113,18 +122,22 @@ class CRUD:
         
         conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
         if conditions:
-            records = records.filter(and_(*conditions))
-        
+            records = records.filter(and_(*conditions))    
+
+        filterd_records = records.all()    
+        if filterd_records is None: raise BaseError("RecordNotFound")
+
         updated_objects = []
-        for obj in records.all():
+        for obj in filterd_records:
             for k, v in update_data.items():
                 setattr(obj, k, v)
             self.db.commit()
             self.db.refresh(obj)
             updated_objects.append(obj)
-        
+
         return updated_objects
     
+    @errorWrapper("QueryError")
     def delete(self, filters: list[list]):
         """
         

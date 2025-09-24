@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from crud.User import user_crud
 from shared.lib.auth import auth
@@ -17,12 +17,12 @@ async def _(user_id = Depends(auth)):
 # Get User
 @router.get("/")
 async def _(email: str = None):
-    users = user_crud.read([
+    success, users, error = user_crud.read([
         ["email", "==", email]
     ])
 
-    # TODO : ここの処理どうにかしたい
-    if not len(users): return None
+    if not success:
+        return HTTPException(status_code=500, detail=error)
 
     user = users[0]
     return(

@@ -1,15 +1,22 @@
 import json
+import os
 
-def read_file(filepath: str):
-    #TODO : エラー処理
-    
-    with open(filepath, "r", encoding="utf-8") as f:
-        contents = f.read()
+from shared.lib.error import errorWrapper, BaseError
 
-    return contents
-
+@errorWrapper("FileOpenError")
 def readJson(file_path: str):
+    if not os.path.isfile(file_path): raise BaseError("FileIsNotFount")
+
     with open(file_path, "r") as f:
         dict_data = json.load(f)
     
     return dict_data
+
+@errorWrapper("FileOpenError")
+def readText(file_path: str):
+    if not os.path.isfile(file_path): raise BaseError("FileIsNotFount")
+
+    with open(file_path, "r") as f:
+        str_data = f.read()
+
+    return str_data

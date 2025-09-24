@@ -33,7 +33,11 @@ class WebSocketManager:
                         msg = json.loads(raw)
                         await func(self.schema(**msg), manager)
                 except Exception as e:
-                    await manager.send_error(str(e))
+                    print(e, flush=True)
+                    await manager.send_error(
+                        "",
+                        str(e)
+                    )
 
             self.router.websocket(self.path)(endpoint)
         return decorator
@@ -68,11 +72,14 @@ class WebSocketManager:
         }))
         self.index = 0
 
-    async def send_error(self, message: str):
+    async def send_error(self, code: str, message: str):
         self.index = 0
         await self.ws.send_text(json.dumps({
-            "success": True,
-            "data": {"error": message},
+            "success": False,
+            "data": {
+                "code": code,
+                "message": message
+            },
             "index": -1
         }))
 
@@ -85,8 +92,15 @@ async def streamer(
     loop = asyncio.get_running_loop()
 
     def sync(queue, loop):    
-        for res in generator_func(): 
-            asyncio.run_coroutine_threadsafe(queue.put(res), loop)
+        # for netSuccess, res, netError in generator_func(): 
+        for netSuccess, netRes, netError in generator_func(): 
+            # TODO: ネットワークエラーハンドリング
+            if netSuccess:
+                serverSuccess, serverResponse, serverError = netRes
+                
+                if serverSuccess:
+                    asyncio.run_coroutine_threadsafe(queue.put(serverResponse), loop)
+
         
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)
 

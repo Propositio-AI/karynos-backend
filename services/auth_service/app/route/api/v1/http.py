@@ -1,6 +1,6 @@
 # Routing file
 
-from fastapi import APIRouter, Cookie, Header
+from fastapi import APIRouter, Cookie, Header, HTTPException
 
 from uuid import uuid4
 
@@ -39,23 +39,29 @@ async def _(refresh_token: str = Cookie(None)):
 @router.post("/mail")
 async def _(data: AuthTableSchema):
     data.token = uuid4()    
-    auth = auth_crud.create(data)
+    success, auth, error = auth_crud.create(data)
 
+    if not success:
+        HTTPException(status_code=500, detail=error)
+        
     return {
         "email": auth.email,
         "created_at": auth.created_at,
         "expires_at": auth.expires_at
     }
-
-
+    
 # verify Login
 @router.get("/login")
 async def _(token:str):
-    valid_tokens = auth_crud.read([
+    success, valid_tokens, error = auth_crud.read([
         ["token", "==", token],
         ["expires_at", ">=", get_utc_time()],
         ["used_at", "==", None]
     ])
+
+    if not success:
+        # HTTPException(status_code=500, detail=error)
+        pass
 
     if not len(valid_tokens): return {
         "is_new": False,

@@ -1,5 +1,6 @@
 import grpc
 from shared.lib.gRPC.utils import request_deserializer, response_serializer, readConfig
+from shared.lib.error import errorWrapper, streamErrorWrapper
 
 class gRPC_Client:
     def __init__(self, service_name: str):       
@@ -14,7 +15,7 @@ class gRPC_Client:
         
         """
 
-        config = readConfig()
+        _, config, _ = readConfig()
 
         # TODO: 分散処理実装
         server_1 = config["services"][service_name]["server"][0] # 登録されている0番目のサーバーを使用
@@ -23,7 +24,8 @@ class gRPC_Client:
 
         self.channel = grpc.insecure_channel(f"{host}:{port}")
         self.service_name = service_name
-
+    
+    @errorWrapper("NetworkConnectionFailed")
     def call(self, method_name: str, request_obj: dict) -> dict:
         """
 
@@ -41,6 +43,10 @@ class gRPC_Client:
         ----------
             サーバーレスポンス
 
+        Exception
+        ----------
+            NetworkConnectionFailed
+
         """
 
         grpc_method = f"/{self.service_name}/{method_name}"
@@ -50,11 +56,12 @@ class gRPC_Client:
             request_serializer=response_serializer,
             response_deserializer=request_deserializer
         )
-
+        
         response = stub(request_obj)
 
         return response
 
+    @streamErrorWrapper("NetworkConnectionFailed")
     def call_server_stream(self, method_name: str, request_obj: dict):
         """
 
@@ -72,6 +79,10 @@ class gRPC_Client:
         ----------
             サーバーレスポンス
 
+        Exception
+        ----------
+            NetworkConnectionFailed
+
         """
 
         grpc_method = f"/{self.service_name}/{method_name}"
@@ -83,9 +94,11 @@ class gRPC_Client:
         )
 
         responses = stub(request_obj)
+
         for res in responses:
             yield res
 
+    @errorWrapper("NetworkConnectionFailed")
     def call_client_stream(self, method_name: str, request_iter):
         """
 
@@ -103,7 +116,12 @@ class gRPC_Client:
         ----------
             サーバーレスポンス
 
+        Exception
+        ----------
+            NetworkConnectionFailed
+
         """
+        
         grpc_method = f"/{self.service_name}/{method_name}"
 
         stub = self.channel.stream_unary(
@@ -116,6 +134,7 @@ class gRPC_Client:
 
         return response
 
+    @streamErrorWrapper("NetworkConnectionFailed")
     def call_bidi_stream(self, method_name: str, request_iter):
         """
 
@@ -133,7 +152,12 @@ class gRPC_Client:
         ----------
             サーバーレスポンス
 
+        Exception
+        ----------
+            NetworkConnectionFailed
+
         """
+
         grpc_method = f"/{self.service_name}/{method_name}"
 
         stub = self.channel.stream_stream(
