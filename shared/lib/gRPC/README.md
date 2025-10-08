@@ -126,7 +126,7 @@ from shared.lib.gRPC import gRPC_Client
 
 client = gRPC_Client("User")
 
-netSuccess, netRes, netError = client.call_server_stream("getUserName", {
+netSuccess, netRes, netError = client.call("getUserName", {
                                                             "user_id": "123"
                                                         })
 if netSuccess:
