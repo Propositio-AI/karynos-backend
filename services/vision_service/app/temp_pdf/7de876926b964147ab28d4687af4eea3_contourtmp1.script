@@ -1,0 +1,1 @@
+unset surface; set cntrparam levels discrete 3; set contour; set table "7de876926b964147ab28d4687af4eea3_contourtmp1.table"; splot "7de876926b964147ab28d4687af4eea3_contourtmp1.dat";

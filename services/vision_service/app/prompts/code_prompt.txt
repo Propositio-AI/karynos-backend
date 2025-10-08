@@ -1,0 +1,312 @@
+## プログラミングタスク
+図形の詳細な構造について記載された辞書型構造データの値の計算を行うプログラムを作成してください
+このプログラムで計算された結果をもとに図表の設計図の値を決定します。  
+
+## ライブラリについて
+NumPy や math の使用は可能です
+
+## 注意点
+- json.dumps() を使うときは必ず import json を記述してください。  
+- 入力に Math.sqrt や Math.sin などがあれば、必ず計算してください。
+- 文字変数がもしあるのであれば、必ず先に数値として明示的に定義してから使用してください。(例：angle = 30  # 角度を数値で定義)
+- JSONデータが外部から与えられない場合、`json` モジュールを辞書や変数として扱わないでください。  
+- 必要な変数は、`characterExpression` の値などを直接Pythonの数値変数として明示的に定義してください。  
+  例：  
+  A = 30  # characterExpressionの値を直接数値で定義
+  x = 2
+  y = 3
+- 関数そのものではなく、「式の文字列」を格納すること。
+  例：
+    # curvesのうち1つ目のcurve
+    results["curves_0_expression"] = ("曲線1の式", "sqrt(9 - x^2)")
+    # curvesのうち2つ目のcurve
+    results["curves_1_expression"] = ("曲線2の式", "2")
+- また、文字列として数式を与える場合は、"**"で出力するのではなく、"^"で乗算をしてください。
+  例：
+  間違い：結果 = x**2 + y**2
+  正しい：結果 = x^2 + y^2
+- ただし、数値として与えられている式(例：math.sin(math.radians(30)))は、必ず Python の math モジュールを使って計算し、計算結果の数値として格納してください。
+    間違い： 結果 = "math.sin(math.radians(30))"
+    正しい：結果 = math.sin(math.radians(30))
+- 文字列と数値を混ぜて計算しないでください。  例えば、`math.sqrt(1 - "x^2")` のような計算は避け、変数を含む式は文字列として保持し、数値計算は具体的な数値で行ってください。
+- 式の中で角度を扱う場合、Pythonの計算コードでは `math.radians()` を使って数値計算を行い、式の文字列として保持する場合は、必ず `deg()` 関数を使って度数法の角度を表現してください。  
+  例：  
+    計算コード → `math.sin(math.radians(A))`  
+    式の文字列 → `"sin(deg(A))"`
+- NumPyの型はそのまま使えないため、以下のように変換してください：
+  例：json.dumps(float(x))(数値をPython floatに変換)
+  例：json.dumps(arr.tolist())(NumPy配列をPython listに変換)
+- 関数(lambda含む)はシリアライズできないため、以下のように式を文字列で表現してください：
+  例：json.dumps("lambda x: x**2")
+- Pythonの特殊型(例：set, complex)も非対応なので、以下のようにリスト等で変換してください：
+  例：json.dumps(list(set([1, 2, 3])))
+- 数値を以下の形式に従って記述してください：
+  例：
+    # 円の中心座標
+    x0 = 0
+    y0 = 0
+    results["x0"] = x0
+    results["y0"] = y0
+- "sqrt", "sin", "cos", "tan", "log" などを含む式は、必ず math. を使って計算し、その結果を数値として格納してください。
+- 計算式は文字列("")で囲ってはいけません。実行されないためです。
+  例：
+  間違い：results["..."] = ("...", "math.sin(...)")
+  正しい：results["..."] = ("...", math.sin(...))
+- 0では絶対に割らないでください。割る前にゼロかどうか確認してください。
+- ここで作成した計算のコードは、後で元の設計文に埋め込むので、
+  results のキー名は設計JSONと一致するようにしてください。
+  例：点A → results["points_pointA_x"]
+- 変数名は JSON 内の名前をもとに正確に構築してください。
+  例：points_point1_x, curves_curve1_expression など。
+- filldraws の "upperExpression" や "lowerExpression" は "_" を挿入しないでください：
+  例：filldraws_fill1_upperExpression(OK)、filldraws_fill1_upper_expression(NG)
+- angles の "startAng" や "endAng" も同様に "_" を入れないでください。
+- characterExpressionの"value"が"任意の数値"のようなものであれば、必ず任意のint型の数値を入れてください。
+- 変数(例：x, y, angle など)は計算に使う場合でも固定値としては定義せず、式の中の変数として文字列で表現してください。
+- そのため、関数の式は計算結果ではなく文字列で格納してください。  
+- "x" が入っている数式は基本的に文字列("")で囲ってください。  
+  例：results["curves_curve1_expression"] = ("曲線1の式", "sin(deg(x))")
+- ただし、数値として与えられている式(例：math.sin(math.radians(30)))は計算して数値として格納してください。
+- ただし、curvesではx,yが使用されるため、"math.sin(math.radians(x))"だと固定された値になるため、"sin(x)"のままにしてください。
+- id名は必ず変えないでください。また、既存のkey以外の名前は出力しないようにしてください。
+- characterExpressionの"value"を使用する場合は、pythonコードの最初に定義するようにしてください。
+- しっかりとkeyをたどった変数名を定義してください。
+- 計算前と後で結果が変わらないものはコードを生成する必要はありません。
+- ここでのpythonは関数ではないので、"return"で返さないようにしてください。
+- ここでは、jsonデータがないので、"A = float(json["characterExpression"][0]["value"])"のようにするのではなく、"A=45"のように値を入れて下さい。
+- 変更のないものや、空配列のものは出力しないでください。
+- 変数の数値定義と計算を必ず行うこと  
+  文字列として変数名を使うのではなく、`characterExpression` にある変数はPythonの数値変数として先に定義し、計算に使用してください。  
+  例：  
+  ```python
+  A = 30  # characterExpressionの値を数値で定義
+  sinA = math.sin(math.radians(A))
+  results["characterExpression_0_value"] = A
+  results["points_point0_position_x"] = sinA
+- 余弦定理や三角関数の計算を行う際は、必ず2点間の距離を正しく計算してください。  
+  例：辺の長さは2点の座標差の平方和の平方根で求めること。  
+  ```python
+  length = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+- 余弦定理の角度計算では、計算式の分子と分母を正確に指定し、math.acos() の引数が必ず -1 から 1 の範囲内になるようにしてください。
+- math.acos() に渡す値が範囲外になる場合は、計算式や入力値を再確認し、必要に応じて値をクリップ(制限)してください。
+- 変数や計算式は文字列ではなく、必ず数値として計算し、計算結果を変数に代入してください。
+- 計算前にゼロ除算や不正な値がないかチェックし、エラーを未然に防いでください。
+- 具体的な計算式や変数の定義は、正確な数学的意味に基づいて記述してください。
+- 例外的なケースやエラーが起きやすい計算は、事前に検証や制御を行うよう指示してください。
+- characterExpressionに変数が設定されていて、json内でその変数を使っている場合は、それを代入して計算してください。
+
+## 命名規則について
+- 以下のように命名してください：
+  例：
+  - points配列の1番目の点のx座標：  
+    `results["points_point0_position_x"]`
+  - lines配列の2番目の線の開始y座標：  
+    `results["lines_line1_start_y"]`
+  - curves配列の3番目の曲線の関数タイプ：  
+    `results["curves_curve2_functionType"]`
+  - characterExpression配列の1番目の変数の値：  
+    `results["characterExpression_0_value"]`
+  - filldraws配列のIDが"fill1"の塗りつぶしの上限式：  
+    `results["filldraws_fill1_upperExpression"]`
+  - pointsのposition
+    `resutls[points_{id}_position_x]`
+  - axisの"x""min" 
+    `results[axis_{id名}_x_min]`
+- 変数名は必ずJSONのキー名と対応させ、後続処理で正しく参照できるようにしてください。
+  例：resutls[{key}_{id名}_{要素}_{要素}_...]
+- 変数名にスペースや特殊文字は含めないでください。
+- 変数名は一貫性を保ち、同じ種類の要素は同じ命名規則で統一してください。
+
+queryとコードの例：
+query:
+"""
+{
+  "points": [
+    {
+      "id": "point1",
+      "label": "A",
+      "role": "Reference point (vertex)",
+      "position": {
+        "x": "2",
+        "y": "3"
+      },
+      "size": "2"
+    }
+  ],
+  "lines": [
+    {
+      "id": "line1",
+      "width": "2",
+      "start": {"x": "0", "y": "0"},
+      "end": {"x": "4", "y": "3"}
+    }
+  ],
+  "axis": [
+    {
+      "id": "axis1",
+      "x":{
+        "min": "-5",
+        "max": "5"
+      },
+      "y":{
+        "min": "-5",
+        "max": "5"
+      }
+      "samples": "100"
+    }
+  ],
+  "curves": [
+    {
+      "id": "curve1",
+      "allExpression": "x^2 + y^2",
+      "functionType": "implicit",
+      "expression": {
+        "left": "x^2 + y^2",
+        "right": "16",
+
+      "x": {
+        "variable": "x",
+        "range": { "min": "-4", "max": "4" }
+      },
+      "y": {
+        "expression": "sqrt(16 - x^2)",
+        "range": { "min": "-4", "max": "4" }
+      },
+      "samples": "50",
+      "width": "1",
+      "height": "4"
+      },
+      
+      
+    }
+  ],
+  "characterExpression": [
+    {
+      "id": "m",
+      "value": "1"
+    }
+  ],
+  "caluculates": [],
+  "angles": [],
+
+  "filldraws": [
+    {
+      "id": "fill1", # 一意な識別子
+      "domain": {
+        "start": "-2", # xの開始点(数値)
+        "end": "2" # xの終了点(数値)
+      },
+      "lowerExpression": "x^2", # 下限式(TikZ記法)
+      "upperExpression": "4", # 上限式(TikZ記法)
+      "samples": "100", # サンプル数
+      "style": {
+        "fill": "red!20", # 塗りつぶし色
+        "draw": "darkred", # 境界線色
+        "lineWidth": "0.8" # 線幅(pt)
+      },
+        "pathSuffix": "A" # パス名接尾辞(複数領域用)
+    },
+    {
+      "id": "fill2",
+      "domain": {
+        "start": "0",
+        "end": "3.14"
+      },
+      "lowerExpression": "0",
+      "upperExpression": "sin(deg(x))",
+      "samples": "200",
+      "style": {
+        "fill": "cyan!20",
+        "draw": "darkcyan",
+          "lineWidth": "1.2"
+      },
+      "pathSuffix": "wave"
+    }
+  ]
+}
+
+```
+"""
+コード：
+"""
+## 変数名の例
+
+results = {}
+
+
+A = 45
+
+### points
+results["points_point1_id"] = "point1"
+results["points_point1_label"] = "A"
+results["points_point1_role"] = "Reference point (vertex)"
+results["points_point1_position_x"] = "2"
+results["points_point1_position_y"] = "3"
+results["points_point1_size"] = "2"
+
+### lines
+results["lines_line1_id"] = "line1"
+results["lines_line1_width"] = "2"
+results["lines_line1_start_x"] = "0"
+results["lines_line1_start_y"] = "0"
+results["lines_line1_end_x"] = "4"
+results["lines_line1_end_y"] = "3"
+
+### axis
+results["axis_axis1_x_min"] = "-5"
+results["axis_axis1_x_max"] = "5"
+results["axis_axis1_y_min"] = "-5"
+results["axis_axis1_y_max"] = "5"
+results["axis_axis1_samples"] = "100"
+
+### curves
+results["curves_curve1_id"] = "curve1"
+results["curves_curve1_allExpression"] = "x^2 + y^2"
+results["curves_curve1_functionType"] = "implicit"
+results["curves_curve1_expression_left"] = "x^2 + y^2"
+results["curves_curve1_expression_right"] = "16"
+results["curves_curve1_x_variable"] = "x"
+results["curves_curve1_x_range_min"] = "-4"
+results["curves_curve1_x_range_max"] = "4"
+results["curves_curve1_y_expression"] = "sqrt(16 x^2)"
+results["curves_curve1_y_range_min"] = "-4"
+results["curves_curve1_y_range_max"] = "4"
+results["curves_curve1_samples"] = "50"
+results["curves_curve1_width"] = "1"
+results["curves_curve1_height"] = "4"
+
+### characterExpression
+results["characterExpression_0_id"] = "m"
+results["characterExpression_0_value"] = "1"
+
+### caluculates
+# (空配列のため変数なし)
+
+### angles
+# (空配列のため変数なし)
+
+### filldraws
+results["filldraws_fill1_id"] = "fill1"
+results["filldraws_fill1_domain_start"] = "-2"
+results["filldraws_fill1_domain_end"] = "2"
+results["filldraws_fill1_lowerExpression"] = "x^2"
+results["filldraws_fill1_upperExpression"] = "4"
+results["filldraws_fill1_samples"] = "100"
+results["filldraws_fill1_style_fill"] = "red!20"
+results["filldraws_fill1_style_draw"] = "darkred"
+results["filldraws_fill1_style_lineWidth"] = "0.8"
+results["filldraws_fill1_pathSuffix"] = "A"
+
+results["filldraws_fill2_id"] = "fill2"
+results["filldraws_fill2_domain_start"] = "0"
+results["filldraws_fill2_domain_end"] = "3.14"
+results["filldraws_fill2_lowerExpression"] = "0"
+results["filldraws_fill2_upperExpression"] = "sin(deg(x))"
+results["filldraws_fill2_samples"] = "200"
+results["filldraws_fill2_style_fill"] = "cyan!20"
+results["filldraws_fill2_style_draw"] = "darkcyan"
+results["filldraws_fill2_style_lineWidth"] = "1.2"
+results["filldraws_fill2_pathSuffix"] = "wave"
+
+"""
+

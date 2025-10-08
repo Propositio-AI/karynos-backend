@@ -1,0 +1,14 @@
+## query
+{query}
+
+## page
+{page}
+
+## question
+{question}
+
+## answer
+{answer}
+
+## explanation
+{explanation}
