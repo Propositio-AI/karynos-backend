@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from shared.lib.gRPC.client import gRPC_Client
+from shared.lib.gRPC import gRPC_Client
 from shared.lib.websocket import WebSocketManager, streamer
 from shared.lib.api_client import HTTP_APIClient
 from crud.Archive import archive_crud

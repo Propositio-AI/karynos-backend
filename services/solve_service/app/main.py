@@ -1,5 +1,5 @@
 from service import solve_question
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import Server, Servicer
 
 class SolveServicer(Servicer):
     def __init__(self):

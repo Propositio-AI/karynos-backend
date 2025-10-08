@@ -15,7 +15,6 @@ class WebSocketManager:
     def websocket(self, path: str, schema: BaseModel):
         """
         
-
         
         """
         self.path = path

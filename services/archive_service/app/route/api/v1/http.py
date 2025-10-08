@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from models.ArchiveTable import ArchiveTableSchema
 from crud.Archive import archive_crud
 from shared.utils import convert_to_filter
-from shared.lib.gRPC.client import gRPC_Client
+from shared.lib.gRPC import gRPC_Client
 
 # /api/v1/archive
 router = APIRouter()

@@ -1,5 +1,5 @@
 from service import generate_vision
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import Server, Servicer
 
 class VisionServicer(Servicer):
     def __init__(self):

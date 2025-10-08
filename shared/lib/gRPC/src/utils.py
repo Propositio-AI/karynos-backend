@@ -1,5 +1,4 @@
 import json
-
 from shared.utils.file import readJson
 
 def request_deserializer(data: bytes):
@@ -8,5 +7,6 @@ def request_deserializer(data: bytes):
 def response_serializer(obj):
     return json.dumps(obj).encode()
 
+
 def readConfig():
-    return readJson("./shared/lib/gRPC/config/grpc.json")
+    return readJson("./shared/lib/gRPC/grpc.json")

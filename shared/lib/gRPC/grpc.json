@@ -5,7 +5,7 @@
             "Methods": ["GenerateElement", "GeneratePlan", "GenerateStructure"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "textbook_service_1",
                     "Port": 50000
                 }
             ]
@@ -16,7 +16,7 @@
             "Methods": ["GenerateExercise"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "exercise_service_1",
                     "Port": 50010
                 }
             ]
@@ -27,7 +27,7 @@
             "Methods": ["GenerateDefinition", "GenerateColumn", "GenerateFormula", "GenerateSummary", "GenerateTheorem", "GenerateText"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "element_service_1",
                     "Port": 50020
                 }
             ]
@@ -38,7 +38,7 @@
             "Methods": ["search"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "search_service_1",
                     "Port": 50030
                 }
             ]
@@ -49,7 +49,7 @@
             "Methods": ["solveMath"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "solve_service_1",
                     "Port": 50040
                 }
             ]
@@ -60,7 +60,7 @@
             "Methods": ["GenerateVision"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "vision_service_1",
                     "Port": 50050
                 }
             ]
@@ -71,7 +71,7 @@
             "Methods": ["GeneralInvoke", "StructInvoke"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "llm_service_1",
                     "Port": 50060
                 }
             ]
@@ -82,7 +82,7 @@
             "Methods": ["GenerateCode", "ExecCode", "GenExecCode"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "code_service_1",
                     "Port": 50070
                 }
             ]
@@ -93,7 +93,7 @@
             "Methods": ["ChatInvoke"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "chat_service_1",
                     "Port": 50080
                 }
             ]
@@ -104,7 +104,7 @@
             "Methods": ["CreatePersona"],
             "server": [
                 {
-                    "HostName": "133.125.86.231",
+                    "HostName": "persona_service_1",
                     "Port": 50090
                 }
             ]

@@ -1,5 +1,5 @@
 from core_service import generate_plan, generate_textbook, generate_structure
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import Server, Servicer
 from schema import (
     Element,
 )

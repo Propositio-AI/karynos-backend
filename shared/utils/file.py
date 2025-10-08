@@ -1,7 +1,7 @@
 import json
 import os
 
-from shared.lib.error import errorWrapper, BaseError
+from shared.lib.basicError import errorWrapper, BaseError
 
 @errorWrapper("FileOpenError")
 def readJson(file_path: str):

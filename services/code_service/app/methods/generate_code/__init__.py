@@ -1,4 +1,4 @@
-from shared.lib.gRPC.client import gRPC_Client
+from shared.lib.gRPC import gRPC_Client
 from shared.utils import readText, createPromptTemplate
 
 import os

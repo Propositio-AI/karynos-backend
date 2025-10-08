@@ -1,5 +1,5 @@
-from shared.lib.gRPC.client import gRPC_Client
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import gRPC_Client
+from shared.lib.gRPC import Server, Servicer
 from shared.utils import readText, createPromptTemplate
 from pydantic import BaseModel
 

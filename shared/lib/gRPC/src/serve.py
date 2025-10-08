@@ -7,9 +7,11 @@ import time
 import os
 import functools
 
-from shared.lib.gRPC.utils import request_deserializer, response_serializer, readConfig
+from shared.lib.gRPC.src.utils import request_deserializer, response_serializer, readConfig
+from shared.lib.basicError import errorWrapper, streamErrorWrapper
 
-DOCKER_PORT = os.getenv("DOCKER_PORT")
+# デフォルトポート：50000
+DOCKER_PORT = os.getenv("DOCKER_PORT", 50000)
 
 class Servicer:
     def __init__(self):
@@ -46,7 +48,13 @@ class Servicer:
         """
 
         def decorator(func):
+            if method_type in ["unary_stream", "stream_stream"]:
+                wrapper_decorator = streamErrorWrapper("NetworkConnectionFailed")
+            else:
+                wrapper_decorator = errorWrapper("NetworkConnectionFailed")
+
             @functools.wraps(func)
+            @wrapper_decorator
             def wrapper(self, request, context):
                 # TODO: 認証処理の実装
                 

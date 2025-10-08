@@ -1,7 +1,7 @@
 import json
 
-from shared.lib.gRPC.client import gRPC_Client
-from shared.utils import twice_backslash, readText, createPromptTemplate, model_to_prompt_structure
+from shared.lib.gRPC import gRPC_Client
+from shared.utils import readText, createPromptTemplate, model_to_prompt_structure
 from shared.types import BaseFig, AnswerSchema
 
 from pydantic import BaseModel, Field

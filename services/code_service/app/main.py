@@ -1,7 +1,7 @@
 from methods.generate_code import generate_code
 from methods.exec_code import exec_code
 from methods.exec_gen import exec_gen
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import Server, Servicer
 import json
 
 class CodeServicer(Servicer):

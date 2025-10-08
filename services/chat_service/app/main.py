@@ -1,7 +1,7 @@
-from shared.lib.gRPC.client import gRPC_Client
-from shared.lib.gRPC.serve import Server, Servicer
+from shared.lib.gRPC import gRPC_Client
+from shared.lib.gRPC import Server, Servicer
 from shared.utils import readText, createPromptTemplate
-from shared.lib.error import BaseError
+from shared.lib.basicError import BaseError
 
 # パス定義
 STYLE_PROMPT_PATH = "./shared/prompts/style_prompt.txt"

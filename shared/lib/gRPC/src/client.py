@@ -1,6 +1,6 @@
 import grpc
-from shared.lib.gRPC.utils import request_deserializer, response_serializer, readConfig
-from shared.lib.error import errorWrapper, streamErrorWrapper
+from shared.lib.gRPC.src.utils import request_deserializer, response_serializer, readConfig
+from shared.lib.basicError import errorWrapper, streamErrorWrapper
 
 class gRPC_Client:
     def __init__(self, service_name: str):       
@@ -15,7 +15,7 @@ class gRPC_Client:
         
         """
 
-        _, config, _ = readConfig()
+        config = readConfig()
 
         # TODO: 分散処理実装
         server_1 = config["services"][service_name]["server"][0] # 登録されている0番目のサーバーを使用
@@ -56,7 +56,7 @@ class gRPC_Client:
             request_serializer=response_serializer,
             response_deserializer=request_deserializer
         )
-        
+
         response = stub(request_obj)
 
         return response
