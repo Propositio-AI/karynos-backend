@@ -12,7 +12,8 @@ from schema import (
     ExerciseRootParts
 )
 
-from pydantic import BaseModel
+from element.service import generate_text
+from exercise.service import generate_exercise
 
 LLM_MODEL = os.getenv("LLM_MODEL", "local")
 
@@ -61,12 +62,26 @@ def generate_element(persona: str, element: Element, textbook: List):
     parts = None
 
     if element.element in ["Definition", "Theorem", "Formula", "Column", "Text", "Summary"]:
-        netSuccess, netResponse, netError = gRPC_Client("Element").call(f"Generate{element.element}", {
-            "persona": persona,
-            "title": element.title,
-            "message": element.message,
-            "textbook": textbook
-        })
+        match element.element:
+            case "Definition":
+                theme = "定義"
+            case "Theorem":
+                theme = "定理"
+            case "Formula":
+                theme = "公式"
+            case "Column":
+                theme = "コラム"
+            case "Text":
+                theme = "構成要素と構成要素のつなぎ"
+            case "Summary":
+                theme = "まとめ"
+        netSuccess, netResponse, netError = generate_text(
+            theme = theme,
+            persona = persona,
+            title = element.title,
+            message = element.message,
+            textbook = textbook
+        )
         if netSuccess:
             serverSuccess, serverRes, serverError = netResponse
             
@@ -85,12 +100,13 @@ def generate_element(persona: str, element: Element, textbook: List):
         )
 
     elif element.element == "Exercise":
-        netSuccess, netResponse, netError = gRPC_Client("Exercise").call(f"GenerateExercise", {
-            "persona": persona,
-            "title": element.title,
-            "message": element.message,
-            "textbook": textbook
-        })
+
+        netSuccess, netResponse, netError = generate_exercise(
+            persona = persona,
+            title = element.title,
+            message = element.message,
+            textbook = textbook
+        )
         if netSuccess:
             serverSuccess, serverRes, serverError = netResponse
 

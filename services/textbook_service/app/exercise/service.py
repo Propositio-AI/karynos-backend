@@ -3,16 +3,18 @@ import json
 from shared.lib.gRPC import gRPC_Client
 from shared.utils import readText, createPromptTemplate, model_to_prompt_structure
 from shared.types import BaseFig, AnswerSchema
+from shared.lib.basicError import errorWrapper
 
 from pydantic import BaseModel, Field
 from typing import List, Optional
+
 
 import os
 
 LLM_MODEL = os.getenv("LLM_MODEL", "local")
 
 # パス定義
-QUESTON_PROMPT_PATH = "./prompts/question_prompt.txt"
+QUESTON_PROMPT_PATH = "./exercise/prompts/question_prompt.txt"
 STYLE_PROMPT_PATH = "./shared/prompts/style_prompt.txt"
 USER_TEMPLATE_PATH = "./shared/prompts/section_user_template.txt"
 
@@ -76,6 +78,7 @@ def generate_question(persona: str, title: str, message: str, textbook: str) -> 
         
     else: raise netError
 
+
 def generate_answer(persona: str, question: str) -> AnswerSchema: 
     # gRPCクライアントの定義
     solve_client = gRPC_Client("Solve")
@@ -109,7 +112,7 @@ def generate_fig(persona:str, message:str) -> dict:
         
     else: raise netError
 
-
+@errorWrapper("Unclassified system exception")
 def generate_exercise(persona: str, title: str, message: str, textbook: str) -> dict:
     # 問題の作成
     questions = generate_question(persona, title, message, textbook)
