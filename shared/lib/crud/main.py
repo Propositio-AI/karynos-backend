@@ -55,6 +55,17 @@ class CRUD:
         Returns
         ---------
             DeclarativeMeta: 挿入結果
+
+        Examples
+        --------
+            >>> @router.post("/", response_model=ArchiveTableSchema)
+            >>> async def _(data: ArchiveTableSchema):
+            >>>    success, result, error = archive_crud.create(data)
+
+            >>>    if not success:
+            >>>        return HTTPException(status_code=500, detail=error)
+    
+            >>>    return result
         
         """
 
@@ -80,6 +91,14 @@ class CRUD:
         Returns
         ---------
             list[DeclarativeMeta]: 取得結果
+
+        Examples
+        --------
+            >>> success, valid_tokens, error = auth_crud.read([
+            >>>    ["token", "==", token],
+            >>>    ["expires_at", ">=", get_utc_time()],
+            >>>    ["used_at", "==", None]
+            >>> ])
         
         """
 
@@ -115,6 +134,18 @@ class CRUD:
         Returns
         ---------
             list[DeclarativeMeta]: 更新結果
+
+        Examples
+        --------
+            >>> success, new_archive, error = archive_crud.update(
+            >>>    [
+            >>>        ["id", "==", data.id]
+            >>>    ],
+            >>>    {
+            >>>        "contents": new_contents,
+            >>>        "archive_status": "RUNNING"
+            >>>    }
+            >>> )
         
         """
 
@@ -152,6 +183,12 @@ class CRUD:
         Returns
         ---------
             list[DeclarativeMeta]: 削除結果
+
+        Examples
+        ---------
+            >>> success, deleted_memos, error = memo_crud.delete([
+            >>>    ["id", "==", memo_id]
+            >>> ])
         
         """
         

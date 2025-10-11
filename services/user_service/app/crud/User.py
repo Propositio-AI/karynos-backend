@@ -1,6 +1,6 @@
 from models.UserTable import UserTable
 from core.db import session
-from shared.lib.crud import CRUD
+from shared.lib.crud.crud import CRUD
 
 user_crud = CRUD(session, UserTable)
 

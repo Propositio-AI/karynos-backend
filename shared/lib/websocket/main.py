@@ -17,6 +17,7 @@ class WebSocketManager:
         
         
         """
+
         self.path = path
         self.schema = schema
 
@@ -24,8 +25,10 @@ class WebSocketManager:
             async def endpoint(ws: WebSocket):
                 self.ws = ws
                 self.index = 0
+
                 await ws.accept()
                 manager = self
+                
                 try:
                     while True:
                         raw = await ws.receive_text()
