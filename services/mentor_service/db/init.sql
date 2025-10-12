@@ -1,0 +1,57 @@
+CREATE OR REPLACE FUNCTION uuid_generate_v7() RETURNS UUID AS
+$$
+BEGIN
+    return encode(set_bit(set_bit(overlay(
+        uuid_send(gen_random_uuid())
+        placing substring(int8send(floor(extract(epoch from clock_timestamp()) * 1000)::bigint) from 3)
+        from 1 for 6
+    ), 52, 1), 53, 1), 'hex')::uuid;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE SCHEMA IF NOT EXISTS public;
+
+/*
+    Table: mentors
+*/
+CREATE TABLE mentors (
+    mentor_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    chief_mentor_id UUID NOT NULL,
+    orgnaztion_id INTEGER NOT NULL,
+    login_id VARCHAR NOT NULL,
+    name_family VARCHAR NOT NULL,
+    name_given VARCHAR NOT NULL,
+    access_group UUID NOT NULL,
+    last_login_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+
+/*
+    Table: mentor_groups
+*/
+CREATE TABLE mentor_groups (
+    group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    chief_mentor_id UUID NOT NULL,
+    name VARCHAR NOT NULL,
+    description VARCHAR,
+    updated_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_mentor_groups_chief
+        FOREIGN KEY (chief_mentor_id) REFERENCES mentors (mentor_id)
+);
+
+
+/*
+    Table: mentor_group_members 
+*/
+CREATE TABLE mentor_group_members (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    group_id UUID NOT NULL,
+    mentor_id UUID NOT NULL,
+    role VARCHAR NOT NULL,
+    joined_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_mgm_group FOREIGN KEY (group_id) REFERENCES mentor_groups (group_id),
+    CONSTRAINT fk_mgm_mentor FOREIGN KEY (mentor_id) REFERENCES mentors (mentor_id)
+);
