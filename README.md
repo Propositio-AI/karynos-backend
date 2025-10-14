@@ -13,9 +13,13 @@
     cd karynos-backend
     ```
 
-2. ### .envファイルのダウンロード
+2. ### .envファイルのダウンロードV
 
     `.env`は[Googleドライブ](https://drive.google.com/drive/folders/12U9-36mWvZU0-SYGxlg3OeA4gWnsi3La?usp=drive_link)にあります。適切な場所に配置してください。
+    
+    .envはkarynos-backend/docker/devの中
+    .dreamer_service_envはkarynos_backend/service/dreamer_serviceの中
+    (.dreamer_service_envのように他のものも同じファイル名の場所に入れる。)
 
 3. ### 共通イメージのビルド
 
