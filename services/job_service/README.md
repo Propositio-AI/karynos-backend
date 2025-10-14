@@ -1,94 +1,48 @@
-# User Service
+# Job Service
 
-[システム設計](https://www.notion.so/Karynos-backend-module-1b39a9038f388050816afe733aa3cdfc?source=copy_link#2109a9038f388027b50cd137a959e89e)
+[システム設計](https://www.notion.so/Karynos-backend-module-1b39a9038f388050816afe733aa3cdfc?source=copy_link#2899a9038f38808aa984c1d67ac464fe)
 
-## 概要
-
-User serviceではKarynosにおいてユーザー管理のサービスを提供します。
-
-## 技術スタック
-
-```
-python==3.12
-
-postgresql==17.5
-```
-
-## コンテナのビルド
-
-```
-docker compose build
-```
-
-## コンテナの起動
-
-```
-docker compose --env-file .env_dev up -d
-```
-
-## コンテナ内への入り方
-
-app
-```
-docker-compose exec app bash
-```
-
-db
-```
-docker-compose exec user-db bash // コンテナに入る
-psql -U karynos_admin -d user // PostgreSQLへログイン
-```
+| **項目** | **内容** |
+|-----------|-----------|
+| **サービス名** | job_service |
+| **主な責務** | ・Job Matching<br>・Job パラメータ表示<br>・Job ストレージ<br>・Job Suggestion |
+| **通信方法** | API |
+| **ルート** | `job/` |
+| **構成コンテナ** | APIサーバー（job_service）<br>DBサーバー（job-db） |
+| **実装言語** | Python |
 
 ## フォルダ構成
 
-`*`がついているファイルは編集しないでください。
-
 ```
-app/
-├── api/
-│   ├── v1/
-│   │   ├── endpoints/
-│   │   │   └── user.py           # /user関連エンドポイント
-│   │   └── *api_router.py        # V1全体のルーター統括
-│   └── **main_router.py          # バージョン統括ルーター（/api/v1）
+│  .job_env                                   // 環境変数
+│  Dockerfile                                
+│  README.md
+│  requirements.txt                           // Pythonライブラリ一覧 
 │
-├── core/
-│   ├── *config.py                # 環境変数読み込み（pydantic）
-│   ├── **db.py                   # DBセッション設定
-│   └── *init_db.py               # DB初期データの挿入
+├─app
+│  │  crud.py                                 // DB操作関係
+│  │  main.py                                 // 実行不ファイル
+│  │
+│  ├─core                                      
+│  │  │  config.py                            // 設定ファイル
+│  │  │  db.py                                // DB接続関係
+│  │
+│  ├─models　　　　　　　　　　　　　　　　　　　 // DBテーブル関係
+│  │ │   base.py                              
+│  │
+│  ├─route
+│  │  │  main_router.py                       // ルートルーティング
+│  │  │
+│  │  ├─api
+│  │  │  │  v1.py                             // APIルーティング
+│  │  │
+│  │  ├─ws
+│  │     │  v1.py                             // WebSocketルーティング
+│  │
+│  └─shared
 │
-├── crud/
-│   ├── User.py                   # UserTable関連のCRUD操作
-│   └── UserType.py　　　　　      # UserTypeTable関連のCRUD操作
-│
-├── models/             
-│   ├── *UserTable.py             # UserTable 定義
-│   ├── **base.py                 # SQLAlchemy 定義
-│   └── *UserTypeTable.py         # UserTypeTable 定義
-│
-├── schemas/
-│   ├── Auth.py                   # Pydanticモデル
-│   └── Refresh.py
-│
-├── utils/
-│   └── time.py                   # 時間関係
-│
-├── tests/
-│   └── **db-data/                # 開発用DBデータ
-│
-├── *.env                         # 本番用環境変数
-├── *.env_dev                     # 開発用環境変数
-|
-├── **.gitignore                     
-|
-├── *docker-compose.yml                            
-├── **Dockerfile                            
-|
-├── *requirements.txt                            
-|
-├── *README.md                            
-|
-├── **main.py                     # アプリエントリーポイント
-└── **__init__.py
-
+└─db
+   │  init.sql                                 // DB初回実行ファイル
 ```
+
+## テスト設計
