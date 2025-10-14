@@ -9,7 +9,7 @@
 1. ### Gitからダウンロード
 
     ```cmd
-    git clone https://github.com/Propositio-AI/karynos-backend.git
+    git clone https://github.com/Propositio-AI/karynos-backend.git -b feature-new-organization
     cd karynos-backend
     ```
 
