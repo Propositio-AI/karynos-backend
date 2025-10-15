@@ -30,7 +30,7 @@
 1. ### Gitからダウンロード
 
     ```cmd
-    git clone https://github.com/Propositio-AI/karynos-backend.git -b feature-new-organization
+    git clone https://github.com/Propositio-AI/karynos-backend.git
     cd karynos-backend
     ```
 
