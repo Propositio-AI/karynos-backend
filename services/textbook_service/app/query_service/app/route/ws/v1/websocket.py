@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 from models.QueryTable import QueryTableSchema
 
-from shared.lib.api_client import HTTP_APIClient
+from shared.lib.API import HTTP_APIClient
 from shared.lib.gRPC import gRPC_Client
 from shared.lib.websocket.websocket import WebSocketManager, streamer
 

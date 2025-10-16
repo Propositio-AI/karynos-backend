@@ -29,11 +29,11 @@ class BasicError(Exception):
 
         error = ERRORS[key]
 
-        if code is None: self.code = code
-        else: self.code = self.code = f"{error["category"]}-{error["code"]}"
+        if code is not None: self.code = code
+        else: self.code = f"{error["category"]}-{error["code"]}"
 
-        if message is None: self.message = message
-        else: self.message = f"[{message}]"
+        if message is not None: self.message = message
+        else: self.message = f"[{message['message'][LANG]}]"
 
         super().__init__(f"[{self.code}] {self.message}")
 
@@ -64,12 +64,15 @@ def errorWrapper(key: ErrorKey, service_prefix = os.getenv("ERROR_PREFIX", "")):
 
                 return True, result, None
             except BasicError as e:
+                print(e, flush=True)
                 return (
                     False,
                     None,
                     e
                 )
             except Exception as e:
+                print(e, flush=True)
+
                 return  (
                     False,
                     None,
