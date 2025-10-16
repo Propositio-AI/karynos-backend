@@ -22,6 +22,7 @@
 ├─app
 │  │  crud.py                                 // DB操作関係
 │  │  main.py                                 // 実行不ファイル
+│  │　schemas.py                              // 型定義ファイル
 │  │
 │  ├─core                                      
 │  │  │  config.py                            // 設定ファイル
