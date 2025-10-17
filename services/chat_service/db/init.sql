@@ -9,6 +9,8 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE TYPE share_type AS ENUM ('PRIVATE', 'PUBLIC');
+
 CREATE SCHEMA IF NOT EXISTS public;
 
 /*
@@ -18,6 +20,7 @@ CREATE TABLE conversations (
     conversation_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     owner_id UUID NOT NULL,
     title VARCHAR NOT NULL,
+    share_type share_type NOT NULL DEFAULT 'PRIVATE',
     updated_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW()
 );
