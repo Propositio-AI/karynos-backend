@@ -12,9 +12,9 @@ class NewDreamerResponse(BaseModel):
     dreamer_id: UUID = Field(..., description = "dreamer ID")
 
 class UpdateDreamerRequest(BaseModel):
-    organization_id: Optional[int] = Field(None, description = "団体ID")
-    name_family: Optional[str] = Field(None, description = "苗字")
-    name_given: Optional[str] = Field(None, description = "名前")
+    organization_id: int = Field(..., description = "団体ID")
+    name_family: str = Field(..., description = "苗字")
+    name_given: str = Field(..., description = "名前")
 
 class DreamerGroupSummary(BaseModel): #サブモデル
     name: str = Field(..., description = "グループ名")
@@ -27,7 +27,7 @@ class DreamerResponse(BaseModel):
     name_given: str = Field(..., description = "名前")
     groups: List[DreamerGroupSummary] = Field(
         default_factory = list,
-        description = "所属しているdreamerグループの概要リスト"
+        description = "所属しているdreamerのグループ概要リスト"
     )
     
 #Dreamer Group Schemas
@@ -54,7 +54,7 @@ class DreamerGroupResponse(BaseModel):
         )
     
 class UpdateDreamerGroupRequest(BaseModel):
-    name: Optional[str] = Field(None, description = "グループ名")
+    name: str = Field(..., description = "グループ名")
     description: Optional[str] = Field(None, description = "グループの説明")
 
 #Dreamer to Group
