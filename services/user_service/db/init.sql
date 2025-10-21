@@ -9,6 +9,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
 CREATE TYPE user_type AS ENUM ('GENERAL', 'STUDENT', 'TEACHER', 'ADMIN');
 
 /*Users Table*/
@@ -27,6 +36,10 @@ CREATE TABLE users (
     last_login_at TIMESTAMP WITHOUT TIME ZONE
 );
 
+CREATE TRIGGER update_user_timestamp
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
 
 /*Initialize*/
 INSERT INTO user (first_name, email) VALUES ('Toya', 'toya@propositio.com'), ('Ren', 'ren@propositio.com'), ('Kage', 'kage@propositio.com'),

@@ -9,6 +9,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
 /*Mail Table*/
 CREATE TABLE mail (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v7() NOT NULL,
@@ -22,3 +31,8 @@ CREATE TABLE mail (
 
 CREATE INDEX id ON mail (id);
 CREATE INDEX status ON mail (status);
+
+CREATE TRIGGER update_mail_timestamp
+BEFORE UPDATE ON mail
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
