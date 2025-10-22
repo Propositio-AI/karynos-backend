@@ -5,7 +5,7 @@ from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest
                      DreamerToGroupResponse)
 
 # /api/v1/dreamer
-router = APIRouter(prefix="/v1", tags=["dreamer"])
+router = APIRouter()
 
 # ================
 # Admin
