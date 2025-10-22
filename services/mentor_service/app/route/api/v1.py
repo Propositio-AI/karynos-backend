@@ -8,7 +8,7 @@ from schemas import (
 
 # /api/v1/mentor
 
-router = APIRouter(prefix="/v1", tags=["mentor"])
+router = APIRouter()
 
 # =============
 # Mentor Admin
