@@ -61,7 +61,7 @@ class MentorGroupResponse(BaseModel):
         description="グループに所属しているMentorの一覧"
     )
     
-class UpdataMentorGroupRequest(BaseModel):
+class UpdateMentorGroupRequest(BaseModel):
     chief_mentor_id: Optional[UUID] = Field(None, description="グループチーフメンターのID")
     name: Optional[str] = Field(None, description="グループ名")
     description: Optional[str] = Field(None, description="グループの説明")
