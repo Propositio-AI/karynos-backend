@@ -9,6 +9,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
 CREATE SCHEMA IF NOT EXISTS public;
 
 /*
@@ -17,7 +26,7 @@ CREATE SCHEMA IF NOT EXISTS public;
 CREATE TABLE IF NOT EXISTS public.jobs (
     job_id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -29,7 +38,7 @@ CREATE TABLE IF NOT EXISTS public.job_reviews (
     job_id INTEGER NOT NULL REFERENCES public.jobs (job_id) ON DELETE CASCADE,
     worker_id UUID NOT NULL,
     salary INTEGER CHECK (salary >= 0),
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -43,5 +52,5 @@ CREATE TABLE IF NOT EXISTS public.history (
     good BOOLEAN NOT NULL DEFAULT FALSE,
     bad BOOLEAN NOT NULL DEFAULT FALSE,
     save BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

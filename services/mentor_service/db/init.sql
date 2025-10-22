@@ -9,6 +9,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
 CREATE SCHEMA IF NOT EXISTS public;
 
 /*
@@ -23,8 +32,8 @@ CREATE TABLE mentors (
     name_given VARCHAR NOT NULL,
     access_group UUID NOT NULL,
     last_login_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -36,8 +45,8 @@ CREATE TABLE mentor_groups (
     chief_mentor_id UUID NOT NULL,
     name VARCHAR NOT NULL,
     description VARCHAR,
-    updated_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_mentor_groups_chief
         FOREIGN KEY (chief_mentor_id) REFERENCES mentors (mentor_id)
 );
@@ -51,7 +60,17 @@ CREATE TABLE mentor_group_members (
     group_id UUID NOT NULL,
     mentor_id UUID NOT NULL,
     role VARCHAR NOT NULL,
-    joined_at TIMESTAMP DEFAULT NOW(),
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_mgm_group FOREIGN KEY (group_id) REFERENCES mentor_groups (group_id),
     CONSTRAINT fk_mgm_mentor FOREIGN KEY (mentor_id) REFERENCES mentors (mentor_id)
 );
+
+CREATE TRIGGER update_mentor_timestamp
+BEFORE UPDATE ON mentors
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
+
+CREATE TRIGGER update_mentor_group_timestamp
+BEFORE UPDATE ON mentor_groups
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();

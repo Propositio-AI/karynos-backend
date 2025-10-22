@@ -9,6 +9,15 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 CREATE TYPE share_type AS ENUM ('PRIVATE', 'PUBLIC');
 
 CREATE SCHEMA IF NOT EXISTS public;
@@ -21,8 +30,8 @@ CREATE TABLE conversations (
     owner_id UUID NOT NULL,
     title VARCHAR NOT NULL,
     share_type share_type NOT NULL DEFAULT 'PRIVATE',
-    updated_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -35,8 +44,8 @@ CREATE TABLE messages (
     sender_id UUID NOT NULL,
     role VARCHAR NOT NULL,
     text_content TEXT NOT NULL,
-    updated_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_messages_conversation
         FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
 );
@@ -49,7 +58,17 @@ CREATE TABLE conversation_participants (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     conversation_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    joined_at TIMESTAMP DEFAULT NOW(),
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_participants_conversation
         FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
 );
+
+CREATE TRIGGER update_conversation_timestamp
+BEFORE UPDATE ON conversations
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
+
+CREATE TRIGGER update_message_timestamp
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
