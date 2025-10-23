@@ -98,7 +98,7 @@ async def delete_group(group_id: str):
 async def add_dreamer_to_group(group_id: str, request: DreamerToGroupRequest):
     """グループにdreamerを追加"""
     added_dreamers=[]
-    for dreamer_id in request.mentors:
+    for dreamer_id in request.dreamers:
         data={"group_id": group_id, "dreamer_id": dreamer_id}
         _, result, _=dreamer_group_members_crud.create(data)
         added_dreamers.append(result)
