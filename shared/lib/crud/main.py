@@ -4,7 +4,7 @@ from typing import Type, TypeVar
 from sqlalchemy.orm import DeclarativeMeta
 from pydantic import BaseModel
 
-from shared.lib.basicError import errorWrapper, BaseError
+from shared.lib.basicError import errorWrapper, BasicError
 
 T = TypeVar("T", bound=BaseModel)
 M = TypeVar("M", bound=DeclarativeMeta)

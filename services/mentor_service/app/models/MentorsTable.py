@@ -12,7 +12,7 @@ from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
 
-class MentorTable(Base):
+class MentorsTable(Base):
     __tablename__ = "mentors"
 
     mentor_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
@@ -31,4 +31,4 @@ class MentorTable(Base):
     memberships = relationship("MentorGroupMember", back_populates="mentor")
 
 
-MentorTableSchema: BaseModel = sqlalchemy_to_pydantic(MentorTable)
+MentorTableSchema: BaseModel = sqlalchemy_to_pydantic(MentorsTable)
