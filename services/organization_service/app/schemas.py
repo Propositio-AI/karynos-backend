@@ -52,9 +52,9 @@ class OrganizationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateOrganizationRequest(BaseModel):
-    organization_name: str = Field(..., description="組織名")
-    display_name: str = Field(..., description="表示用名称")
-    organization_type: OrganizationType = Field(..., description="団体種別")
+    organization_name: str = Field(None, description="組織名")
+    display_name: str = Field(None, description="表示用名称")
+    organization_type: OrganizationType = Field(None, description="団体種別")
 
 class UpdateOrganizationResponse(BaseModel):
     organization_id: int = Field(..., description="組織ID")

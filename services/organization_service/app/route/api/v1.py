@@ -54,7 +54,7 @@ async def _(organization_id: int, request: UpdateOrganizationRequest):
         [
             ["organization_id", "==", organization_id]
         ],
-        request.model_dump()
+        request.model_dump(exclude_none=True)
     )
 
     return UpdateOrganizationResponse.model_validate(updateOrganization[0])
