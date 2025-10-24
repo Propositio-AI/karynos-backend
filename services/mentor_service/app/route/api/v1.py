@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.crud import mentors_crud, mentor_groups_crud, mentor_group_members_crud
+from crud import mentors_crud, mentor_groups_crud, mentor_group_members_crud
 from schemas import (
     NewMentorRequest, NewMentorResponse,MentorResponse,
     UpdateMentorRequest, NewMentorGroupRequest,NewMentorGroupResponse,

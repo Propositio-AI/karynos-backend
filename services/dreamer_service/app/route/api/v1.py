@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.crud import dreamer_crud, dreamer_group_crud, dreamer_group_members_crud
+from crud import dreamer_crud, dreamer_group_crud, dreamer_group_members_crud
 from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest,
                      DreamerResponse, NewDreamerGroupRequest, NewDreamerGroupResponse, 
                      DreamerGroupResponse, UpdateDreamerGroupRequest, DreamerToGroupRequest, 
