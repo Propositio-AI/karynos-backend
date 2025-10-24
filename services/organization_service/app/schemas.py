@@ -31,10 +31,6 @@ class OrganizationNameResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-class OrganizationListRequest(BaseModel):
-    organization_type: Optional[OrganizationType] = Field(None, description="団体種別")
-
 class OrganizationListItem(BaseModel):
     organization_name: str = Field(..., description="組織名")
     organization_id: int = Field(..., description="組織ID")

@@ -3,7 +3,7 @@ from crud import organization_crud
 from schemas import (
     NewOrganizationRequest, NewOrganizationResponse,
     OrganizationNameResponse,
-    OrganizationListRequest, OrganizationListResponse,
+    OrganizationListResponse,
     OrganizationResponse,
     UpdateOrganizationRequest, UpdateOrganizationResponse,
     OrganizationResponse,
