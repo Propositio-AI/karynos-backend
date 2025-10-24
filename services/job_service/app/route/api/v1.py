@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from schema import (RecommendResponse,JobDetailResponse)
 # /api/v1/job
-router = APIRouter(prefix="/v1", tags=["job"])
+router = APIRouter()
 
 @router.get("/detail/{job_id}", response_model=JobDetailResponse)
 async def get_job(job_id: int):
