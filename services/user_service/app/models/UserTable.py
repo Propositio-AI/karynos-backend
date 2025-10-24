@@ -2,6 +2,7 @@
 
 from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, VARCHAR, UUID, INTEGER
+from sqlalchemy import func
 from pydantic import BaseModel
 
 from shared.utils.time import get_utc_time
@@ -21,8 +22,8 @@ class UserTable(Base):
     class_no = Column(INTEGER)
     student_no = Column(INTEGER)
     school = Column(UUID(as_uuid=True))
-    created_at = Column(DateTime, default=get_utc_time)
-    updated_at = Column(DateTime, default=get_utc_time, onupdate=get_utc_time)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     last_login_at = Column(DateTime)
 
 UserTableSchema: BaseModel = sqlalchemy_to_pydantic(UserTable)

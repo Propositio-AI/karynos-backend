@@ -8,8 +8,7 @@ from sqlalchemy.types import (
     INTEGER
 )
 from pydantic import BaseModel
-
-from shared.utils.time import get_utc_time
+from sqlalchemy import func
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
@@ -23,7 +22,7 @@ class HistoryTable(Base):
     good = Column(BOOLEAN, nullable=False, default=False)
     bad = Column(BOOLEAN, nullable=False, default=False)
     save = Column(BOOLEAN, nullable=False, default=False)
-    created_at = Column(DateTime, nullable=False, default=get_utc_time)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
 
 HistoryTableSchema: BaseModel = sqlalchemy_to_pydantic(HistoryTable)

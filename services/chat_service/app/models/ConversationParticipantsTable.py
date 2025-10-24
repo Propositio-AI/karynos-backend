@@ -1,7 +1,8 @@
 from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy import func
 from sqlalchemy.types import (
     UUID,
-    TIMESTAMP
+    DateTime
 )
 from pydantic import BaseModel
 from sqlalchemy.orm import relationship
@@ -17,7 +18,7 @@ class ConversationParticipantTable(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.conversation_id"), nullable=False, index=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    joined_at = Column(TIMESTAMP, default="NOW()")
+    joined_at = Column(DateTime, server_default=func.now())
 
     # リレーション
     conversation = relationship("Conversation", back_populates="participants")

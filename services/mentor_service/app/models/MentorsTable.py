@@ -3,8 +3,9 @@ from sqlalchemy.types import (
     VARCHAR,
     UUID,
     INTEGER,
-    TIMESTAMP
+    DateTime
 )
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 
@@ -22,9 +23,9 @@ class MentorsTable(Base):
     name_family = Column(VARCHAR, nullable=False)
     name_given = Column(VARCHAR, nullable=False)
     access_group = Column(UUID(as_uuid=True), index=True)
-    last_login_at = Column(TIMESTAMP)
-    updated_at = Column(TIMESTAMP)
-    created_at = Column(TIMESTAMP, default="NOW()")
+    last_login_at = Column(DateTime)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     chief_mentor = relationship("Mentor", remote_side=[mentor_id])
     groups = relationship("MentorGroup", back_populates="chief_mentor")

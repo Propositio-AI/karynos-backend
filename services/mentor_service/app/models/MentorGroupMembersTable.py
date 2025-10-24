@@ -2,8 +2,9 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
     UUID,
     VARCHAR,
-    TIMESTAMP
+    DateTime
 )
+from sqlalchemy import func
 from pydantic import BaseModel
 from sqlalchemy.orm import relationship
 
@@ -18,7 +19,7 @@ class MentorGroupMembersTable(Base):
     group_id = Column(UUID(as_uuid=True), ForeignKey("mentor_groups.group_id"), nullable=False, index=True)
     mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"), nullable=False, index=True)
     role = Column(VARCHAR, nullable=False)
-    joined_at = Column(TIMESTAMP, default="NOW()")
+    joined_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     group = relationship("MentorGroup", back_populates="members")
     mentor = relationship("Mentor", back_populates="memberships")

@@ -1,5 +1,6 @@
 from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, UUID, BOOLEAN, VARCHAR
+from sqlalchemy import func
 from pydantic import BaseModel
 
 from shared.utils.time import get_utc_time
@@ -16,7 +17,7 @@ class QueryTable(Base):
     query = Column(VARCHAR)
     query_type = Column(VARCHAR, default="CHAT")
     favorite = Column(BOOLEAN, default=False)
-    created_at = Column(DateTime, default=get_utc_time)
-    updated_at = Column(DateTime, default=get_utc_time, onupdate=get_utc_time)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 QueryTableSchema: BaseModel = sqlalchemy_to_pydantic(QueryTable)

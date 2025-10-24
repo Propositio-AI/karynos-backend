@@ -1,8 +1,8 @@
 from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, UUID, JSON, VARCHAR
+from sqlalchemy import func
 from pydantic import BaseModel
 
-from shared.utils.time import get_utc_time
 from shared.utils.security import gen_uuid7
 from models.base import Base
 from shared.utils.shema import sqlalchemy_to_pydantic
@@ -18,6 +18,7 @@ class ArchiveTable(Base):
     archive_status = Column(VARCHAR, default="PENDING")
     contents = Column(JSON)
     contents_metadata = Column(JSON)
-    created_at = Column(DateTime, default=get_utc_time)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    
 
 ArchiveTableSchema: BaseModel = sqlalchemy_to_pydantic(ArchiveTable)

@@ -2,8 +2,9 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
     VARCHAR,
     UUID,
-    TIMESTAMP
+    DateTime
 )
+from sqlalchemy import func
 from pydantic import BaseModel
 from sqlalchemy.orm import relationship
 
@@ -17,8 +18,8 @@ class DreamerGroupTable(Base):
     group_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     name = Column(VARCHAR, nullable=False)
     description = Column(VARCHAR)
-    updated_at = Column(TIMESTAMP)
-    created_at = Column(TIMESTAMP, default="NOW()")
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # リレーション
     members = relationship("DreamerGroupMember", back_populates="group")
