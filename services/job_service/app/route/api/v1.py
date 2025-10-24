@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from schema import (RecommendResponse,JobDetailResponse)
+
 # /api/v1/job
 router = APIRouter(prefix="/v1", tags=["job"])
 
