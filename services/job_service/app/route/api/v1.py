@@ -1,12 +1,16 @@
-from fastapi import APIRouter
-from schema import (RecommendResponse,JobDetailResponse)
+from schemas import (RecommendResponse,JobDetailResponse)
+from typing import List
+from uuid import UUID
+from dependencies import get_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 # /api/v1/job
 router = APIRouter()
 
 @router.get("/detail/{job_id}", response_model=JobDetailResponse)
-async def get_job(job_id: int):
+async def get_job(job_id: int, db: Session = Depends(get_db)):
     """job情報の取得"""
-
     pass
 
 @router.put("/good/{history_id}", status_code=200)
