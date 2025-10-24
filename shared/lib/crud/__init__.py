@@ -1,1 +1,1 @@
-from main import CRUD
+from shared.lib.crud.main import CRUD

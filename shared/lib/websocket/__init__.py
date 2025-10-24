@@ -1,1 +1,1 @@
-from main import WebSocketManager
+from shared.lib.websocket.main import WebSocketManager
