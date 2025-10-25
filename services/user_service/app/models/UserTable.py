@@ -1,7 +1,7 @@
 # User Table
 
 from sqlalchemy.schema import Column
-from sqlalchemy.types import DateTime, VARCHAR, UUID, INTEGER
+from sqlalchemy.types import DateTime, TEXT, UUID, INTEGER
 from sqlalchemy import func
 from pydantic import BaseModel
 
@@ -14,9 +14,9 @@ class UserTable(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
-    last_name = Column(VARCHAR)
-    first_name = Column(VARCHAR)
-    email = Column(VARCHAR)
+    last_name = Column(TEXT)
+    first_name = Column(TEXT)
+    email = Column(TEXT)
     user_type = Column(INTEGER)
     grade = Column(INTEGER)
     class_no = Column(INTEGER)

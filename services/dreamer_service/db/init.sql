@@ -26,9 +26,9 @@ CREATE SCHEMA IF NOT EXISTS public;
 CREATE TABLE dreamers (
     dreamer_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     orgnaztion_id INTEGER,
-    login_id VARCHAR NOT NULL,
-    name_family VARCHAR NOT NULL,
-    name_given VARCHAR NOT NULL,
+    login_id TEXT NOT NULL,
+    name_family TEXT NOT NULL,
+    name_given TEXT NOT NULL,
     last_login_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -40,8 +40,8 @@ CREATE TABLE dreamers (
 */
 CREATE TABLE dreamer_groups (
     group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    description VARCHAR,
+    name TEXT NOT NULL,
+    description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

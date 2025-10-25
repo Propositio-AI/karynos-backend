@@ -21,10 +21,10 @@ $$ language 'plpgsql';
 /*Mail Table*/
 CREATE TABLE mail (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v7() NOT NULL,
-    to_email VARCHAR NOT NULL,
-    title VARCHAR NOT NULL,
-    contents VARCHAR,
-    status VARCHAR NOT NULL DEFAULT 'PENDING',
+    to_email TEXT NOT NULL,
+    title TEXT NOT NULL,
+    contents TEXT,
+    status TEXT NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -16,7 +16,7 @@ CREATE TABLE query (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v7() NOT NULL,
     user_id UUID NOT NULL,
     parent_id UUID REFERENCES query(id),
-    query VARCHAR,
+    query TEXT,
     query_type query_type NOT NULL DEFAULT 'CHAT',
     favorite BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

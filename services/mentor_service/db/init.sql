@@ -27,9 +27,9 @@ CREATE TABLE mentors (
     mentor_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chief_mentor_id UUID NOT NULL,
     orgnaztion_id INTEGER NOT NULL,
-    login_id VARCHAR NOT NULL,
-    name_family VARCHAR NOT NULL,
-    name_given VARCHAR NOT NULL,
+    login_id TEXT NOT NULL,
+    name_family TEXT NOT NULL,
+    name_given TEXT NOT NULL,
     access_group UUID NOT NULL,
     last_login_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -43,8 +43,8 @@ CREATE TABLE mentors (
 CREATE TABLE mentor_groups (
     group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chief_mentor_id UUID NOT NULL,
-    name VARCHAR NOT NULL,
-    description VARCHAR,
+    name TEXT NOT NULL,
+    description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_mentor_groups_chief
@@ -59,7 +59,7 @@ CREATE TABLE mentor_group_members (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     group_id UUID NOT NULL,
     mentor_id UUID NOT NULL,
-    role VARCHAR NOT NULL,
+    role TEXT NOT NULL,
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_mgm_group FOREIGN KEY (group_id) REFERENCES mentor_groups (group_id),
     CONSTRAINT fk_mgm_mentor FOREIGN KEY (mentor_id) REFERENCES mentors (mentor_id)

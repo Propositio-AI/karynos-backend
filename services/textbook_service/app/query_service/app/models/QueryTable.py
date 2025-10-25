@@ -1,5 +1,5 @@
 from sqlalchemy.schema import Column
-from sqlalchemy.types import DateTime, UUID, BOOLEAN, VARCHAR
+from sqlalchemy.types import DateTime, UUID, BOOLEAN, TEXT
 from sqlalchemy import func
 from pydantic import BaseModel
 
@@ -14,8 +14,8 @@ class QueryTable(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     user_id = Column(UUID(as_uuid=True))
     parent_id = Column(UUID(as_uuid=True))
-    query = Column(VARCHAR)
-    query_type = Column(VARCHAR, default="CHAT")
+    query = Column(TEXT)
+    query_type = Column(TEXT, default="CHAT")
     favorite = Column(BOOLEAN, default=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

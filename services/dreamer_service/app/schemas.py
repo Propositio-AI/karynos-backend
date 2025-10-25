@@ -14,9 +14,9 @@ class NewDreamerResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateDreamerRequest(BaseModel):
-    organization_id: int = Field(..., description = "団体ID")
-    name_family: str = Field(..., description = "苗字")
-    name_given: str = Field(..., description = "名前")
+    organization_id: int = Field(None, description = "団体ID")
+    name_family: str = Field(None, description = "苗字")
+    name_given: str = Field(None, description = "名前")
 
 class DreamerGroupSummary(BaseModel): #サブモデル
     name: str = Field(..., description = "グループ名")
@@ -64,8 +64,8 @@ class DreamerGroupResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateDreamerGroupRequest(BaseModel):
-    name: str = Field(..., description = "グループ名")
-    description: Optional[str] = Field(None, description = "グループの説明")
+    name: str = Field(None, description = "グループ名")
+    description: str = Field(None, description = "グループの説明")
 
 #Dreamer to Group
 class DreamerToGroupRequest(BaseModel):
