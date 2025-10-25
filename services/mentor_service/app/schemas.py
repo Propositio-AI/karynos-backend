@@ -35,11 +35,11 @@ class MentorResponse(BaseModel):
 
     
 class UpdateMentorRequest(BaseModel):
-    chief_mentor_id: Optional[UUID] = Field(None, description="チーフメンターのID") 
-    organization_id: Optional[int] = Field(None, description="団体ID")
-    name_family: Optional[str] = Field(None, description="苗字")
-    name_given: Optional[str] = Field(None, description="名前")
-    access_group: Optional[UUID] = Field(None, description="アクセスグループのID")
+    chief_mentor_id: UUID = Field(None, description="チーフメンターのID") 
+    organization_id: int = Field(None, description="団体ID")
+    name_family: str = Field(None, description="苗字")
+    name_given: str = Field(None, description="名前")
+    access_group: UUID = Field(None, description="アクセスグループのID")
     
 class NewMentorGroupRequest(BaseModel):
     chief_mentor_id: UUID = Field(..., description="グループチーフメンターのID")
@@ -71,9 +71,9 @@ class MentorGroupResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateMentorGroupRequest(BaseModel):
-    chief_mentor_id: Optional[UUID] = Field(None, description="グループチーフメンターのID")
-    name: Optional[str] = Field(None, description="グループ名")
-    description: Optional[str] = Field(None, description="グループの説明")
+    chief_mentor_id: UUID = Field(None, description="グループチーフメンターのID")
+    name: str = Field(None, description="グループ名")
+    description: str = Field(None, description="グループの説明")
     
 class MentorRoleInfo(BaseModel):
     mentor_id: UUID = Field(..., description="Mentor ID")

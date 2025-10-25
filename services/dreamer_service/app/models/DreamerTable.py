@@ -1,7 +1,7 @@
 from sqlalchemy.schema import Column
 from sqlalchemy.types import (
     UUID,
-    VARCHAR,
+    TEXT,
     TIMESTAMP,
     INTEGER,
     DateTime
@@ -19,9 +19,9 @@ class DreamerTable(Base):
 
     dreamer_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     orgnaztion_id = Column(INTEGER, index=True)
-    login_id = Column(VARCHAR, nullable=False, index=True)
-    name_family = Column(VARCHAR, nullable=False)
-    name_given = Column(VARCHAR, nullable=False)
+    login_id = Column(TEXT, nullable=False, index=True)
+    name_family = Column(TEXT, nullable=False)
+    name_given = Column(TEXT, nullable=False)
     last_login_at = Column(TIMESTAMP)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

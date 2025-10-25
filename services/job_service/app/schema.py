@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
-from typing import List, Optional
+from typing import List
 
 class JobData(BaseModel):
     name: str = Field(..., description="jobs.name")
+    imgs: List[str] = Field(..., description="職業ごとの画像データリンク")
     salary: int = Field(..., description="jobs_feedback.salary")
     level: int = Field(..., description="jobs_feedback.level")
 
@@ -45,6 +46,7 @@ class Interest(BaseModel):
 
 class JobDetailResponse(BaseModel):
     job_id: int = Field(..., description="jobs.job_id")
+    imgs: List[str] = Field(..., description="職業の画像データリンク")
     salary: int = Field(..., description="jobs_feedback.salary")
     level: int = Field(..., description="jobs_feedback.level")
     end_time: str = Field(..., description="勤務終了時刻（例: '18:00'）")

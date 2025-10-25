@@ -1,6 +1,6 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
-    VARCHAR,
+    TEXT,
     UUID,
     INTEGER,
     DateTime
@@ -19,9 +19,9 @@ class MentorsTable(Base):
     mentor_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     chief_mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"))
     orgnaztion_id = Column(INTEGER, index=True)
-    login_id = Column(VARCHAR, nullable=False, index=True)
-    name_family = Column(VARCHAR, nullable=False)
-    name_given = Column(VARCHAR, nullable=False)
+    login_id = Column(TEXT, nullable=False, index=True)
+    name_family = Column(TEXT, nullable=False)
+    name_given = Column(TEXT, nullable=False)
     access_group = Column(UUID(as_uuid=True), index=True)
     last_login_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

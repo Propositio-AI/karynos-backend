@@ -1,7 +1,7 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
     UUID,
-    VARCHAR,
+    TEXT,
     DateTime
 )
 from sqlalchemy import func
@@ -18,7 +18,7 @@ class MentorGroupMembersTable(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     group_id = Column(UUID(as_uuid=True), ForeignKey("mentor_groups.group_id"), nullable=False, index=True)
     mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"), nullable=False, index=True)
-    role = Column(VARCHAR, nullable=False)
+    role = Column(TEXT, nullable=False)
     joined_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     group = relationship("MentorGroup", back_populates="members")

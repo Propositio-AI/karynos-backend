@@ -1,6 +1,6 @@
 from sqlalchemy.schema import Column
 from sqlalchemy.types import (
-    VARCHAR,
+    TEXT,
     UUID,
     DateTime,
 )
@@ -23,7 +23,7 @@ class ConversationsTable(Base):
 
     conversation_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     owner_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    title = Column(VARCHAR, nullable=False)
+    title = Column(TEXT, nullable=False)
     share_type = Column(SQLEnum(ShareType, name="share_type", create_type=False), nullable=False, server_default=text("'PRIVATE'"))
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

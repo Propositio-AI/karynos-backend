@@ -1,5 +1,5 @@
 from sqlalchemy.schema import Column
-from sqlalchemy.types import DateTime, UUID, JSON, VARCHAR
+from sqlalchemy.types import DateTime, UUID, JSON, TEXT
 from sqlalchemy import func
 from pydantic import BaseModel
 
@@ -13,9 +13,9 @@ class ArchiveTable(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     query_id = Column(UUID(as_uuid=True))
     parent_id = Column(UUID(as_uuid=True))
-    archive_type = Column(VARCHAR, default="CHAT")
-    share_type = Column(VARCHAR, default="PRIVATE")
-    archive_status = Column(VARCHAR, default="PENDING")
+    archive_type = Column(TEXT, default="CHAT")
+    share_type = Column(TEXT, default="PRIVATE")
+    archive_status = Column(TEXT, default="PENDING")
     contents = Column(JSON)
     contents_metadata = Column(JSON)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

@@ -1,6 +1,6 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
-    VARCHAR,
+    TEXT,
     UUID,
     DateTime
 )
@@ -16,8 +16,8 @@ class DreamerGroupTable(Base):
     __tablename__ = "dreamer_groups"
 
     group_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
-    name = Column(VARCHAR, nullable=False)
-    description = Column(VARCHAR)
+    name = Column(TEXT, nullable=False)
+    description = Column(TEXT)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 

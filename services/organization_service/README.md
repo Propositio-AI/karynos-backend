@@ -1,14 +1,14 @@
-# Mentor Service
+# Organization Service
 
-[システム設計](https://www.notion.so/Karynos-backend-module-1b39a9038f388050816afe733aa3cdfc?source=copy_link#2899a9038f388042bcf9d58bec3be020)
+[システム設計](https://www.notion.so/Karynos-backend-module-1b39a9038f388050816afe733aa3cdfc?source=copy_link#2919a9038f38809db197c837837c5488)
 
 | **項目** | **内容** |
 |-----------|-----------|
-| **サービス名** | mentor_service |
-| **主な責務** | ・Mentorアカウントの発行/管理<br>・Mentorグルーピング管理<br>・グループ管理権限 |
+| **サービス名** | organization_service |
+| **主な責務** | ・組織ID・組織情報の管理 |
 | **通信方法** | API |
-| **ルート** | `mentor/` |
-| **構成コンテナ** | APIサーバー（mentor_service）<br>DBサーバー（mentor-db） |
+| **ルート** | `organization/` |
+| **構成コンテナ** | APIサーバー（organization_service）<br>DBサーバー（organization-db） |
 | **実装言語** | Python |
 
 ## フォルダ構成
