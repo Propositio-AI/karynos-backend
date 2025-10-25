@@ -6,7 +6,6 @@ from schemas import (
     OrganizationListResponse,
     OrganizationResponse,
     UpdateOrganizationRequest, UpdateOrganizationResponse,
-    OrganizationResponse,
 
     OrganizationType,
     OrganizationListItem
