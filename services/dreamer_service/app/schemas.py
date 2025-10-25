@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from typing import List, Optional
 
@@ -10,6 +10,8 @@ class NewDreamerRequest(BaseModel):
 
 class NewDreamerResponse(BaseModel):
     dreamer_id: UUID = Field(..., description = "dreamer ID")
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class UpdateDreamerRequest(BaseModel):
     organization_id: int = Field(..., description = "団体ID")
@@ -29,6 +31,9 @@ class DreamerResponse(BaseModel):
         default_factory = list,
         description = "所属しているdreamerのグループ概要リスト"
     )
+
+    model_config = ConfigDict(from_attributes=True)
+
     
 #Dreamer Group Schemas
 class NewDreamerGroupRequest(BaseModel):
@@ -41,6 +46,9 @@ class NewDreamerGroupRequest(BaseModel):
 class NewDreamerGroupResponse(BaseModel):
     group_id: UUID =Field(..., description = "グループID")
 
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DreamerInGroup(BaseModel): #サブモデル
     name: str = Field(..., description = "dreamer名")
     dreamer_id: UUID = Field(..., description = "dreamer ID")
@@ -52,7 +60,9 @@ class DreamerGroupResponse(BaseModel):
         default_factory = list,
         description = "所属しているdreamerの一覧"
         )
-    
+
+    model_config = ConfigDict(from_attributes=True)
+
 class UpdateDreamerGroupRequest(BaseModel):
     name: str = Field(..., description = "グループ名")
     description: Optional[str] = Field(None, description = "グループの説明")
@@ -63,3 +73,5 @@ class DreamerToGroupRequest(BaseModel):
     
 class DreamerToGroupResponse(BaseModel):
     dreamers: List[UUID] = Field(..., description = "更新後のdreamer IDのリスト")
+
+    model_config = ConfigDict(from_attributes=True)

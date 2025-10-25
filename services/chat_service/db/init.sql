@@ -30,8 +30,8 @@ CREATE TABLE conversations (
     owner_id UUID NOT NULL,
     title VARCHAR NOT NULL,
     share_type share_type NOT NULL DEFAULT 'PRIVATE',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -44,8 +44,8 @@ CREATE TABLE messages (
     sender_id UUID NOT NULL,
     role VARCHAR NOT NULL,
     text_content TEXT NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_messages_conversation
         FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
 );
@@ -58,7 +58,7 @@ CREATE TABLE conversation_participants (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     conversation_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_participants_conversation
         FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
 );

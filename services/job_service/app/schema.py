@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from typing import List, Optional
 
@@ -12,8 +12,7 @@ class RecommendResponse(BaseModel):
     history_id: UUID = Field(..., description="histories.history_id")
     job_data: JobData = Field(..., description="職業データ情報")
 
-
-
+    model_config = ConfigDict(from_attributes=True)
 
 class Skill(BaseModel):
     skill_id: int = Field(..., description="skills.skill_id")
@@ -75,3 +74,5 @@ class JobDetailResponse(BaseModel):
     companies: List[Company] = Field(..., description="関連企業リスト")
     talents: List[Talent] = Field(..., description="求められる才能リスト")
     interests: List[Interest] = Field(..., description="関連興味リスト")
+
+    model_config = ConfigDict(from_attributes=True)

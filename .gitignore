@@ -8,4 +8,5 @@ __pycache__/
 .notification_env
 .textbook_env
 .user_env
+.organization_env
 .env

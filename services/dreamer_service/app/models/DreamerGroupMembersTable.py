@@ -1,10 +1,9 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import (
-    VARCHAR,
     UUID,
-    INTEGER,
-    TIMESTAMP
+    DateTime,
 )
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 
@@ -18,7 +17,7 @@ class DreamerGroupMembersTable(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     group_id = Column(UUID(as_uuid=True), ForeignKey("dreamer_groups.group_id"), nullable=False, index=True)
     dreamer_id = Column(UUID(as_uuid=True), ForeignKey("dreamers.dreamer_id"), nullable=False, index=True)
-    joined_at = Column(TIMESTAMP, default="NOW()")
+    joined_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     # リレーション
     group = relationship("DreamerGroup", back_populates="members")

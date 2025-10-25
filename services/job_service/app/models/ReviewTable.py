@@ -5,6 +5,7 @@ from sqlalchemy.types import (
     INTEGER
 )
 from pydantic import BaseModel
+from sqlalchemy import func
 
 from shared.utils.time import get_utc_time
 from shared.utils.security import gen_uuid7
@@ -18,7 +19,7 @@ class JobReviewTable(Base):
     job_id = Column(INTEGER, ForeignKey("jobs.job_id", ondelete="CASCADE"), nullable=False)
     worker_id = Column(INTEGER(as_uuid=True), nullable=False)
     salary = Column(INTEGER, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=get_utc_time)
-
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    
 
 JobReviewTableSchema: BaseModel = sqlalchemy_to_pydantic(JobReviewTable)

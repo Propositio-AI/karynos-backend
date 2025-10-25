@@ -1,14 +1,14 @@
-from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.schema import Column
 from sqlalchemy.types import (
     VARCHAR,
     UUID,
-    INTEGER,
-    TIMESTAMP
+    DateTime,
 )
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from enum import Enum as PyEnum
 from sqlalchemy import Enum as SQLEnum, text
+from sqlalchemy import func
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
@@ -25,8 +25,8 @@ class ConversationsTable(Base):
     owner_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     title = Column(VARCHAR, nullable=False)
     share_type = Column(SQLEnum(ShareType, name="share_type", create_type=False), nullable=False, server_default=text("'PRIVATE'"))
-    updated_at = Column(TIMESTAMP)
-    created_at = Column(TIMESTAMP, default="NOW()")
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # リレーション
     messages = relationship("Message", back_populates="conversation")

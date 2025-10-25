@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from typing import List, Optional
 
@@ -12,6 +12,8 @@ class NewMentorRequest(BaseModel):
     
 class NewMentorResponse(BaseModel):
     mentor_id: UUID = Field(..., description="Mentor ID")
+
+    model_config = ConfigDict(from_attributes=True)
     
 class MentorGroupInfo(BaseModel):
     name: str = Field(..., description="グループ名")
@@ -28,6 +30,9 @@ class MentorResponse(BaseModel):
         default_factory=list,
         description="所属しているMentorグループの一覧"          
     )
+
+    model_config = ConfigDict(from_attributes=True)
+
     
 class UpdateMentorRequest(BaseModel):
     chief_mentor_id: Optional[UUID] = Field(None, description="チーフメンターのID") 
@@ -47,6 +52,8 @@ class NewMentorGroupRequest(BaseModel):
     
 class NewMentorGroupResponse(BaseModel):
     group_id: UUID = Field(..., description="グループID")
+
+    model_config = ConfigDict(from_attributes=True)
     
 class MentorInGroup(BaseModel):
     name: str = Field(..., description="Mentor名")
@@ -60,7 +67,9 @@ class MentorGroupResponse(BaseModel):
         default_factory=list,
         description="グループに所属しているMentorの一覧"
     )
-    
+
+    model_config = ConfigDict(from_attributes=True)
+
 class UpdateMentorGroupRequest(BaseModel):
     chief_mentor_id: Optional[UUID] = Field(None, description="グループチーフメンターのID")
     name: Optional[str] = Field(None, description="グループ名")
@@ -76,3 +85,4 @@ class MentorToGroupRequest(BaseModel):
 class MentorToGroupResponse(BaseModel):
     mentors: List[MentorRoleInfo] = Field(...,description="グループに所属しているMentorの一覧とその役割")
     
+    model_config = ConfigDict(from_attributes=True)
