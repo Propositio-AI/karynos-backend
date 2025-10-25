@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, status
 from typing import List
 from uuid import UUID
-from sqlalchemy.orm import Session
 
 from schema import RecommendResponse, JobDetailResponse
 
