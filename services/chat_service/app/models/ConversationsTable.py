@@ -4,7 +4,6 @@ from sqlalchemy.types import (
     UUID,
     DateTime,
 )
-from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from enum import Enum as PyEnum
 from sqlalchemy import Enum as SQLEnum, text

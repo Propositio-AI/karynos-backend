@@ -1,9 +1,12 @@
 from fastapi import APIRouter
+
 from crud import dreamer_crud, dreamer_group_crud, dreamer_group_members_crud
 from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest,
                      DreamerResponse, NewDreamerGroupRequest, NewDreamerGroupResponse, 
                      DreamerGroupResponse, UpdateDreamerGroupRequest, DreamerToGroupRequest, 
                      DreamerToGroupResponse)
+from shared.utils.security import random_string
+from models.DreamerTable import DreamerTableSchema
 
 # /api/v1/dreamer
 router = APIRouter()
@@ -15,8 +18,12 @@ router = APIRouter()
 @router.post("/admin/new", response_model=NewDreamerResponse)
 async def create_dreamer(request: NewDreamerRequest):
     """新しいアカウントの作成"""
-    _, result, _=dreamer_crud.create(request)
-    return result
+
+    _, result, error = dreamer_crud.create(DreamerTableSchema(**request.model_dump(), login_id = random_string()))
+
+    print(error, flush=True)
+
+    return NewDreamerResponse.model_validate(result)
 
 @router.get("/admin/{dreamer_id}", response_model=DreamerResponse)
 async def get_dreamer(dreamer_id: str):

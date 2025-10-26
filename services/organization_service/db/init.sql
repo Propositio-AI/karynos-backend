@@ -13,7 +13,7 @@ CREATE TYPE organization_type AS ENUM ('SCHOOL_ELEMENTARY', 'SCHOOL_JUNIOR', 'SC
 /*
     Table: organization
 */
-CREATE TABLE organization (
+CREATE TABLE IF NOT EXISTS organization (
     organization_id SERIAL PRIMARY KEY,
     organization_name TEXT NOT NULL,
     display_name TEXT NOT NULL,

@@ -5,7 +5,6 @@ from sqlalchemy.types import (
     DateTime
 )
 from pydantic import BaseModel
-from sqlalchemy.orm import relationship
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic

@@ -6,7 +6,6 @@ from sqlalchemy.types import (
     DateTime
 )
 from sqlalchemy import func
-from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 
 from shared.utils.security import gen_uuid7
@@ -26,10 +25,5 @@ class MentorsTable(Base):
     last_login_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
-
-    chief_mentor = relationship("Mentor", remote_side=[mentor_id])
-    groups = relationship("MentorGroup", back_populates="chief_mentor")
-    memberships = relationship("MentorGroupMember", back_populates="mentor")
-
 
 MentorTableSchema: BaseModel = sqlalchemy_to_pydantic(MentorsTable)
