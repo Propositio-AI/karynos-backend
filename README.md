@@ -59,6 +59,9 @@
     │  ├─notification_service
     |  |  └─.notification_env 
     |  |
+    │  ├─organization_service
+    |  |  └─.organization_env 
+    |  |
     │  ├─textbook_service
     |  |  └─.textbook_env 
     |  |
