@@ -5,7 +5,6 @@ from sqlalchemy.types import (
     DateTime
 )
 from pydantic import BaseModel
-from sqlalchemy.orm import relationship
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
@@ -19,8 +18,5 @@ class ConversationParticipantTable(Base):
     conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.conversation_id"), nullable=False, index=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     joined_at = Column(DateTime, server_default=func.now())
-
-    # リレーション
-    conversation = relationship("Conversation", back_populates="participants")
 
 ConversationParticipantTableSchema: BaseModel = sqlalchemy_to_pydantic(ConversationParticipantTable)

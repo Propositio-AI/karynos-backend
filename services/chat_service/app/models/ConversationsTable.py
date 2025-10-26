@@ -4,7 +4,6 @@ from sqlalchemy.types import (
     UUID,
     DateTime,
 )
-from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from enum import Enum as PyEnum
 from sqlalchemy import Enum as SQLEnum, text
@@ -27,10 +26,5 @@ class ConversationsTable(Base):
     share_type = Column(SQLEnum(ShareType, name="share_type", create_type=False), nullable=False, server_default=text("'PRIVATE'"))
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
-
-    # リレーション
-    messages = relationship("Message", back_populates="conversation")
-    participants = relationship("ConversationParticipant", back_populates="conversation")
-
 
 ConversationsTableSchema: BaseModel = sqlalchemy_to_pydantic(ConversationsTable)

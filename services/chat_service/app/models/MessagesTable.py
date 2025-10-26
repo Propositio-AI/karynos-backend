@@ -8,7 +8,6 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import func
 from pydantic import BaseModel
 from enum import Enum as PyEnum
-from sqlalchemy.orm import relationship
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
@@ -28,8 +27,5 @@ class MessagesTable(Base):
     text_content = Column(TEXT, nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
-
-    # リレーション
-    conversation = relationship("Conversation", back_populates="messages")
 
 MessagesTableSchema: BaseModel = sqlalchemy_to_pydantic(MessagesTable)
