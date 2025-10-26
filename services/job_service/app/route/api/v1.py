@@ -47,5 +47,5 @@ async def _(history_id: UUID):
 @router.get("/recommend/{dreamer_id}", response_model=List[RecommendResponse])
 async def _(dreamer_id: UUID):
     """Dreamerにおすすめの職業をレスポンス"""
-    # 指示どおり、まだDB操作は不要
+   
     pass
