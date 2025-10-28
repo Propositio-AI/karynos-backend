@@ -8,6 +8,8 @@ from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest
 from shared.utils.security import random_string
 from models.DreamerTable import DreamerTableSchema
 from models.DreamerGroupTable import DreamerGroupTableSchema
+from models.DreamerGroupMembersTable import DreamerGroupMembersTableSchema
+
 
 # /api/v1/dreamer
 router = APIRouter()
@@ -75,26 +77,24 @@ async def create_group(request: NewDreamerGroupRequest):
     """新しいグループの作成"""
     group_data = request.model_dump(exclude={"dreamers"})
     group_instance = DreamerGroupTableSchema(**group_data)
-    _, group_result, error=dreamer_group_crud.create(group_instance)
-
+    _, group_result, error = dreamer_group_crud.create(group_instance)
     print(error, flush=True)
 
-    group_id=group_result.group_id
+    group_id = group_result.group_id
 
-    """メンバー登録"""
-    added_dreamers=[]
+    # メンバー登録
+    added_dreamers = []
     for dreamer_id in request.dreamers:
-        member_data={
-            "group_id": group_id,
-            "dreamer_id": dreamer_id
-        }
-        _, member_result, error=dreamer_group_members_crud.create(member_data)
-
+        member_instance = DreamerGroupMembersTableSchema(
+            group_id=group_id,
+            dreamer_id=dreamer_id
+        )
+        _, member_result, error = dreamer_group_members_crud.create(member_instance)
         print(error, flush=True)
-
         added_dreamers.append(member_result)
-    
+
     return NewDreamerGroupResponse.model_validate(group_result)
+
 
 
 @router.get("/groups/{group_id}", response_model=DreamerGroupResponse)
@@ -147,7 +147,7 @@ async def delete_group(group_id: str):
             ["group_id", "==", group_id]
         ]
     )
-
+    print("group_id:", group_id)
     print(error, flush=True)
 
     return DreamerGroupResponse.model_validate(result[0])
@@ -156,29 +156,37 @@ async def delete_group(group_id: str):
 # Dreamer Group Members
 #================
 
-@router.post("/groups/{group_id}/add_dreamer", response_model=DreamerToGroupResponse)
+@router.put("/groups/{group_id}/add_dreamer", response_model=DreamerToGroupResponse)
 async def add_dreamer_to_group(group_id: str, request: DreamerToGroupRequest):
     """グループにdreamerを追加"""
-    added_dreamers=[]
+    added_dreamers = []
     for dreamer_id in request.dreamers:
-        data={"group_id": group_id, "dreamer_id": dreamer_id}
-        _, result, error=dreamer_group_members_crud.create(data)
-        added_dreamers.append(result.dreamer_id)
-    
-    print(error, flush=True)
+        member_instance = DreamerGroupMembersTableSchema(
+            group_id=group_id,
+            dreamer_id=dreamer_id
+        )
+        _, member_result, error = dreamer_group_members_crud.create(member_instance)
+        print(error, flush=True)
+        added_dreamers.append(member_result)
 
-    return DreamerToGroupResponse.model_validate(dreamers=added_dreamers)
+    dreamer_ids = [member.dreamer_id for member in added_dreamers]
+    return DreamerToGroupResponse.model_validate({"dreamers": dreamer_ids})
 
-@router.post("/groups/{group_id}/remove_dreamer", response_model=DreamerToGroupResponse)
+
+@router.delete("/groups/{group_id}/remove_dreamer", response_model=DreamerToGroupResponse)
 async def remove_dreamer_from_group(group_id: str, request: DreamerToGroupRequest):
     """グループからdreamerを削除"""
-    _, result, error=dreamer_group_members_crud.delete(
-        [
-            ["group_id", "==", group_id],
-            ["dreamer_id", "in", request.dreamers]
-        ]
-    )
+    deleted_ids = []
 
-    print(error, flush=True)
+    for dreamer_id in request.dreamers:
+        _, result, error = dreamer_group_members_crud.delete(
+            [
+                ["group_id", "==", group_id],
+                ["dreamer_id", "==", dreamer_id]
+            ]
+        )
+        print(error, flush=True)
+        if result:
+            deleted_ids.append(dreamer_id)
 
-    return DreamerToGroupResponse.model_validate({"dreamers": result})
+    return DreamerToGroupResponse.model_validate({"dreamers": deleted_ids})
