@@ -15,7 +15,7 @@ class MentorGroupsTable(Base):
     __tablename__ = "mentor_groups"
 
     group_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
-    chief_mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"), nullable=False)
+    chief_mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"), nullable=True)
     name = Column(TEXT, nullable=False)
     description = Column(TEXT)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

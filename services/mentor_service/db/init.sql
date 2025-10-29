@@ -25,12 +25,12 @@ CREATE SCHEMA IF NOT EXISTS public;
 */
 CREATE TABLE IF NOT EXISTS mentors (
     mentor_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    chief_mentor_id UUID NOT NULL,
-    orgnaztion_id INTEGER NOT NULL,
+    chief_mentor_id UUID,
+    organization_id INTEGER NOT NULL,
     login_id TEXT NOT NULL,
     name_family TEXT NOT NULL,
     name_given TEXT NOT NULL,
-    access_group UUID NOT NULL,
+    access_group UUID,
     last_login_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -45,7 +45,7 @@ EXECUTE PROCEDURE update_timestamp();
 */
 CREATE TABLE IF NOT EXISTS mentor_groups (
     group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    chief_mentor_id UUID NOT NULL REFERENCES mentors(mentor_id) ON DELETE RESTRICT,
+    chief_mentor_id UUID REFERENCES mentors(mentor_id) ON DELETE RESTRICT,
     name TEXT NOT NULL,
     description TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
