@@ -2,20 +2,20 @@ from fastapi import APIRouter, status
 from typing import List
 from uuid import UUID
 
-from crud import jobs_crud, history_crud
-from schema import RecommendResponse, JobDetailResponse
+from crud import  history_crud
+from schema import RecommendResponse
 
 # /api/v1/job
 router = APIRouter()
 
-@router.get("/detail/{job_id}", response_model=JobDetailResponse)
-async def _(job_id: int):
-    """job情報の取得"""
-    _, jobs, error = jobs_crud.read([
-        ["job_id", "==", job_id]
-    ])
+# @router.get("/detail/{job_id}", response_model=JobDetailResponse)
+# async def _(job_id: int):
+#     """job情報の取得"""
+#     _, jobs, error = jobs_crud.read([
+#         ["job_id", "==", job_id]
+#     ])
 
-    return JobDetailResponse.model_validate(jobs[0])
+#     return JobDetailResponse.model_validate(jobs[0])
 
 @router.put("/good/{history_id}", status_code=status.HTTP_200_OK)
 async def _(history_id: UUID):
@@ -24,6 +24,8 @@ async def _(history_id: UUID):
         [["history_id", "==", history_id]],
         {"good": True}
     )
+    print(updated,flush=True)
+    print(error,flush=True)
     return {"message": "いいね登録が完了しました"}
 
 @router.put("/bad/{history_id}", status_code=status.HTTP_200_OK)
