@@ -9,7 +9,6 @@ from schema import RecommendResponse, JobDetailResponse
 router = APIRouter()
 
 
-
 @router.get("/detail/{job_id}", response_model=JobDetailResponse)
 async def get_job(job_id: int):
     """job情報の取得"""
