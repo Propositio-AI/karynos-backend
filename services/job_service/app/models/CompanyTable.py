@@ -8,6 +8,6 @@ class CompanyTable(Base):
     __tablename__ = "companies"
 
     company_id = Column(INTEGER, primary_key=True, autoincrement=True)
-    name = Column(TEXT, nullable=False)
+    name = Column(TEXT, nullable=False, unique=True)
 
 CompanyTableSchema: BaseModel = sqlalchemy_to_pydantic(CompanyTable)

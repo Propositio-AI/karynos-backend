@@ -6,7 +6,7 @@ from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
 
-class JobFeedbackTable(Base):
+class JobFeedbacksTable(Base):
     __tablename__ = "job_feedbacks"
 
     feedback_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
@@ -38,4 +38,4 @@ class JobFeedbackTable(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
-JobFeedbackTableSchema: BaseModel = sqlalchemy_to_pydantic(JobFeedbackTable)
+JobFeedbackTableSchema: BaseModel = sqlalchemy_to_pydantic(JobFeedbacksTable)
