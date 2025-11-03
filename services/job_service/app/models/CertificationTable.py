@@ -8,6 +8,6 @@ class CertificationTable(Base):
     __tablename__ = "certifications"
 
     certification_id = Column(INTEGER, primary_key=True, autoincrement=True)
-    name = Column(TEXT, nullable=False)
+    name = Column(TEXT, nullable=False, unique=True)
 
 CertificationTableSchema: BaseModel = sqlalchemy_to_pydantic(CertificationTable)

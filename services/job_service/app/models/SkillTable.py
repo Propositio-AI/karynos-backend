@@ -8,6 +8,6 @@ class SkillTable(Base):
     __tablename__ = "skills"
 
     skill_id = Column(INTEGER, primary_key=True, autoincrement=True)
-    name = Column(TEXT, nullable=False)
+    name = Column(TEXT, nullable=False, unique=True)
 
 SkillTableSchema: BaseModel = sqlalchemy_to_pydantic(SkillTable)
