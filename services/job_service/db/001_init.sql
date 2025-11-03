@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS interests (
 CREATE TABLE IF NOT EXISTS jobs (
   job_id SERIAL PRIMARY KEY,
   industry_id INTEGER NOT NULL REFERENCES industries(industry_id) ON DELETE RESTRICT,
-  category_id INTEGER NOT NULL REFERENCES job_categories(category_id) ON DELETE RESTRICT,
+  category_id INTEGER REFERENCES job_categories(category_id) ON DELETE RESTRICT,
   name TEXT NOT NULL,
   description TEXT,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
