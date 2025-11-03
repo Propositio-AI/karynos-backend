@@ -12,4 +12,5 @@ class IndustryTable(Base):
     name = Column(TEXT, nullable=False, unique=True)
     description = Column(TEXT)
 
+
 IndustryTableSchema: BaseModel = sqlalchemy_to_pydantic(IndustryTable)

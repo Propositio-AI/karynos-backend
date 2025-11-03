@@ -1,5 +1,6 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import DateTime, BOOLEAN, UUID, INTEGER
+from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from pydantic import BaseModel
 from shared.utils.security import gen_uuid7
@@ -16,5 +17,7 @@ class HistoryTable(Base):
     bad = Column(BOOLEAN, nullable=False, default=False)
     save = Column(BOOLEAN, nullable=False, default=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    job = relationship("JobsTable", back_populates="histories")
 
 HistoryTableSchema: BaseModel = sqlalchemy_to_pydantic(HistoryTable)

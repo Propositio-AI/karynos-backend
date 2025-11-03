@@ -1,9 +1,12 @@
 from sqlalchemy.schema import Column, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.types import UUID, INTEGER, BOOLEAN, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from pydantic import BaseModel
 from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
+
+from models.TalentTable import TalentTable
 
 class FeedbackTalentTable(Base):
     __tablename__ = "feedback_talent"
@@ -16,5 +19,8 @@ class FeedbackTalentTable(Base):
     __table_args__ = (
         PrimaryKeyConstraint("feedback_id", "talent_id"),
     )
+
+    feedback = relationship("JobFeedbacksTable", back_populates="talents")
+    talent = relationship("TalentTable", back_populates="feedbacks")
 
 FeedbackTalentTableSchema: BaseModel = sqlalchemy_to_pydantic(FeedbackTalentTable)
