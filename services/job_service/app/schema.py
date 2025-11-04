@@ -46,6 +46,8 @@ class Interest(BaseModel):
 
 class JobDetailResponse(BaseModel):
     job_id: int = Field(..., description="jobs.job_id")
+    name: str = Field(..., description="jobs.name")
+    description: str = Field(..., description="jobs.description")
     imgs: List[str] = Field(..., description="職業の画像データリンク")
     salary: int = Field(..., description="jobs_feedback.salary")
     level: int = Field(..., description="jobs_feedback.level")

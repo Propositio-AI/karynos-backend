@@ -19,6 +19,8 @@ async def _(job_id: int):
 
     payload = {
         "job_id": getattr(job, "job_id", 0),
+        "name": getattr(job, "name", "") or "",
+        "description": getattr(job, "description", "") or "",
         "imgs": getattr(job, "imgs", []) or [],
         "salary": int(getattr(job, "salary", 0) or 0),
         "level": int(getattr(job, "level", 0) or 0),
