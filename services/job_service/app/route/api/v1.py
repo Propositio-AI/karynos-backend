@@ -46,7 +46,6 @@ async def _(job_id: int):
         "appeal_points": getattr(job, "appeal_points", "") or "",
         "daily_routine": getattr(job, "daily_routine", "") or "",
         "comments": getattr(job, "comments", "") or "",
-        # collections: these are produced as list[dict] by JobsTable properties
         "skills": getattr(job, "skills", []) or [],
         "certifications": getattr(job, "certifications", []) or [],
         "companies": getattr(job, "companies", []) or [],
@@ -63,9 +62,8 @@ async def _(history_id: UUID):
         [["history_id", "==", history_id]],
         {"good": True}
     )
-    print(updated,flush=True)
-    print(error,flush=True)
-    return {"message": "いいね登録が完了しました"}
+
+    return status.HTTP_200_OK
 
 @router.put("/bad/{history_id}", status_code=status.HTTP_200_OK)
 async def _(history_id: UUID):
@@ -74,7 +72,7 @@ async def _(history_id: UUID):
         [["history_id", "==", history_id]],
         {"bad": True}
     )
-    return {"message": "バッド登録が完了しました"}
+    return status.HTTP_200_OK
 
 @router.put("/save/{history_id}", status_code=status.HTTP_200_OK)
 async def _(history_id: UUID):
