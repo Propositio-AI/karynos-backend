@@ -126,7 +126,16 @@ async def update_group(group_id: str, request: UpdateDreamerGroupRequest):
 @router.delete("/groups/{group_id}", response_model=DreamerGroupResponse)
 async def delete_group(group_id: str):
     """グループを削除"""
-    _, result, error=dreamer_group_crud.delete(
+    # グループのメンバーを全て削除
+    _, _, error = dreamer_group_members_crud.delete(
+        [
+            ["group_id", "==", group_id]
+        ]
+    )
+    print(error, flush=True)
+    
+    # グループを削除
+    _, result, error = dreamer_group_crud.delete(
         [
             ["group_id", "==", group_id]
         ]
