@@ -83,7 +83,7 @@ async def create_group(request: NewMentorGroupRequest):
         member_data = {
             "group_id": group_id,
             "mentor_id": mentor_info.mentor_id,
-            "role": mentor_info.mentor_id
+            "role": mentor_info.role
         }
         _, member_result, error = mentor_group_members_crud.create(member_data)
         print(error, flush=True)
@@ -132,6 +132,15 @@ async def update_group(group_id: str, request: UpdateMentorGroupRequest):
 @router.delete("/groups/{group_id}", response_model=MentorGroupResponse)
 async def delete_group(group_id: str):
     """Mentorグループを削除"""
+    # まずグループのメンバーを全て削除（外部キー制約対策）
+    _, _, error = mentor_group_members_crud.delete(
+        [
+            ["group_id", "==", group_id]
+        ]
+    )
+    print(error, flush=True)
+
+    # グループを削除
     _, result, error = mentor_groups_crud.delete(
         [
             ["group_id", "==", group_id]
@@ -163,15 +172,15 @@ async def add_mentor_to_group(group_id: str, request: MentorToGroupRequest):
 @router.post("/groups/{group_id}/remove_mentor", response_model=MentorToGroupResponse)
 async def remove_mentor_from_group(group_id: str, request: MentorToGroupRequest):
     """Mentorをグループから削除"""
-    removed_mentors=[]
-    for mentor_id in request.mentors:
+    removed_mentors = []
+    for mentor_info in request.mentors:
         _, result, error = mentor_group_members_crud.delete(
             [
                 ["group_id", "==", group_id],
-                ["mentor_id", "==", mentor_id]
+                ["mentor_id", "==", mentor_info.mentor_id]
             ]
         )
-    print(error, flush=True)
-    if result:
-        removed_mentors.append(MentorRoleInfo(mentor_id=mentor_id, role="member"))
-    return MentorToGroupResponse(mentors=result)
+        print(error, flush=True)
+        if result:
+            removed_mentors.append(MentorRoleInfo(mentor_id=mentor_info.mentor_id, role="member"))
+    return MentorToGroupResponse(mentors=removed_mentors)
