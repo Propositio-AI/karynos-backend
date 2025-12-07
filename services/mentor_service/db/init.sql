@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS mentors (
     name_family TEXT NOT NULL,
     name_given TEXT NOT NULL,
     access_group UUID,
-    last_login_at TIMESTAMP NOT NULL,
+    last_login_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
