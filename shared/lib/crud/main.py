@@ -116,7 +116,7 @@ class CRUD:
             results = query.all()
 
             if results is None:
-                raise BaseError("RecordNotFound")
+                raise BasicError("RecordNotFound")
             
             return results
         except Exception as e:

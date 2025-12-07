@@ -1,14 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from crud import mentors_crud, mentor_groups_crud, mentor_group_members_crud
 from schemas import (
     NewMentorRequest, NewMentorResponse, UpdateMentorRequest, MentorResponse,
     NewMentorGroupRequest, NewMentorGroupResponse, MentorGroupResponse,
-    UpdateMentorGroupRequest, MentorToGroupRequest, MentorToGroupResponse, 
-    MentorInGroup,MentorRoleInfo
+    UpdateMentorGroupRequest, AddMentorToGroupRequest, AddMentorToGroupResponse, 
+    MentorInGroup, MentorRoleInfo, RemoveMentorFromGroupRequest, RemoveMentorResponse
 )
 from models.MentorsTable import MentorTableSchema
 from models.MentorGroupsTable import MentorGroupTableSchema
+from models.MentorGroupMembersTable import MentorGroupMemberTableSchema
 from shared.utils.security import random_string
 
 # /api/v1/mentor
@@ -26,6 +27,7 @@ async def create_mentor(request: NewMentorRequest):
     )
     print(error, flush=True)
     return NewMentorResponse.model_validate(result)
+
 
 
 @router.get("/admin/{mentor_id}", response_model=MentorResponse)
@@ -153,34 +155,34 @@ async def delete_group(group_id: str):
 # Mentor Group Members
 # ====================
 
-@router.post("/groups/{group_id}/add_mentor", response_model=MentorToGroupResponse)
-async def add_mentor_to_group(group_id: str, request: MentorToGroupRequest):
-    """Mentorをグループに追加"""
+@router.post("/groups/{group_id}/add_mentor", response_model=AddMentorToGroupResponse)
+async def add_mentor_to_group(group_id: str, request: AddMentorToGroupRequest):
+    """メンターをグループに追加"""
     added_mentors = []
     for mentor_info in request.mentors:
-        data = {
-            "group_id": group_id,
-            "mentor_id": mentor_info.mentor_id,
-            "role": mentor_info.role
-            }
-        _, result, error = mentor_group_members_crud.create(data)
+        member_instance = MentorGroupMemberTableSchema(
+            group_id=group_id,
+            mentor_id=mentor_info.mentor_id,
+            role=mentor_info.role
+        )
+        _, result, error = mentor_group_members_crud.create(member_instance)
         print(error, flush=True)
         added_mentors.append(MentorRoleInfo(mentor_id=result.mentor_id, role=result.role))
-    return MentorToGroupResponse(mentors=added_mentors)
+    return AddMentorToGroupResponse(mentors=added_mentors)
 
 
-@router.post("/groups/{group_id}/remove_mentor", response_model=MentorToGroupResponse)
-async def remove_mentor_from_group(group_id: str, request: MentorToGroupRequest):
+@router.delete("/groups/{group_id}/remove_mentor", response_model=RemoveMentorResponse)
+async def remove_mentor_from_group(group_id: str, request: RemoveMentorFromGroupRequest):
     """Mentorをグループから削除"""
-    removed_mentors = []
-    for mentor_info in request.mentors:
+    removed_mentor_ids = []
+    for mentor_id in request.mentor_ids:
         _, result, error = mentor_group_members_crud.delete(
             [
                 ["group_id", "==", group_id],
-                ["mentor_id", "==", mentor_info.mentor_id]
+                ["mentor_id", "==", mentor_id]
             ]
         )
         print(error, flush=True)
         if result:
-            removed_mentors.append(MentorRoleInfo(mentor_id=mentor_info.mentor_id, role="member"))
-    return MentorToGroupResponse(mentors=removed_mentors)
+            removed_mentor_ids.append(mentor_id)
+    return RemoveMentorResponse(mentor_ids=removed_mentor_ids)
