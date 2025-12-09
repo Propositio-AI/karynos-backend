@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from crud import dreamer_crud, dreamer_group_crud, dreamer_group_members_crud
 from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest,
@@ -6,6 +6,7 @@ from schemas import (NewDreamerRequest, NewDreamerResponse, UpdateDreamerRequest
                      DreamerGroupResponse, UpdateDreamerGroupRequest, DreamerToGroupRequest, 
                      DreamerToGroupResponse,DreamerInGroup)
 from shared.utils.security import random_string
+from shared.lib.API import Client
 from models.DreamerTable import DreamerTableSchema
 from models.DreamerGroupTable import DreamerGroupTableSchema
 from models.DreamerGroupMembersTable import DreamerGroupMembersTableSchema
@@ -21,6 +22,13 @@ router = APIRouter()
 @router.post("/admin/new", response_model=NewDreamerResponse)
 async def create_dreamer(request: NewDreamerRequest):
     """新しいアカウントの作成"""
+    # organizationが存在するか事前チェック（存在しないIDでの登録を防止）
+    client = Client()
+    org_url = f"http://organization-service:8000/api/v1/organization/{request.organization_id}"
+    success, _, error = client.get(org_url)
+    if not success:
+        raise HTTPException(status_code=400, detail="organization_id が存在しません")
+
     _, result, error = dreamer_crud.create(DreamerTableSchema(**request.model_dump(), login_id = random_string()))
     print(error, flush=True)
     return NewDreamerResponse.model_validate(result)
