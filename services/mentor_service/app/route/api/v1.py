@@ -11,6 +11,7 @@ from models.MentorsTable import MentorTableSchema
 from models.MentorGroupsTable import MentorGroupTableSchema
 from models.MentorGroupMembersTable import MentorGroupMemberTableSchema
 from shared.utils.security import random_string
+from shared.lib.API import Client
 
 # /api/v1/mentor
 router = APIRouter()
@@ -22,6 +23,29 @@ router = APIRouter()
 @router.post("/admin/new", response_model=NewMentorResponse)
 async def create_mentor(request: NewMentorRequest):
     """新しいMentorアカウントを作成"""
+    # organization_id の存在確認
+    client = Client()
+    org_url = f"http://organization-service:8000/api/v1/organization/{request.organization_id}"
+    success, _, error = client.get(org_url)
+    if not success:
+        raise HTTPException(status_code=400, detail="organization_id が存在しません")
+    
+    # chief_mentor_id が指定されている場合、存在確認
+    if request.chief_mentor_id:
+        _, chief_result, error = mentors_crud.read(
+            [["mentor_id", "==", request.chief_mentor_id]]
+        )
+        if not chief_result:
+            raise HTTPException(status_code=400, detail="chief_mentor_id が存在しません")
+    
+    # access_group が指定されている場合、存在確認
+    if request.access_group:
+        _, group_result, error = mentor_groups_crud.read(
+            [["group_id", "==", request.access_group]]
+        )
+        if not group_result:
+            raise HTTPException(status_code=400, detail="access_group が存在しません")
+    
     _, result, error = mentors_crud.create(
         MentorTableSchema(**request.model_dump(), login_id=random_string())
     )
@@ -73,6 +97,14 @@ async def delete_mentor(mentor_id: str):
 @router.post("/groups/new", response_model=NewMentorGroupResponse)
 async def create_group(request: NewMentorGroupRequest):
     """新しいMentorグループを作成"""
+    # chief_mentor_id が指定されている場合、存在確認
+    if request.chief_mentor_id:
+        _, chief_result, error = mentors_crud.read(
+            [["mentor_id", "==", request.chief_mentor_id]]
+        )
+        if not chief_result:
+            raise HTTPException(status_code=400, detail="chief_mentor_id が存在しません")
+    
     group_data = request.model_dump(exclude={"mentors"})
     group_instance = MentorGroupTableSchema(**group_data)
     _, group_result, error = mentor_groups_crud.create(group_instance)
@@ -134,7 +166,7 @@ async def update_group(group_id: str, request: UpdateMentorGroupRequest):
 @router.delete("/groups/{group_id}", response_model=MentorGroupResponse)
 async def delete_group(group_id: str):
     """Mentorグループを削除"""
-    # まずグループのメンバーを全て削除（外部キー制約対策）
+    # まずグループのメンバーを全て削除
     _, _, error = mentor_group_members_crud.delete(
         [
             ["group_id", "==", group_id]
