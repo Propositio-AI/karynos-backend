@@ -23,12 +23,6 @@ router = APIRouter()
 @router.post("/admin/new", response_model=NewMentorResponse)
 async def create_mentor(request: NewMentorRequest):
     """新しいMentorアカウントを作成"""
-    # organization_id の存在確認
-    client = Client()
-    org_url = f"http://organization-service:8000/api/v1/organization/{request.organization_id}"
-    success, _, error = client.get(org_url)
-    if not success:
-        raise HTTPException(status_code=400, detail="organization_id が存在しません")
     
     # chief_mentor_id が指定されている場合、存在確認
     if request.chief_mentor_id:
@@ -37,6 +31,13 @@ async def create_mentor(request: NewMentorRequest):
         )
         if not chief_result:
             raise HTTPException(status_code=400, detail="chief_mentor_id が存在しません")
+        
+    # organization_id の存在確認
+    client = Client()
+    org_url = f"http://organization-service:8000/api/v1/organization/{request.organization_id}"
+    success, _, error = client.get(org_url)
+    if not success:
+        raise HTTPException(status_code=400, detail="organization_id が存在しません")
     
     # access_group が指定されている場合、存在確認
     if request.access_group:
