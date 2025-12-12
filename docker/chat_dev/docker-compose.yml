@@ -1,0 +1,67 @@
+services:
+  # Job Service
+  job-db:
+    container_name: "${JOB_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ../../services/job_service/.job_env
+    volumes:
+      - ../../services/job_service/db/:/docker-entrypoint-initdb.d/
+      - ../../services/job_service/db-data:/var/lib/postgresql/data
+
+  job-service:
+    container_name: "job-service"
+    build:
+      context: ../../services/job_service
+    ports:
+      - "${JOB_SERVICE_HOST_PORT}:${JOB_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - job-db
+    env_file:
+      - ../../services/job_service/.job_env
+    environment:
+      - "POSTGRES_SERVER=${JOB_DB_SERVER_NAME}"
+    volumes:
+      - ../../services/job_service/app:/app
+      - ../../shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${JOB_SERVICE_DOCKER_PORT}", "--reload"]
+
+
+  # Chat Service
+  chat-db:
+    container_name: "${CHAT_DB_SERVER_NAME}" 
+    image: postgres:17.5
+    networks:
+      - karynos-network
+    env_file:
+      - ../../services/chat_service/.chat_env
+    volumes:
+      - ../../services/chat_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../../services/chat_service/db-data:/var/lib/postgresql/data
+
+  chat-service:
+    container_name: "chat-service"
+    build:
+      context: ../../services/chat_service
+    ports:
+      - "${CHAT_SERVICE_HOST_PORT}:${CHAT_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    depends_on:
+      - chat-db
+    env_file:
+      - ../../services/chat_service/.chat_env
+    environment:
+      - "POSTGRES_SERVER=${CHAT_DB_SERVER_NAME}"
+    volumes:
+      - ../../services/chat_service/app:/app
+      - ../../shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${CHAT_SERVICE_DOCKER_PORT}", "--reload"]
+
+networks:
+  karynos-network:
+    driver: bridge
