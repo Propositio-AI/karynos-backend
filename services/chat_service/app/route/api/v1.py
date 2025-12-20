@@ -3,7 +3,10 @@ from fastapi.responses import StreamingResponse
 
 from shared.lib.basicError import errorWrapper, BasicError
 from crud import conversation_participants_crud,conversation_table_crud,messages_crud
-from utils.tools import get_messages_db, get_job_data, generate_name, build_openai_messages
+from services.external.job_api import get_job_data
+from services.character_service import generate_name
+from services.chat_context import build_openai_messages
+from repositories.message_repository import get_messages_db
 from schemas import CreateConversationRequest, CreateConversationDB, NewMessageRequest, NewUserMessageDB, NewAIMessageDB
 from LLM_Client.OpenAI import OpenAIClient
 # /api/v1/chat
@@ -35,6 +38,35 @@ async def get_conversation_history(user_id: str):
     if not success:
         raise HTTPException(status_code=500, detail=err)
     return conversations
+
+# ... (import部分はそのまま)
+
+# ★修正: 会話情報とメッセージの両方を返すように変更
+@router.get("/conversation/{conversation_id}")
+async def get_conversation_details(conversation_id: str):
+    """会話の詳細（メタデータ＋メッセージ履歴）を取得"""
+    
+    # 1. 会話データ（job_nameなどが含まれる）を取得
+    # curd.read はリストを返すので [0] を取得
+    success, conv_data, err = conversation_table_crud.read([
+        ["conversation_id", "==", conversation_id]
+    ])
+    if not success or not conv_data:
+        raise HTTPException(status_code=404, detail=err)
+    
+    conversation = conv_data[0]
+
+    # 2. メッセージ履歴を取得
+    messages = get_messages_db(
+        conversation_id=conversation_id,
+        crud=messages_crud
+    )
+
+    # 3. セットにして返す
+    return {
+        "conversation": conversation, # ここに job_name がある
+        "messages": messages
+    }
 
 @router.get("/conversation/{conversation_id}")
 async def get_conversation_details(conversation_id: str):
@@ -71,7 +103,13 @@ async def create_new_ai_response(conversation_id: str, request: NewMessageReques
         role = request.role,
         text_content = request.text_content
     )
-    messages_crud.create(user_message)
+    success, result, err = messages_crud.create(user_message)
+    if not success:
+        raise HTTPException(status_code=500, detail=err)
+    conversation_table_crud.update(
+        filters = [["conversation_id", "==", conversation_id]],
+        update_data = {"last_message_at": result.created_at}
+    )
 
     success,conversation_data, err = conversation_table_crud.read([
         ["conversation_id", "==", conversation_id]
