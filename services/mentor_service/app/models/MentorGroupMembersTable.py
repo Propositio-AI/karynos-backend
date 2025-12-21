@@ -19,5 +19,6 @@ class MentorGroupMembersTable(Base):
     mentor_id = Column(UUID(as_uuid=True), ForeignKey("mentors.mentor_id"), nullable=False, index=True)
     role = Column(TEXT, nullable=False)
     joined_at = Column(DateTime, server_default=func.now(), nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
 MentorGroupMemberTableSchema: BaseModel = sqlalchemy_to_pydantic(MentorGroupMembersTable)

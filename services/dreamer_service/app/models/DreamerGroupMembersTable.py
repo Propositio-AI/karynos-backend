@@ -17,5 +17,6 @@ class DreamerGroupMembersTable(Base):
     group_id = Column(UUID(as_uuid=True), ForeignKey("dreamer_groups.group_id"), nullable=False, index=True)
     dreamer_id = Column(UUID(as_uuid=True), ForeignKey("dreamers.dreamer_id"), nullable=False, index=True)
     joined_at = Column(DateTime, server_default=func.now(), nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
 DreamerGroupMembersTableSchema: BaseModel = sqlalchemy_to_pydantic(DreamerGroupMembersTable)

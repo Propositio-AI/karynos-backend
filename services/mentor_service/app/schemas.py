@@ -4,13 +4,13 @@ from typing import List, Optional
 
 class NewMentorRequest(BaseModel):
     chief_mentor_id: Optional[UUID] = Field(None, description="チーフメンターのID") 
-    # UUID7どうしたらよい
     organization_id: int = Field(..., description="団体ID")
     name_family: str = Field(..., description="苗字")
     name_given: str = Field(..., description="名前")
     access_group: Optional[UUID] = Field(None, description="アクセスグループのID")
-    
-    @field_validator('chief_mentor_id', 'access_group', mode='before')
+    access_group_role: Optional[str] = Field(None, description="アクセスグループでの役割")
+    # 空文字をNoneに変換
+    @field_validator('chief_mentor_id', 'access_group', 'access_group_role', mode='before')
     @classmethod
     def empty_str_to_none(cls, v):
         if v == "" or v is None:
@@ -47,7 +47,7 @@ class UpdateMentorRequest(BaseModel):
     name_family: str = Field(None, description="苗字")
     name_given: str = Field(None, description="名前")
     access_group: Optional[UUID] = Field(None, description="アクセスグループのID")
-    
+    # 空文字をNoneに変換
     @field_validator('chief_mentor_id', 'access_group', mode='before')
     @classmethod
     def empty_str_to_none(cls, v):
@@ -67,7 +67,7 @@ class NewMentorGroupRequest(BaseModel):
         default_factory=list,
         description="初期グループメンバー(mentor_idとrole)"
     )
-    
+    # 空文字をNoneに変換
     @field_validator('chief_mentor_id', mode='before')
     @classmethod
     def empty_str_to_none(cls, v):
@@ -99,7 +99,7 @@ class UpdateMentorGroupRequest(BaseModel):
     chief_mentor_id: Optional[UUID] = Field(None, description="グループのチーフメンターのID") 
     name: str = Field(None, description="グループ名")
     description: str = Field(None, description="グループの説明")
-    
+    # 空文字をNoneに変換
     @field_validator('chief_mentor_id', mode='before')
     @classmethod
     def empty_str_to_none(cls, v):
@@ -119,7 +119,7 @@ class AddMentorToGroupResponse(BaseModel):
 class RemoveMentorFromGroupRequest(BaseModel):
     mentor_ids: List[UUID] = Field(..., description="削除したいmentorのIDリスト")
 
-class RemoveMentorResponse(BaseModel):
+class RemoveMentorFromGroupResponse(BaseModel):
     mentor_ids: List[UUID] = Field(..., description="削除されたmentorのIDリスト")
     
     model_config = ConfigDict(from_attributes=True)
