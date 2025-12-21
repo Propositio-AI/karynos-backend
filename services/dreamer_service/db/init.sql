@@ -60,5 +60,6 @@ CREATE TABLE dreamer_group_members (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     group_id UUID NOT NULL REFERENCES dreamer_groups(group_id) ON DELETE RESTRICT,
     dreamer_id UUID NOT NULL REFERENCES dreamers(dreamer_id) ON DELETE RESTRICT,
-    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
