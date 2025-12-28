@@ -8,7 +8,7 @@ services:
     env_file:
       - ../../services/job_service/.job_env
     volumes:
-      - ../../services/job_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../../services/job_service/db/:/docker-entrypoint-initdb.d/
       - ../../services/job_service/db-data:/var/lib/postgresql/data
 
   job-service:

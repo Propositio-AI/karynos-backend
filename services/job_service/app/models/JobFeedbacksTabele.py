@@ -1,12 +1,19 @@
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import UUID, INTEGER, TEXT, BOOLEAN, REAL, TIME, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy import func
 from pydantic import BaseModel
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
 
-class JobFeedbackTable(Base):
+from models.FeedbackSkillTable import FeedbackSkillTable
+from models.FeedbackCertificationTable import FeedbackCertificationTable
+from models.FeedbackCompanyTable import FeedbackCompanyTable
+from models.FeedbackTalentTable import FeedbackTalentTable
+from models.FeedbackInterestTable import FeedbackInterestTable
+
+class JobFeedbacksTable(Base):
     __tablename__ = "job_feedbacks"
 
     feedback_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
@@ -38,4 +45,13 @@ class JobFeedbackTable(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
-JobFeedbackTableSchema: BaseModel = sqlalchemy_to_pydantic(JobFeedbackTable)
+    job = relationship("JobsTable", back_populates="feedback")
+
+    # ✅ 多対多リレーション（中間テーブル経由）
+    skills = relationship("FeedbackSkillTable", back_populates="feedback", cascade="all, delete-orphan")
+    certifications = relationship("FeedbackCertificationTable", back_populates="feedback", cascade="all, delete-orphan")
+    companies = relationship("FeedbackCompanyTable", back_populates="feedback", cascade="all, delete-orphan")
+    talents = relationship("FeedbackTalentTable", back_populates="feedback", cascade="all, delete-orphan")
+    interests = relationship("FeedbackInterestTable", back_populates="feedback", cascade="all, delete-orphan")
+
+JobFeedbackTableSchema: BaseModel = sqlalchemy_to_pydantic(JobFeedbacksTable)

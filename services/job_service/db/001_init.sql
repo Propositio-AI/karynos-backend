@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS interests (
 CREATE TABLE IF NOT EXISTS jobs (
   job_id SERIAL PRIMARY KEY,
   industry_id INTEGER NOT NULL REFERENCES industries(industry_id) ON DELETE RESTRICT,
-  category_id INTEGER NOT NULL REFERENCES job_categories(category_id) ON DELETE RESTRICT,
+  category_id INTEGER REFERENCES job_categories(category_id) ON DELETE RESTRICT,
   name TEXT NOT NULL,
   description TEXT,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -84,7 +84,7 @@ EXECUTE PROCEDURE update_timestamp();
 CREATE TABLE IF NOT EXISTS job_images (
   img_id SERIAL PRIMARY KEY,
   job_id INTEGER NOT NULL REFERENCES jobs(job_id) ON DELETE RESTRICT,
-  urls TEXT NOT NULL,
+  img_url TEXT NOT NULL,
   alt TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

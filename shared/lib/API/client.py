@@ -5,7 +5,7 @@ import requests
 # TODO: エラーハンドリング
 class Client:
 
-    @errorWrapper("InvalidFormat")
+    # @errorWrapper("InvalidFormat")
     def __init__(self, key: str = None):
         self.session = requests.Session()
         self.session.headers.update({
