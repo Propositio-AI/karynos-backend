@@ -1,6 +1,8 @@
 from fastapi import APIRouter
+
 from route.api.v1 import router as http_router
 from route.ws.v1 import router as ws_router
+
 from core.config import settings
 
 VERSION_PREFIX = "/v1"

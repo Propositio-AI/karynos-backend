@@ -1,4 +1,4 @@
 from fastapi import APIRouter
 
-# /ws/v1/user
+# /ws/v1/job
 router = APIRouter()

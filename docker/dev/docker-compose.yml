@@ -185,6 +185,21 @@ services:
       - ../../shared:/app/shared
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${ORGANIZATION_SERVICE_DOCKER_PORT}", "--reload"]
 
+  auth-service:
+    container_name: "auth-service"
+    build:
+      context: ../../services/auth_service
+    ports:
+      - "${AUTH_SERVICE_HOST_PORT}:${AUTH_SERVICE_DOCKER_PORT}"
+    networks:
+      - karynos-network
+    env_file:
+      - ../../services/auth_service/.auth_env
+    volumes:
+      - ../../services/auth_service/app:/app
+      - ../../shared:/app/shared
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${AUTH_SERVICE_DOCKER_PORT}", "--reload"]
+
 networks:
   karynos-network:
     driver: bridge

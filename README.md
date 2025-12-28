@@ -21,7 +21,7 @@
 |  |
 │  ├─textbook_service
 |  |
-│  └─user_service
+│  └─auth_service
 |
 └─shared                           // 全サービス共通モジュール
 ```
@@ -65,8 +65,8 @@
     │  ├─textbook_service
     |  |  └─.textbook_env 
     |  |
-    │  └─user_service
-    |     └─.user_env    
+    │  └─auth_service
+    |     └─.auth_env    
     |
     └─shared    
     ```
