@@ -12,7 +12,7 @@ from shared.utils.shema import sqlalchemy_to_pydantic
 from models.base import Base
 
 
-class ConversationParticipantTable(Base):
+class ConversationParticipantsTable(Base):
     __tablename__ = "conversation_participants"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
@@ -21,6 +21,6 @@ class ConversationParticipantTable(Base):
     joined_at = Column(DateTime, server_default=func.now())
 
     # リレーション
-    conversation = relationship("Conversation", back_populates="participants")
+    # conversation = relationship("Conversation", back_populates="participants")
 
-ConversationParticipantTableSchema: BaseModel = sqlalchemy_to_pydantic(ConversationParticipantTable)
+ConversationParticipantsTableSchema: BaseModel = sqlalchemy_to_pydantic(ConversationParticipantsTable)

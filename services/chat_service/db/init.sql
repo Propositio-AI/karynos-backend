@@ -19,7 +19,7 @@ END;
 $$ language 'plpgsql';
 
 CREATE TYPE share_type AS ENUM ('PRIVATE', 'PUBLIC');
-CREATE TYPE role_type AS ENUM ('HUMAN', 'AI', 'SYSTEM');
+CREATE TYPE role_type AS ENUM ('user', 'assistant', 'system');
 
 CREATE SCHEMA IF NOT EXISTS public;
 
@@ -29,12 +29,15 @@ CREATE SCHEMA IF NOT EXISTS public;
 CREATE TABLE conversations (
     conversation_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     owner_id UUID NOT NULL,
-    title TEXT NOT NULL,
+    job_id TEXT NOT NULL,
+    job_name TEXT NOT NULL,
+    assistant_name TEXT,
+    assistant_gender TEXT,
+    last_message_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     share_type share_type NOT NULL DEFAULT 'PRIVATE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
 
 /*
     Table: messages  
@@ -42,7 +45,7 @@ CREATE TABLE conversations (
 CREATE TABLE messages (
     message_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     conversation_id UUID NOT NULL,
-    sender_id UUID NOT NULL,
+    sender_id UUID,
     role role_type NOT NULL,
     text_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

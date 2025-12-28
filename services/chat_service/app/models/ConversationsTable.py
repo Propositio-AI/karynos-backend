@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from enum import Enum as PyEnum
 from sqlalchemy import Enum as SQLEnum, text
 from sqlalchemy import func
+from datetime import datetime
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic
@@ -23,14 +24,18 @@ class ConversationsTable(Base):
 
     conversation_id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid7)
     owner_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    title = Column(TEXT, nullable=False)
+    job_id = Column(TEXT, nullable=False)
+    job_name = Column(TEXT, nullable=False)
+    assistant_name = Column(TEXT, nullable=True)
+    assistant_gender = Column(TEXT, nullable=True)
+    last_message_at = Column(DateTime, nullable=False, server_default=func.now())
     share_type = Column(SQLEnum(ShareType, name="share_type", create_type=False), nullable=False, server_default=text("'PRIVATE'"))
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # リレーション
-    messages = relationship("Message", back_populates="conversation")
-    participants = relationship("ConversationParticipant", back_populates="conversation")
+    # messages = relationship("Message", back_populates="conversation")
+    # participants = relationship("ConversationParticipant", back_populates="conversation")
 
 
 ConversationsTableSchema: BaseModel = sqlalchemy_to_pydantic(ConversationsTable)
