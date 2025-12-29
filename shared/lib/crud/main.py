@@ -69,12 +69,15 @@ class CRUD:
         
         """
 
-        new_data = self.table(**data.model_dump())
-        self.db.add(new_data)
-        self.db.commit()
-        self.db.refresh(new_data)
-
-        return new_data
+        try:
+            new_data = self.table(**data.model_dump())
+            self.db.add(new_data)
+            self.db.commit()
+            self.db.refresh(new_data)
+            return new_data
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
     @errorWrapper("QueryError")
     def read(self, filters: list[list] = []):
@@ -102,19 +105,23 @@ class CRUD:
         
         """
 
-        query = self.db.query(self.table)
+        try:
+            query = self.db.query(self.table)
 
-        conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
-        if conditions:
-            query = query.filter(and_(*conditions))
-            query = query.order_by(getattr(self.table, "created_at"))
-        
-        results = query.all()
+            conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
+            if conditions:
+                query = query.filter(and_(*conditions))
+                query = query.order_by(getattr(self.table, "created_at"))
+            
+            results = query.all()
 
-        if results is None:
-            raise BaseError("RecordNotFound")
-        
-        return results
+            if results is None:
+                raise BasicError("RecordNotFound")
+            
+            return results
+        except Exception as e:
+            self.db.rollback()
+            raise e
 
     @errorWrapper("QueryError")
     def update(self, filters: list[list], update_data: dict):
@@ -149,24 +156,28 @@ class CRUD:
         
         """
 
-        records = self.db.query(self.table)
-        
-        conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
-        if conditions:
-            records = records.filter(and_(*conditions))    
+        try:
+            records = self.db.query(self.table)
+            
+            conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
+            if conditions:
+                records = records.filter(and_(*conditions))    
 
-        filterd_records = records.all()    
-        if filterd_records is None: raise BaseError("RecordNotFound")
+            filterd_records = records.all()    
+            if filterd_records is None: raise BaseError("RecordNotFound")
 
-        updated_objects = []
-        for obj in filterd_records:
-            for k, v in update_data.items():
-                setattr(obj, k, v)
-            self.db.commit()
-            self.db.refresh(obj)
-            updated_objects.append(obj)
+            updated_objects = []
+            for obj in filterd_records:
+                for k, v in update_data.items():
+                    setattr(obj, k, v)
+                self.db.commit()
+                self.db.refresh(obj)
+                updated_objects.append(obj)
 
-        return updated_objects
+            return updated_objects
+        except Exception as e:
+            self.db.rollback()
+            raise e
     
     @errorWrapper("QueryError")
     def delete(self, filters: list[list]):
@@ -192,17 +203,21 @@ class CRUD:
         
         """
         
-        query = self.db.query(self.table)
-        conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
-        if conditions:
-            query = query.filter(and_(*conditions))
-        records = query.all()
+        try:
+            query = self.db.query(self.table)
+            conditions = [self.OPERATORS[op](getattr(self.table, col), val) for col, op, val in filters]
+            if conditions:
+                query = query.filter(and_(*conditions))
+            records = query.all()
 
-        if not records:
-            return None
+            if not records:
+                return None
 
-        for record in records:
-            self.db.delete(record)
-            self.db.commit()
+            for record in records:
+                self.db.delete(record)
+                self.db.commit()
 
-        return records
+            return records
+        except Exception as e:
+            self.db.rollback()
+            raise e

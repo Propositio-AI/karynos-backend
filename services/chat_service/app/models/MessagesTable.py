@@ -8,7 +8,6 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import func
 from pydantic import BaseModel
 from enum import Enum as PyEnum
-from sqlalchemy.orm import relationship
 
 from shared.utils.security import gen_uuid7
 from shared.utils.shema import sqlalchemy_to_pydantic

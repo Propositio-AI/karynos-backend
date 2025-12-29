@@ -9,7 +9,6 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -26,7 +25,7 @@ CREATE SCHEMA IF NOT EXISTS public;
 /*
     Table: conversations  
 */
-CREATE TABLE conversations (
+CREATE TABLE IF NOT EXISTS conversations (
     conversation_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     owner_id UUID NOT NULL,
     job_id TEXT NOT NULL,
@@ -42,37 +41,31 @@ CREATE TABLE conversations (
 /*
     Table: messages  
 */
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     message_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    conversation_id UUID NOT NULL,
-    sender_id UUID,
+    conversation_id UUID NOT NULL REFERENCES conversations(conversation_id) ON DELETE RESTRICT,
+    sender_id UUID NOT NULL,
     role role_type NOT NULL,
     text_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_messages_conversation
-        FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
+CREATE TRIGGER update_message_timestamp
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
 
 /*
     Table: conversation_participants   
 */
-CREATE TABLE conversation_participants (
+CREATE TABLE IF NOT EXISTS conversation_participants (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    conversation_id UUID NOT NULL,
+    conversation_id UUID NOT NULL REFERENCES conversations(conversation_id) ON DELETE RESTRICT,
     user_id UUID NOT NULL,
-    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_participants_conversation
-        FOREIGN KEY (conversation_id) REFERENCES conversations (conversation_id)
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TRIGGER update_conversation_timestamp
 BEFORE UPDATE ON conversations
-FOR EACH ROW
-EXECUTE PROCEDURE update_timestamp();
-
-CREATE TRIGGER update_message_timestamp
-BEFORE UPDATE ON messages
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp();

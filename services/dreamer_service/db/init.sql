@@ -25,7 +25,7 @@ CREATE SCHEMA IF NOT EXISTS public;
 */
 CREATE TABLE dreamers (
     dreamer_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    orgnaztion_id INTEGER,
+    organization_id INTEGER,
     login_id TEXT NOT NULL,
     name_family TEXT NOT NULL,
     name_given TEXT NOT NULL,
@@ -33,7 +33,10 @@ CREATE TABLE dreamers (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
+CREATE TRIGGER update_dreamer_timestamp
+BEFORE UPDATE ON dreamers
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
 
 /*
     Table: dreamer_groups 
@@ -45,26 +48,18 @@ CREATE TABLE dreamer_groups (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
+CREATE TRIGGER update_dreamer_group_timestamp
+BEFORE UPDATE ON dreamer_groups
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp();
 
 /*
     Table: dreamer_group_members  
 */
 CREATE TABLE dreamer_group_members (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    group_id UUID NOT NULL,
-    dreamer_id UUID NOT NULL,
+    group_id UUID NOT NULL REFERENCES dreamer_groups(group_id) ON DELETE RESTRICT,
+    dreamer_id UUID NOT NULL REFERENCES dreamers(dreamer_id) ON DELETE RESTRICT,
     joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_dgm_group FOREIGN KEY (group_id) REFERENCES dreamer_groups (group_id),
-    CONSTRAINT fk_dgm_dreamer FOREIGN KEY (dreamer_id) REFERENCES dreamers (dreamer_id)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TRIGGER update_dreamer_timestamp
-BEFORE UPDATE ON dreamers
-FOR EACH ROW
-EXECUTE PROCEDURE update_timestamp();
-
-CREATE TRIGGER update_dreamer_group_timestamp
-BEFORE UPDATE ON dreamer_groups
-FOR EACH ROW
-EXECUTE PROCEDURE update_timestamp();

@@ -23,54 +23,48 @@ CREATE SCHEMA IF NOT EXISTS public;
 /*
     Table: mentors
 */
-CREATE TABLE mentors (
+CREATE TABLE IF NOT EXISTS mentors (
     mentor_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    chief_mentor_id UUID NOT NULL,
-    orgnaztion_id INTEGER NOT NULL,
+    chief_mentor_id UUID,
+    organization_id INTEGER NOT NULL,
     login_id TEXT NOT NULL,
     name_family TEXT NOT NULL,
     name_given TEXT NOT NULL,
-    access_group UUID NOT NULL,
-    last_login_at TIMESTAMP NOT NULL,
+    access_group UUID,
+    last_login_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-
-/*
-    Table: mentor_groups
-*/
-CREATE TABLE mentor_groups (
-    group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    chief_mentor_id UUID NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_mentor_groups_chief
-        FOREIGN KEY (chief_mentor_id) REFERENCES mentors (mentor_id)
-);
-
-
-/*
-    Table: mentor_group_members 
-*/
-CREATE TABLE mentor_group_members (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    group_id UUID NOT NULL,
-    mentor_id UUID NOT NULL,
-    role TEXT NOT NULL,
-    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_mgm_group FOREIGN KEY (group_id) REFERENCES mentor_groups (group_id),
-    CONSTRAINT fk_mgm_mentor FOREIGN KEY (mentor_id) REFERENCES mentors (mentor_id)
-);
-
 CREATE TRIGGER update_mentor_timestamp
 BEFORE UPDATE ON mentors
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp();
 
+/*
+    Table: mentor_groups
+*/
+CREATE TABLE IF NOT EXISTS mentor_groups (
+    group_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    chief_mentor_id UUID REFERENCES mentors(mentor_id) ON DELETE RESTRICT,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 CREATE TRIGGER update_mentor_group_timestamp
 BEFORE UPDATE ON mentor_groups
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp();
+
+/*
+    Table: mentor_group_members 
+*/
+CREATE TABLE IF NOT EXISTS mentor_group_members (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    group_id UUID NOT NULL REFERENCES mentor_groups(group_id) ON DELETE RESTRICT,
+    mentor_id UUID NOT NULL REFERENCES mentors(mentor_id) ON DELETE RESTRICT,
+    role TEXT NOT NULL,
+    joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+

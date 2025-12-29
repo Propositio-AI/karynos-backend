@@ -20,51 +20,67 @@ $$ language 'plpgsql';
 
 CREATE SCHEMA IF NOT EXISTS public;
 
--- industries
+/*
+    Table: industries
+*/
 CREATE TABLE IF NOT EXISTS industries (
   industry_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT
 );
 
--- job_categories
+/*
+    Table: job_categories
+*/
 CREATE TABLE IF NOT EXISTS job_categories (
   category_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT
 );
 
--- skills
+/*
+    Table: skills
+*/
 CREATE TABLE IF NOT EXISTS skills (
   skill_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
 
--- certifications
+/*
+    Table: certifications
+*/
 CREATE TABLE IF NOT EXISTS certifications (
   certification_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
 
--- companies
+/*
+    Table: companies
+*/
 CREATE TABLE IF NOT EXISTS companies (
   company_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
 
--- talents
+/*
+    Table: talents
+*/
 CREATE TABLE IF NOT EXISTS talents (
   talent_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
 
--- interests
+/*
+    Table: interests
+*/
 CREATE TABLE IF NOT EXISTS interests (
   interest_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL
 );
 
--- jobs
+/*
+    Table: jobs
+*/
 CREATE TABLE IF NOT EXISTS jobs (
   job_id SERIAL PRIMARY KEY,
   industry_id INTEGER NOT NULL REFERENCES industries(industry_id) ON DELETE RESTRICT,
@@ -80,7 +96,9 @@ BEFORE UPDATE ON jobs
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp();
 
--- job_images
+/*
+    Table: job_images
+*/
 CREATE TABLE IF NOT EXISTS job_images (
   img_id SERIAL PRIMARY KEY,
   job_id INTEGER NOT NULL REFERENCES jobs(job_id) ON DELETE RESTRICT,
@@ -90,7 +108,9 @@ CREATE TABLE IF NOT EXISTS job_images (
 );
 
 
--- job_feedbacks
+/*
+    Table: job_feedbacks
+*/
 CREATE TABLE IF NOT EXISTS job_feedbacks (
   feedback_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   job_id INTEGER NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE,
@@ -127,7 +147,9 @@ BEFORE UPDATE ON job_feedbacks
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp();
 
--- feedback_skill (many-to-many: job_feedbacks <-> skills)
+/*
+    Table: feedback_skill
+*/
 CREATE TABLE IF NOT EXISTS feedback_skill (
   feedback_id UUID NOT NULL REFERENCES job_feedbacks(feedback_id) ON DELETE CASCADE,
   skill_id INTEGER NOT NULL REFERENCES skills(skill_id) ON DELETE RESTRICT,
@@ -136,7 +158,9 @@ CREATE TABLE IF NOT EXISTS feedback_skill (
   PRIMARY KEY (feedback_id, skill_id)
 );
 
--- feedback_certification (job_feedbacks <-> certifications)
+/*
+    Table: feedback_certification
+*/
 CREATE TABLE IF NOT EXISTS feedback_certification (
   feedback_id UUID NOT NULL REFERENCES job_feedbacks(feedback_id) ON DELETE CASCADE,
   certification_id INTEGER NOT NULL REFERENCES certifications(certification_id) ON DELETE RESTRICT,
@@ -145,7 +169,9 @@ CREATE TABLE IF NOT EXISTS feedback_certification (
   PRIMARY KEY (feedback_id, certification_id)
 );
 
--- feedback_company (job_feedbacks <-> companies)
+/*
+    Table: feedback_company
+*/
 CREATE TABLE IF NOT EXISTS feedback_company (
   feedback_id UUID NOT NULL REFERENCES job_feedbacks(feedback_id) ON DELETE CASCADE,
   company_id INTEGER NOT NULL REFERENCES companies(company_id) ON DELETE RESTRICT,
@@ -153,7 +179,9 @@ CREATE TABLE IF NOT EXISTS feedback_company (
   PRIMARY KEY (feedback_id, company_id)
 );
 
--- feedback_talent (job_feedbacks <-> talents)
+/*
+    Table: feedback_talent
+*/
 CREATE TABLE IF NOT EXISTS feedback_talent (
   feedback_id UUID NOT NULL REFERENCES job_feedbacks(feedback_id) ON DELETE CASCADE,
   talent_id INTEGER NOT NULL REFERENCES talents(talent_id) ON DELETE RESTRICT,
@@ -162,7 +190,9 @@ CREATE TABLE IF NOT EXISTS feedback_talent (
   PRIMARY KEY (feedback_id, talent_id)
 );
 
--- feedback_interest (job_feedbacks <-> interests)
+/*
+    Table: feedback_interest
+*/
 CREATE TABLE IF NOT EXISTS feedback_interest (
   feedback_id UUID NOT NULL REFERENCES job_feedbacks(feedback_id) ON DELETE CASCADE,
   interest_id INTEGER NOT NULL REFERENCES interests(interest_id) ON DELETE RESTRICT,
@@ -171,7 +201,9 @@ CREATE TABLE IF NOT EXISTS feedback_interest (
   PRIMARY KEY (feedback_id, interest_id)
 );
 
--- histories (Dreamer の Job 閲覧履歴等)
+/*
+    Table: histories
+*/
 CREATE TABLE IF NOT EXISTS histories (
   history_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   job_id INTEGER NOT NULL REFERENCES jobs(job_id) ON DELETE CASCADE,
