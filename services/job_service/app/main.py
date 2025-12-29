@@ -4,7 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from route.main_router import router as main_router
 from core.config import settings
 
-app = FastAPI(title = settings.SERVICE_NAME)
+app = FastAPI(
+    title = settings.SERVICE_NAME,
+    root_path = settings.PREFIX
+)
 
 origins = [
     "http://localhost:3000",
