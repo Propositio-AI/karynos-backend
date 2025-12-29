@@ -8,5 +8,5 @@ from core.config import settings
 VERSION_PREFIX = "/v1"
 
 router = APIRouter()
-router.include_router(http_router, prefix=f"/api{VERSION_PREFIX}{settings.PREFIX}", tags=[settings.TAG])
-router.include_router(ws_router, prefix=f"/ws{VERSION_PREFIX}{settings.PREFIX}",  tags=[settings.TAG])
+router.include_router(http_router, prefix=f"/api{VERSION_PREFIX}", tags=[settings.TAG])
+router.include_router(ws_router, prefix=f"/ws{VERSION_PREFIX}",  tags=[settings.TAG])

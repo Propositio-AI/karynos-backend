@@ -1,1 +1,0 @@
-from shared.lib.Auth.main import authenticate_user

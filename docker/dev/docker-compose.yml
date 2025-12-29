@@ -15,8 +15,8 @@ services:
     container_name: "job-service"
     build:
       context: ../../services/job_service
-    ports:
-      - "${JOB_SERVICE_HOST_PORT}:${JOB_SERVICE_DOCKER_PORT}"
+    # ports:
+    #   - "${JOB_SERVICE_HOST_PORT}:${JOB_SERVICE_DOCKER_PORT}"
     networks:
       - karynos-network
     depends_on:
@@ -46,8 +46,8 @@ services:
     container_name: "mentor-service"
     build:
       context: ../../services/mentor_service
-    ports:
-      - "${MENTOR_SERVICE_HOST_PORT}:${MENTOR_SERVICE_DOCKER_PORT}"
+    # ports:
+    #   - "${MENTOR_SERVICE_HOST_PORT}:${MENTOR_SERVICE_DOCKER_PORT}"
     networks:
       - karynos-network
     depends_on:
@@ -77,8 +77,8 @@ services:
     container_name: "dreamer-service"
     build:
       context: ../../services/dreamer_service
-    ports:
-      - "${DREAMER_SERVICE_HOST_PORT}:${DREAMER_SERVICE_DOCKER_PORT}"
+    # ports:
+    #   - "${DREAMER_SERVICE_HOST_PORT}:${DREAMER_SERVICE_DOCKER_PORT}"
     networks:
       - karynos-network
     depends_on:
@@ -139,8 +139,8 @@ services:
     container_name: "chat-service"
     build:
       context: ../../services/chat_service
-    ports:
-      - "${CHAT_SERVICE_HOST_PORT}:${CHAT_SERVICE_DOCKER_PORT}"
+    # ports:
+    #   - "${CHAT_SERVICE_HOST_PORT}:${CHAT_SERVICE_DOCKER_PORT}"
     networks:
       - karynos-network
     depends_on:
@@ -170,8 +170,8 @@ services:
     container_name: "organization-service"
     build:
       context: ../../services/organization_service
-    ports:
-      - "${ORGANIZATION_SERVICE_HOST_PORT}:${ORGANIZATION_SERVICE_DOCKER_PORT}"
+    # ports:
+    #   - "${ORGANIZATION_SERVICE_HOST_PORT}:${ORGANIZATION_SERVICE_DOCKER_PORT}"
     networks:
       - karynos-network
     depends_on:
@@ -185,20 +185,21 @@ services:
       - ../../shared:/app/shared
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${ORGANIZATION_SERVICE_DOCKER_PORT}", "--reload"]
 
-  auth-service:
-    container_name: "auth-service"
-    build:
-      context: ../../services/auth_service
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
     ports:
-      - "${AUTH_SERVICE_HOST_PORT}:${AUTH_SERVICE_DOCKER_PORT}"
+      - "8080:80"
+    volumes:
+      - ../../nginx/dev.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - job-service
+      - mentor-service
+      - dreamer-service
+      - chat-service
+      - organization-service
     networks:
       - karynos-network
-    env_file:
-      - ../../services/auth_service/.auth_env
-    volumes:
-      - ../../services/auth_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${AUTH_SERVICE_DOCKER_PORT}", "--reload"]
 
 networks:
   karynos-network:
