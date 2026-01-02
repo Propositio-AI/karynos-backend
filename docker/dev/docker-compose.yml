@@ -3,6 +3,8 @@ services:
   job-db:
     container_name: "${JOB_DB_SERVER_NAME}" 
     image: postgres:17.5
+    ports:
+      - "5432:5432"
     networks:
       - karynos-network
     env_file:
