@@ -1,7 +1,7 @@
 from shared.lib.API.client import Client
 
 #job_serviceから職業データを取得する
-def get_job_data(job_id: str, data_url="http://job-service:8000/api/v1/job"):
+def get_job_data(job_id: str, data_url="http://job-service:8000/api/v1"):
     client = Client()
     success, result, error = client.get(f"{data_url}/detail/{job_id}")
     if success:

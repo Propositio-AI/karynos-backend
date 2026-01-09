@@ -65,12 +65,12 @@ async def create_mentor(request: NewMentorRequest):
     return NewMentorResponse.model_validate(result)
 
 
-@router.get("/admin/{mentor_id}", response_model=MentorResponse)
-async def get_mentor(mentor_id: str):
+@router.get("/admin/{login_id}", response_model=MentorResponse)
+async def get_mentor(login_id: str):
     """Mentor情報を取得"""
     _, result, error = mentors_crud.read(
         [
-            ["mentor_id", "==", mentor_id]
+            ["login_id", "==", login_id]
         ]
     )
     print(error, flush=True)

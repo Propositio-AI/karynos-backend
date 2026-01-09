@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 class CreateConversationRequest(BaseModel):
-    user_id: str
     job_id: str
 
 class CreateConversationDB(BaseModel):
@@ -12,7 +11,6 @@ class CreateConversationDB(BaseModel):
     assistant_name: str    
 
 class NewMessageRequest(BaseModel):
-    sender_id: str
     role: str
     text_content: str
 

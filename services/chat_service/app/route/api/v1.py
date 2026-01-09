@@ -1,6 +1,7 @@
-from fastapi import HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter
 from fastapi.responses import StreamingResponse
 
+from shared.lib.API.auth.main import get_current_user
 from shared.lib.basicError import errorWrapper, BasicError
 from crud import conversation_participants_crud,conversation_table_crud,messages_crud
 from services.external.job_api import get_job_data
@@ -13,20 +14,24 @@ from LLM_Client.OpenAI import OpenAIClient
 router = APIRouter()
 
 @router.post("/")
-async def create_new_conversation(request: CreateConversationRequest):
+async def create_new_conversation(request: CreateConversationRequest, user = Depends(get_current_user)):
     """新しい会話を作成"""
+    user_id = user["dreamer_id"]
+
     job_data = get_job_data(request.job_id)
+    
     if not job_data:
         raise HTTPException(status_code=404, detail="Job not found")
     
     new_conversation_db = CreateConversationDB(
-        owner_id = request.user_id,
+        owner_id = user_id,
         job_id = request.job_id,
         job_name = job_data['name'],
         assistant_gender = "unisex",
         assistant_name = generate_name(name_type=["japanese_surnames", "japanese_unisex_names"])
     )
     conversation = conversation_table_crud.create(new_conversation_db)
+
     return conversation
 
 @router.get("/history/{user_id}")
@@ -43,13 +48,14 @@ async def get_conversation_history(user_id: str):
 
 # ★修正: 会話情報とメッセージの両方を返すように変更
 @router.get("/conversation/{conversation_id}")
-async def get_conversation_details(conversation_id: str):
+async def get_conversation_details(conversation_id: str, user = Depends(get_current_user)):
     """会話の詳細（メタデータ＋メッセージ履歴）を取得"""
     
     # 1. 会話データ（job_nameなどが含まれる）を取得
     # curd.read はリストを返すので [0] を取得
     success, conv_data, err = conversation_table_crud.read([
-        ["conversation_id", "==", conversation_id]
+        ["conversation_id", "==", conversation_id],
+        ["owner_id", "==", user["id"]]
     ])
     if not success or not conv_data:
         raise HTTPException(status_code=404, detail=err)
@@ -64,13 +70,14 @@ async def get_conversation_details(conversation_id: str):
 
     # 3. セットにして返す
     return {
-        "conversation": conversation, # ここに job_name がある
+        "conversation": conversation,
         "messages": messages
     }
 
 @router.get("/conversation/{conversation_id}")
-async def get_conversation_details(conversation_id: str):
+async def get_conversation_details(conversation_id: str, user = Depends(get_current_user)):
     """会話の詳細を取得"""
+
     conversation = get_messages_db(
         conversation_id = conversation_id,
         crud = messages_crud
@@ -95,11 +102,13 @@ async def delete_conversation(conversation_id: str):
     return {"message": "Conversation deleted successfully"}
 
 @router.post("/message/{conversation_id}")
-async def create_new_ai_response(conversation_id: str, request: NewMessageRequest):
+async def create_new_ai_response(conversation_id: str, request: NewMessageRequest, user = Depends(get_current_user)):
     """新しいAI応答メッセージを作成"""
+
+    
     user_message = NewUserMessageDB(
         conversation_id = conversation_id,
-        sender_id = request.sender_id,
+        sender_id = user["id"],
         role = request.role,
         text_content = request.text_content
     )
@@ -112,7 +121,8 @@ async def create_new_ai_response(conversation_id: str, request: NewMessageReques
     )
 
     success,conversation_data, err = conversation_table_crud.read([
-        ["conversation_id", "==", conversation_id]
+        ["conversation_id", "==", conversation_id],
+        ["owner_id", "==", user["id"]]
     ])
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")

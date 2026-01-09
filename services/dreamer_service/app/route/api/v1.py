@@ -34,21 +34,20 @@ async def create_dreamer(request: NewDreamerRequest):
     return NewDreamerResponse.model_validate(result)
 
 
-@router.get("/admin/{dreamer_id}", response_model=DreamerResponse)
-async def get_dreamer(dreamer_id: str):
+@router.get("/admin/{login_id}", response_model=DreamerResponse)
+async def get_dreamer(login_id: str):
     """dreamer情報の取得"""
     _, result, error = dreamer_crud.read(
         [
-            ["dreamer_id", "==", dreamer_id]
+            ["login_id", "==", login_id]
         ] 
     )
-    print(error, flush=True)
     dreamer = result[0]
     
     # dreamerが所属するグループを取得
     _, members, error = dreamer_group_members_crud.read(
         [
-            ["dreamer_id", "==", dreamer_id]
+            ["dreamer_id", "==", dreamer.dreamer_id]
         ]
     )
     print(error, flush=True)
@@ -67,6 +66,7 @@ async def get_dreamer(dreamer_id: str):
                 groups.append(DreamerGroupSummary(name=group.name, group_id=group.group_id))
     
     return DreamerResponse(
+        dreamer_id=dreamer.dreamer_id,
         login_id=dreamer.login_id,
         organization_id=dreamer.organization_id,
         name_family=dreamer.name_family,

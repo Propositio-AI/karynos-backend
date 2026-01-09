@@ -1,9 +1,10 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from typing import List
 from uuid import UUID
 
 from crud import  history_crud, jobs_crud
 from schema import RecommendResponse, JobDetailResponse
+from shared.lib.API.auth.main import get_current_user
 
 # /api/v1/job
 router = APIRouter()
@@ -11,9 +12,11 @@ router = APIRouter()
 @router.get("/detail/{job_id}", response_model=JobDetailResponse)
 async def _(job_id: int):
     """job情報の取得"""
+
     _, jobs, error = jobs_crud.read([
         ["job_id", "==", job_id]
     ])
+
 
     job = jobs[0]
 

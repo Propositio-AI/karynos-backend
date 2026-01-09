@@ -23,6 +23,7 @@ class DreamerGroupSummary(BaseModel): #サブモデル
     group_id: UUID = Field(..., description = "グループID")
 
 class DreamerResponse(BaseModel):
+    dreamer_id: UUID = Field(..., description = "dreamer ID")
     login_id: str = Field(..., description = "ログイン用ID")
     organization_id: int = Field(..., description = "団体ID")
     name_family: str = Field(..., description = "苗字")

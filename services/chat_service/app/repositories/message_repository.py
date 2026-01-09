@@ -4,7 +4,7 @@ from shared.lib.crud import CRUD
 def get_messages_db(conversation_id: str, crud: CRUD):
     success, result, error = crud.read(
         [
-            ["conversation_id", "==", conversation_id]
+            ["conversation_id", "==", conversation_id],
         ]
     )
     if success:
