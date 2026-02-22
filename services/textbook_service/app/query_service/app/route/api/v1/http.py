@@ -5,6 +5,7 @@ from models.QueryTable import QueryTableSchema
 from crud.Query import query_crud
 
 from shared.utils import convert_to_filter
+from shared.lib.auth import get_current_user_id_str
 
 # /api/v1/query
 router = APIRouter()
@@ -12,23 +13,26 @@ router = APIRouter()
 @router.get("/", response_model=list[QueryTableSchema])
 async def _(data: QueryTableSchema = Depends(), op = "=="):
     filters = convert_to_filter(data, op)
-    success, result, error = query_crud.read(filters)
+    response = query_crud.read(filters)
 
-    if not success:
-        HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        HTTPException(status_code=500, detail=response["message"])
     
-    return result
+    return response["data"]
     
 
 @router.post("/", response_model=QueryTableSchema)
-async def _(data: QueryTableSchema):
-    # TODO: ユーザーID取得処理
-    data.user_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+async def _(
+    data: QueryTableSchema,
+    user_id: str = Depends(get_current_user_id_str)
+):
+    # 認証されたユーザーIDを使用
+    data.user_id = user_id
 
-    success, result, error = query_crud.create(data)
+    response = query_crud.create(data)
 
-    if not success:
-        return HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        return HTTPException(status_code=500, detail=response["message"])
     
-    return result
+    return response["data"]
     

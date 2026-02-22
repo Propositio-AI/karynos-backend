@@ -38,7 +38,7 @@ def my_function(x):
         raise BasicError("ValueOutOfRange")
     return x * 2
 
-success, result, error = my_function(10)
+response = my_function(10)
 
 """
 
@@ -61,13 +61,13 @@ catch Exception as e:
 | `x = "hello"` |  `BasicError("InvalidFormat")` <br><br> ※本来なら`TypeError: '<' not supported between instances of 'str' and 'int'`が発生し、処理が停止しますがerrorWrapperでラッピングされているためデフォルトエラーの`BasicError("InvalidFormat")`が出力されます |
 
 #### 出力について
-`errorWrapper`でラッピングされている関数の出力は必ず下記のタプル型で出力されます。
+`errorWrapper`でラッピングされている関数の出力は必ず下記の形式で出力されます。
 
 | 項目 | 内容 |
 |------|-----|
-| 第1項：`bool` | 処理成功の可否 |
-| 第2項：`any` | 処理成功時の関数返り値 |
-| 第3項：`BasicError` | エラー発生時の返り値 |
+| `success` | 処理成功の可否 |
+| `message` | エラー内容の配列（成功時は空配列） |
+| `data` | 処理成功時の関数返り値（失敗時は`None`） |
 
 ## ErrorKeyについて
 

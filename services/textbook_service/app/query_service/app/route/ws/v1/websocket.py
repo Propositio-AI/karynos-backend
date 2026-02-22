@@ -6,6 +6,7 @@ from models.QueryTable import QueryTableSchema
 from shared.lib.API import HTTP_APIClient
 from shared.lib.gRPC import gRPC_Client
 from shared.lib.websocket.websocket import WebSocketManager, streamer
+from shared.lib.auth import get_default_user_id
 
 # /ws/v1/query
 router = APIRouter()
@@ -17,28 +18,29 @@ class PlanQuerySchema(BaseModel):
     query: str
 @WsManager.websocket("/plan", PlanQuerySchema)
 async def _(data: PlanQuerySchema, manager: WebSocketManager):
-    # TODO: ユーザーID取得処理 
+    # ユーザーIDの取得（将来的にはWebSocketのヘッダーから取得）
     # ユーザーIDはDBに保存しないためこのタイミングでは必要ないが、ログとして残すなら必要になる
-    # data.user_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    # user_id = get_default_user_id()
 
     # ペルソナの取得
-    netSuccess, netRes, netError = gRPC_Client("Persona").call("CreatePersona", {})    
-    if(not netSuccess):
+    net_response = gRPC_Client("Persona").call("CreatePersona", {})    
+    if(not net_response["success"]):
         manager.send_error(
-            netError.code,
-            netError.message
+            "",
+            "\n".join(net_response["message"])
         )
 
         return
     else:
-        serverSuccess, persona, serverError = netRes
-        if(not serverSuccess):
+        server_response = net_response["data"]
+        if(not server_response["success"]):
             manager.send_error(
-                serverError.code,
-                serverError.message
+                "",
+                "\n".join(server_response["message"])
             )
 
             return
+        persona = server_response["data"]
     
     # LLMで学習プランを作成
     notions = ""
@@ -63,8 +65,8 @@ async def _(data: PlanQuerySchema, manager: WebSocketManager):
 
 @WsManager.websocket("/chat", QueryTableSchema)
 async def _(data: QueryTableSchema, manager: WebSocketManager):
-    # TODO: ユーザーID取得処理
-    data.user_id = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    # ユーザーIDの取得（将来的にはWebSocketのヘッダーから取得）
+    data.user_id = get_default_user_id()
 
     archive = http_client.post(
         "http://archive-service:8000/api/v1/archive",

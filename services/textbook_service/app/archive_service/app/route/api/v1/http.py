@@ -12,36 +12,36 @@ router = APIRouter()
 @router.get("/", response_model=list[ArchiveTableSchema])
 async def _(data: ArchiveTableSchema = Depends(), op = "=="):
     filters = convert_to_filter(data, op)
-    success, result, error = archive_crud.read(filters)
+    response = archive_crud.read(filters)
 
-    if success:
-        return result
+    if response["success"]:
+        return response["data"]
     else:
-        HTTPException(status_code=500, detail=error)
+        HTTPException(status_code=500, detail=response["message"])
 
 @router.get("/{archive_id}", response_model=ArchiveTableSchema)
 async def _(archive_id: uuid.UUID):
-    success, result, error = archive_crud.read([
+    response = archive_crud.read([
         ["id", "==", archive_id]
     ])
 
-    if not success:
-        return HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        return HTTPException(status_code=500, detail=response["message"])
     
-    return result[0]
+    return response["data"][0]
     
 @router.post("/", response_model=ArchiveTableSchema)
 async def _(data: ArchiveTableSchema):
-    success, result, error = archive_crud.create(data)
+    response = archive_crud.create(data)
 
-    if not success:
-        return HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        return HTTPException(status_code=500, detail=response["message"])
     
-    return result
+    return response["data"]
 
 @router.put("/", response_model=list[ArchiveTableSchema])
 async def _(data: ArchiveTableSchema):
-    success, result, error = archive_crud.update(
+    response = archive_crud.update(
         [
             ["id", "==", data.id]
         ],
@@ -50,42 +50,44 @@ async def _(data: ArchiveTableSchema):
         }
     )
 
-    if not success:
-        return HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        return HTTPException(status_code=500, detail=response["message"])
     
-    return result
+    return response["data"]
 
 
 @router.post("/textbook/structure", response_model=ArchiveTableSchema)
 async def _(data: ArchiveTableSchema):
     # ペルソナの取得
-    netSuccess, netRes, netError = gRPC_Client("Persona").call("CreatePersona", {})
-    if netSuccess:
-        serverSuccess, persona, serverError = netRes
+    net_response = gRPC_Client("Persona").call("CreatePersona", {})
+    if net_response["success"]:
+        server_response = net_response["data"]
 
         # TODO: サーバー側エラーの処理
-        if not serverSuccess:
+        if not server_response["success"]:
             pass
+        persona = server_response["data"]
 
-    else: return HTTPException(status_code=500, detail=netError)
+    else: return HTTPException(status_code=500, detail=net_response["message"])
 
     # 教科書構成の作成
-    netSuccess, netRes, netError = gRPC_Client("TextBook").call("GenerateStructure", {
+    net_response = gRPC_Client("TextBook").call("GenerateStructure", {
         "persona": persona,
         "query": data.contents["notion"]
     })
-    if netSuccess:
-        serverSuccess, structures, serverError = netRes
+    if net_response["success"]:
+        server_response = net_response["data"]
 
         # TODO: サーバー側エラーの処理
-        if not serverSuccess:
+        if not server_response["success"]:
             pass
+        structures = server_response["data"]
 
-    else: return HTTPException(status_code=500, detail=netError)
+    else: return HTTPException(status_code=500, detail=net_response["message"])
 
     new_contents = data.contents
     new_contents["structures"] = structures
-    success, new_archive, error = archive_crud.update(
+    update_response = archive_crud.update(
         [
             ["id", "==", data.id]
         ],
@@ -95,7 +97,7 @@ async def _(data: ArchiveTableSchema):
         }
     )
 
-    if not success:
-        return HTTPException(status_code=500, detail=error)
+    if not update_response["success"]:
+        return HTTPException(status_code=500, detail=update_response["message"])
     
-    return new_archive[0]
+    return update_response["data"][0]

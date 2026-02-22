@@ -1,0 +1,5 @@
+# dreamer_service - Initial Diagnostics Service
+# Additional libraries (beyond shared/requirements.txt)
+
+# Utilities
+python-multipart

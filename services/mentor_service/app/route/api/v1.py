@@ -26,31 +26,33 @@ async def create_mentor(request: NewMentorRequest):
     
     # chief_mentor_id が指定されている場合、存在確認
     if request.chief_mentor_id:
-        _, chief_result, error = mentors_crud.read(
+        chief_response = mentors_crud.read(
             [["mentor_id", "==", request.chief_mentor_id]]
         )
-        if not chief_result:
+        if not chief_response["success"] or not chief_response["data"]:
             raise HTTPException(status_code=400, detail="chief_mentor_id が存在しません")
         
     # organization_id の存在確認
     client = Client()
     org_url = f"http://organization-service:8000/api/v1/organization/{request.organization_id}"
-    success, _, error = client.get(org_url)
-    if not success:
+    org_response = client.get(org_url)
+    if not org_response["success"]:
         raise HTTPException(status_code=400, detail="organization_id が存在しません")
     
     # access_group が指定されている場合、存在確認
     if request.access_group:
-        _, group_result, error = mentor_groups_crud.read(
+        group_response = mentor_groups_crud.read(
             [["group_id", "==", request.access_group]]
         )
-        if not group_result:
+        if not group_response["success"] or not group_response["data"]:
             raise HTTPException(status_code=400, detail="access_group が存在しません")
     
-    _, result, error = mentors_crud.create(
+    mentor_response = mentors_crud.create(
         MentorTableSchema(**request.model_dump(), login_id=random_string())
     )
-    print(error, flush=True)
+    if not mentor_response["success"]:
+        raise HTTPException(status_code=500, detail=mentor_response["message"])
+    result = mentor_response["data"]
     
     # access_group が指定されている場合、そのグループにメンバーとして追加
     if request.access_group:
@@ -59,8 +61,9 @@ async def create_mentor(request: NewMentorRequest):
             mentor_id=result.mentor_id,
             role=request.access_group_role or "member"
         )
-        _, _, member_error = mentor_group_members_crud.create(member_instance)
-        print(member_error, flush=True)
+        member_response = mentor_group_members_crud.create(member_instance)
+        if not member_response["success"]:
+            raise HTTPException(status_code=500, detail=member_response["message"])
     
     return NewMentorResponse.model_validate(result)
 
@@ -68,36 +71,37 @@ async def create_mentor(request: NewMentorRequest):
 @router.get("/admin/{mentor_id}", response_model=MentorResponse)
 async def get_mentor(mentor_id: str):
     """Mentor情報を取得"""
-    _, result, error = mentors_crud.read(
+    mentor_response = mentors_crud.read(
         [
             ["mentor_id", "==", mentor_id]
         ]
     )
-    print(error, flush=True)
-    if not result:
+    if not mentor_response["success"] or not mentor_response["data"]:
         raise HTTPException(status_code=404, detail="mentor が見つかりません")
 
-    mentor = result[0]
+    mentor = mentor_response["data"][0]
     
     # mentorが所属するグループを取得
-    _, members, error = mentor_group_members_crud.read(
+    members_response = mentor_group_members_crud.read(
         [
             ["mentor_id", "==", mentor_id]
         ]
     )
-    print(error, flush=True)
+    if not members_response["success"]:
+        raise HTTPException(status_code=500, detail=members_response["message"])
+    members = members_response["data"]
     
     # グループ情報を取得
     groups = []
     if members:
         for member in members:
-            _, group_result, error = mentor_groups_crud.read(
+            group_response = mentor_groups_crud.read(
                 [
                     ["group_id", "==", member.group_id]
                 ]
             )
-            if group_result:
-                group = group_result[0]
+            if group_response["success"] and group_response["data"]:
+                group = group_response["data"][0]
                 groups.append(MentorGroupInfo(name=group.name, group_id=group.group_id))
     
     return MentorResponse(
@@ -114,37 +118,38 @@ async def get_mentor(mentor_id: str):
 @router.put("/admin/{mentor_id}", response_model=MentorResponse)
 async def update_mentor(mentor_id: str, request: UpdateMentorRequest):
     """Mentor情報を更新"""
-    _, result, error = mentors_crud.update(
+    update_response = mentors_crud.update(
         [
             ["mentor_id", "==", mentor_id]
         ],
         request.model_dump(exclude_unset=True)
     )
-    print(error, flush=True)
-    return MentorResponse.model_validate(result[0])
+    if not update_response["success"] or not update_response["data"]:
+        raise HTTPException(status_code=500, detail=update_response["message"])
+    return MentorResponse.model_validate(update_response["data"][0])
 
 
 @router.delete("/admin/{mentor_id}", response_model=MentorResponse)
 async def delete_mentor(mentor_id: str):
     """Mentor情報を削除"""
     # 所属している全グループから削除
-    _, _, error = mentor_group_members_crud.delete(
+    delete_members_response = mentor_group_members_crud.delete(
         [
             ["mentor_id", "==", mentor_id]
         ]
     )
-    print(error, flush=True)
+    if not delete_members_response["success"]:
+        raise HTTPException(status_code=500, detail=delete_members_response["message"])
     
     # mentorを削除
-    _, result, error = mentors_crud.delete(
+    delete_mentor_response = mentors_crud.delete(
         [
             ["mentor_id", "==", mentor_id]
         ]
     )
-    print(error, flush=True)
-    if not result:
+    if not delete_mentor_response["success"] or not delete_mentor_response["data"]:
         raise HTTPException(status_code=404, detail="mentor が見つかりません")
-    return MentorResponse.model_validate(result[0])
+    return MentorResponse.model_validate(delete_mentor_response["data"][0])
 
 # ====================
 # Mentor Groups
@@ -155,24 +160,26 @@ async def create_group(request: NewMentorGroupRequest):
     """新しいMentorグループを作成"""
     # chief_mentor_id が指定されている場合、存在確認
     if request.chief_mentor_id:
-        _, chief_result, error = mentors_crud.read(
+        chief_response = mentors_crud.read(
             [["mentor_id", "==", request.chief_mentor_id]]
         )
-        if not chief_result:
+        if not chief_response["success"] or not chief_response["data"]:
             raise HTTPException(status_code=400, detail="chief_mentor_id が存在しません")
 
     # メンバーに指定された mentor_id を事前に全件確認（存在しなければ 400）
     for mentor_info in request.mentors:
-        _, mentor_result, error = mentors_crud.read(
+        mentor_response = mentors_crud.read(
             [["mentor_id", "==", mentor_info.mentor_id]]
         )
-        if not mentor_result:
+        if not mentor_response["success"] or not mentor_response["data"]:
             raise HTTPException(status_code=400, detail="mentor_id が存在しません")
     
     group_data = request.model_dump(exclude={"mentors"})
     group_instance = MentorGroupTableSchema(**group_data)
-    _, group_result, error = mentor_groups_crud.create(group_instance)
-    print(error, flush=True)
+    group_response = mentor_groups_crud.create(group_instance)
+    if not group_response["success"]:
+        raise HTTPException(status_code=500, detail=group_response["message"])
+    group_result = group_response["data"]
     group_id = group_result.group_id
 
     """メンバー登録"""
@@ -183,42 +190,46 @@ async def create_group(request: NewMentorGroupRequest):
             mentor_id=mentor_info.mentor_id,
             role=mentor_info.role
         )
-        _, member_result, error = mentor_group_members_crud.create(member_instance)
-        print(error, flush=True)
-        added_mentors.append(member_result)
+        member_response = mentor_group_members_crud.create(member_instance)
+        if not member_response["success"]:
+            raise HTTPException(status_code=500, detail=member_response["message"])
+        added_mentors.append(member_response["data"])
     return NewMentorGroupResponse.model_validate(group_result)
 
 
 @router.get("/groups/{group_id}", response_model=MentorGroupResponse)
 async def get_group(group_id: str):
     """Mentorグループの情報を取得"""
-    _, group_result, error = mentor_groups_crud.read(
+    group_response = mentor_groups_crud.read(
         [
             ["group_id", "==", group_id]
         ]
     )
-    print(error, flush=True)
+    if not group_response["success"] or not group_response["data"]:
+        raise HTTPException(status_code=404, detail="group が見つかりません")
     
-    group = group_result[0]
+    group = group_response["data"][0]
 
-    _, members, error = mentor_group_members_crud.read(
+    members_response = mentor_group_members_crud.read(
         [
             ["group_id", "==", group_id]
         ]
     )
-    print(error, flush=True)
+    if not members_response["success"]:
+        raise HTTPException(status_code=500, detail=members_response["message"])
+    members = members_response["data"]
     
     # 各メンバーのmentor情報を取得
     mentors = []
     if members:
         for member in members:
-            _, mentor_result, error = mentors_crud.read(
+            mentor_response = mentors_crud.read(
                 [
                     ["mentor_id", "==", member.mentor_id]
                 ]
             )
-            if mentor_result:
-                mentor = mentor_result[0]
+            if mentor_response["success"] and mentor_response["data"]:
+                mentor = mentor_response["data"][0]
                 full_name = f"{mentor.name_family} {mentor.name_given}"
                 mentors.append(MentorInGroup(name=full_name, mentor_id=mentor.mentor_id))
     
@@ -233,35 +244,38 @@ async def get_group(group_id: str):
 @router.put("/groups/{group_id}", response_model=MentorGroupResponse)
 async def update_group(group_id: str, request: UpdateMentorGroupRequest):
     """Mentorグループの情報を更新"""
-    _, result, error = mentor_groups_crud.update(
+    update_response = mentor_groups_crud.update(
         [
             ["group_id", "==", group_id]
         ],
         request.model_dump(exclude_unset=True)
     )
-    print(error, flush=True)
-    return MentorGroupResponse.model_validate(result[0])
+    if not update_response["success"] or not update_response["data"]:
+        raise HTTPException(status_code=500, detail=update_response["message"])
+    return MentorGroupResponse.model_validate(update_response["data"][0])
 
 
 @router.delete("/groups/{group_id}", response_model=MentorGroupResponse)
 async def delete_group(group_id: str):
     """Mentorグループを削除"""
     # まずグループのメンバーを全て削除
-    _, _, error = mentor_group_members_crud.delete(
+    delete_members_response = mentor_group_members_crud.delete(
         [
             ["group_id", "==", group_id]
         ]
     )
-    print(error, flush=True)
+    if not delete_members_response["success"]:
+        raise HTTPException(status_code=500, detail=delete_members_response["message"])
 
     # グループを削除
-    _, result, error = mentor_groups_crud.delete(
+    delete_group_response = mentor_groups_crud.delete(
         [
             ["group_id", "==", group_id]
         ]
     )
-    print(error, flush=True)
-    return MentorGroupResponse.model_validate(result[0])
+    if not delete_group_response["success"] or not delete_group_response["data"]:
+        raise HTTPException(status_code=500, detail=delete_group_response["message"])
+    return MentorGroupResponse.model_validate(delete_group_response["data"][0])
 
 # ====================
 # Mentor Group Members
@@ -272,11 +286,10 @@ async def add_mentor_to_group(group_id: str, request: AddMentorToGroupRequest):
     """メンターをグループに追加"""
     # 追加対象メンターの存在確認（外部キー違反防止）
     for mentor_info in request.mentors:
-        _, mentor_exists, error = mentors_crud.read(
+        mentor_response = mentors_crud.read(
             [["mentor_id", "==", mentor_info.mentor_id]]
         )
-        print(error, flush=True)
-        if not mentor_exists:
+        if not mentor_response["success"] or not mentor_response["data"]:
             raise HTTPException(status_code=400, detail="mentor_id が存在しません")
 
     added_mentors = []
@@ -286,9 +299,11 @@ async def add_mentor_to_group(group_id: str, request: AddMentorToGroupRequest):
             mentor_id=mentor_info.mentor_id,
             role=mentor_info.role
         )
-        _, result, error = mentor_group_members_crud.create(member_instance)
-        print(error, flush=True)
-        added_mentors.append(MentorRoleInfo(mentor_id=result.mentor_id, role=result.role))
+        member_response = mentor_group_members_crud.create(member_instance)
+        if not member_response["success"]:
+            raise HTTPException(status_code=500, detail=member_response["message"])
+        member = member_response["data"]
+        added_mentors.append(MentorRoleInfo(mentor_id=member.mentor_id, role=member.role))
     return AddMentorToGroupResponse(mentors=added_mentors)
 
 
@@ -297,13 +312,12 @@ async def remove_mentor_from_group(group_id: str, request: RemoveMentorFromGroup
     """Mentorをグループから削除"""
     removed_mentor_ids = []
     for mentor_id in request.mentor_ids:
-        _, result, error = mentor_group_members_crud.delete(
+        delete_response = mentor_group_members_crud.delete(
             [
                 ["group_id", "==", group_id],
                 ["mentor_id", "==", mentor_id]
             ]
         )
-        print(error, flush=True)
-        if result:
+        if delete_response["success"] and delete_response["data"]:
             removed_mentor_ids.append(mentor_id)
     return RemoveMentorFromGroupResponse(mentor_ids=removed_mentor_ids)

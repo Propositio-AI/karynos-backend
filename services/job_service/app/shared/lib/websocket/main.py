@@ -94,16 +94,17 @@ async def streamer(
     loop = asyncio.get_running_loop()
 
     def sync(queue, loop):    
-        # for netSuccess, res, netError in generator_func(): 
-        for netSuccess, netRes, netError in generator_func(): 
+        for netRes in generator_func():
             # TODO: ネットワークエラーハンドリング
-            if netSuccess:
-                serverSuccess, serverResponse, serverError = netRes
-                
-                if serverSuccess:
-                    asyncio.run_coroutine_threadsafe(queue.put(serverResponse), loop)
+            if netRes["success"]:
+                serverRes = netRes["data"]
 
-        
+                if serverRes["success"]:
+                    asyncio.run_coroutine_threadsafe(queue.put(serverRes["data"]), loop)
+            else:
+                asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+                return
+
         asyncio.run_coroutine_threadsafe(queue.put(None), loop)
 
     asyncio.get_running_loop().run_in_executor(None, partial(sync, queue, loop))

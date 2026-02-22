@@ -9,4 +9,7 @@ def response_serializer(obj):
 
 
 def readConfig():
-    return readJson("./shared/lib/gRPC/grpc.json")
+    response = readJson("./shared/lib/gRPC/grpc.json")
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))

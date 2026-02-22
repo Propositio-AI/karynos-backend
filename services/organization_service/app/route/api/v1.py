@@ -17,51 +17,68 @@ router = APIRouter()
 
 @router.post("/", response_model=NewOrganizationResponse)
 async def _(request: NewOrganizationRequest):
-    _, newOrganization, error = organization_crud.create(request)
+    response = organization_crud.create(request)
+    if not response["success"]:
+        raise Exception(response["message"])
 
-    return NewOrganizationResponse.model_validate(newOrganization)
+    return NewOrganizationResponse.model_validate(response["data"])
 
 @router.get("/", response_model=OrganizationListResponse)
 async def _(organization_type: OrganizationType = None):
-    _, organizations, error = organization_crud.read([
+    response = organization_crud.read([
         ["organization_type", "==", organization_type]
     ])
 
+    if not response["success"]:
+        raise Exception(response["message"])
+
     return OrganizationListResponse(
-        organizations = [OrganizationListItem.model_validate(o) for o in organizations]
+        organizations = [OrganizationListItem.model_validate(o) for o in response["data"]]
     )
 
 @router.get("/{organization_id}/name", response_model=OrganizationNameResponse)
 async def _(organization_id:int):
-    _, organizations, error = organization_crud.read([
+    response = organization_crud.read([
         ["organization_id", "==", organization_id]
     ])
 
-    return OrganizationNameResponse.model_validate(organizations[0])
+    if not response["success"] or not response["data"]:
+        raise Exception(response["message"])
+
+    return OrganizationNameResponse.model_validate(response["data"][0])
 
 @router.get("/{organization_id}", response_model=OrganizationResponse)
 async def _(organization_id: int):
-    _, organizations, error = organization_crud.read([
+    response = organization_crud.read([
         ["organization_id", "==", organization_id]
     ])
 
-    return OrganizationResponse.model_validate(organizations[0])
+    if not response["success"] or not response["data"]:
+        raise Exception(response["message"])
+
+    return OrganizationResponse.model_validate(response["data"][0])
 
 @router.put("/{organization_id}", response_model=UpdateOrganizationResponse)
 async def _(organization_id: int, request: UpdateOrganizationRequest):
-    _, updateOrganization, error = organization_crud.update(
+    response = organization_crud.update(
         [
             ["organization_id", "==", organization_id]
         ],
         request.model_dump(exclude_none=True)
     )
 
-    return UpdateOrganizationResponse.model_validate(updateOrganization[0])
+    if not response["success"] or not response["data"]:
+        raise Exception(response["message"])
+
+    return UpdateOrganizationResponse.model_validate(response["data"][0])
 
 @router.delete("/{organization_id}", response_model=OrganizationResponse)
 async def _(organization_id: int):
-    _, organizations, error = organization_crud.delete([
+    response = organization_crud.delete([
         ["organization_id", "==", organization_id]
     ])
 
-    return OrganizationResponse.model_validate(organizations[0])
+    if not response["success"] or not response["data"]:
+        raise Exception(response["message"])
+
+    return OrganizationResponse.model_validate(response["data"][0])

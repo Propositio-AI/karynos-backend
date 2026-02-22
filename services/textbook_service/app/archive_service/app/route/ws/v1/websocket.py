@@ -16,20 +16,21 @@ http_client = HTTP_APIClient()
 @WsManager.websocket("/textbook", ArchiveTableSchema)
 async def _(data: ArchiveTableSchema, manager: WebSocketManager):  
     # ペルソナの取得
-    netSuccess, netRes, netError = gRPC_Client("Persona").call("CreatePersona", {})    
-    if(not netSuccess):
+    net_response = gRPC_Client("Persona").call("CreatePersona", {})    
+    if(not net_response["success"]):
         manager.send_error(
-            netError.code,
-            netError.message
+            "",
+            "\n".join(net_response["message"])
         )
     else:
-        serverSuccess, persona, serverError = netRes
+        server_response = net_response["data"]
         
-        if(not serverSuccess):
+        if(not server_response["success"]):
             manager.send_error(
-                serverError.code,
-                serverError.message
+                "",
+                "\n".join(server_response["message"])
             )
+        persona = server_response["data"]
 
 
     # LLMで教科書を逐次生成

@@ -1,13 +1,13 @@
 from shared.lib.API.client import Client
 
 #job_serviceから職業データを取得する
-def get_job_data(job_id: str, data_url="http://job-service:8000/api/v1/job"):
+def get_job_data(job_id: str, data_url="http://job-service:8000/job/api/v1"):
     client = Client()
-    success, result, error = client.get(f"{data_url}/detail/{job_id}")
-    if success:
-        return result
-    else:
-        raise Exception(f"Job Serviceから職業データの取得に失敗しました: {error}")
+    response = client.get(f"{data_url}/detail/{job_id}")
+    if response["success"]:
+        return response["data"]
+    raise Exception(f"Job Serviceから職業データの取得に失敗しました: {', '.join(response['message'])}")
+    
 """
 実行結果
 {

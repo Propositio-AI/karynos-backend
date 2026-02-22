@@ -21,9 +21,15 @@ LLM_MODEL = os.getenv("LLM_MODEL", "local")
 PAGE_PROMPT_PATH = "./prompts/page.txt"
 PLAN_PROMPT_PATH = "./prompts/plan_prompt.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # プロンプト読み込み
-PAGE_PROMPT = readText(PAGE_PROMPT_PATH)
-PLAN_PROMPT = readText(PLAN_PROMPT_PATH)
+PAGE_PROMPT = _read_text_or_raise(PAGE_PROMPT_PATH)
+PLAN_PROMPT = _read_text_or_raise(PLAN_PROMPT_PATH)
 
 def generate_textbook(persona: str, structures: List[Element], elements: list = []):
     # 各要素を作成
@@ -36,7 +42,7 @@ def generate_textbook(persona: str, structures: List[Element], elements: list = 
 
 def generate_structure(persona: str, query: str) -> List[Element]:    
     # ページの構成を推論
-    netSuccess, netResponse, netError = gRPC_Client("LLM").call("StructInvoke", {
+    net_response = gRPC_Client("LLM").call("StructInvoke", {
         "input": createPromptTemplate(
             PAGE_PROMPT.format(schema = model_to_prompt_structure(Page)),
             f"# テーマ: 「{query}」\n\n # 生徒情報\n {persona}"
@@ -44,13 +50,14 @@ def generate_structure(persona: str, query: str) -> List[Element]:
         "json_schema": Page.model_json_schema(),
         "llm_model": "openai"
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            page = Page(**serverRes)
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            page = Page(**server_response["data"])
+        else:
+            raise RuntimeError("\n".join(server_response["message"]))
+    else:
+        raise RuntimeError("\n".join(net_response["message"]))
 
 
     structures = page.page
@@ -75,23 +82,24 @@ def generate_element(persona: str, element: Element, textbook: List):
                 theme = "構成要素と構成要素のつなぎ"
             case "Summary":
                 theme = "まとめ"
-        netSuccess, netResponse, netError = generate_text(
+        text_response = generate_text(
             theme = theme,
             persona = persona,
             title = element.title,
             message = element.message,
             textbook = textbook
         )
-        if netSuccess:
-            serverSuccess, serverRes, serverError = netResponse
-            
-            if serverSuccess:
+        if text_response["success"]:
+            server_response = text_response["data"]
+            if server_response["success"]:
                 parts = ElementParts(
                     type = element.element,
-                    **serverRes
+                    **server_response["data"]
                 )
-            
-        else: raise netError
+            else:
+                raise RuntimeError("\n".join(server_response["message"]))
+        else:
+            raise RuntimeError("\n".join(text_response["message"]))
 
     elif element.element == "Section":
         parts = ElementParts(
@@ -101,19 +109,20 @@ def generate_element(persona: str, element: Element, textbook: List):
 
     elif element.element == "Exercise":
 
-        netSuccess, netResponse, netError = generate_exercise(
+        exercise_response = generate_exercise(
             persona = persona,
             title = element.title,
             message = element.message,
             textbook = textbook
         )
-        if netSuccess:
-            serverSuccess, serverRes, serverError = netResponse
-
-            if serverSuccess:
-                parts = ExerciseRootParts(exercises=serverRes)
-            
-        else: raise netError
+        if exercise_response["success"]:
+            server_response = exercise_response["data"]
+            if server_response["success"]:
+                parts = ExerciseRootParts(exercises=server_response["data"])
+            else:
+                raise RuntimeError("\n".join(server_response["message"]))
+        else:
+            raise RuntimeError("\n".join(exercise_response["message"]))
 
 
     print(parts, flush=True)
@@ -129,14 +138,15 @@ def generate_plan(persona: str, query: str):
     )
 
 
-    for netSuccess, netRes, netError in llm_client.call_server_stream("GeneralInvoke", {
+    for net_res in llm_client.call_server_stream("GeneralInvoke", {
         "input": inputs,
         "llm_model": LLM_MODEL
     }):
-        if netSuccess:
-            serverSuccess, serverResponse, serverError = netRes
-            
-            if serverSuccess:
-                yield serverResponse
-        
-        else: raise netError
+        if net_res["success"]:
+            server_response = net_res["data"]
+            if server_response["success"]:
+                yield server_response["data"]
+            else:
+                raise RuntimeError("\n".join(server_response["message"]))
+        else:
+            raise RuntimeError("\n".join(net_res["message"]))

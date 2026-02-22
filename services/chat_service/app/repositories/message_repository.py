@@ -2,15 +2,14 @@ from shared.lib.crud import CRUD
 
 # DBから過去の会話履歴を取得する
 def get_messages_db(conversation_id: str, crud: CRUD):
-    success, result, error = crud.read(
+    response = crud.read(
         [
             ["conversation_id", "==", conversation_id]
         ]
     )
-    if success:
-        return result
-    else:
-        raise Exception(f"会話履歴の取得に失敗しました: {error}")
+    if response["success"]:
+        return response["data"]
+    raise Exception(f"会話履歴の取得に失敗しました: {', '.join(response['message'])}")
     
 """
 実行結果

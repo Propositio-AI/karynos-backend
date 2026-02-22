@@ -1,61 +1,65 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from crud.Memo import memo_crud
 from models.MemoTable import MemoTableSchema
+from shared.lib.auth import get_current_user_id_str
 
 # /api/v1/memo
 router = APIRouter()
 
 @router.get("/{archive_id}", response_model=list[MemoTableSchema])
-async def getMemo(archive_id: str):
-    # TODO: ユーザーIDの取得処理
-    user_id = ""
+async def getMemo(
+    archive_id: str,
+    user_id: str = Depends(get_current_user_id_str)
+):
+    # 認証されたユーザーIDを使用
 
-    success, memos, error = memo_crud.read([
-        ["archive_id", "==", archive_id]
+    response = memo_crud.read([
+        ["archive_id", "==", archive_id],
         ["user_id", "==", user_id]
     ])
 
-    if not success:
-        HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        HTTPException(status_code=500, detail=response["message"])
     
-    return memos
+    return response["data"]
 
 
 @router.post("/", response_model=MemoTableSchema)
-async def newMemo(data: MemoTableSchema):
-    # TODO: ユーザーIDの取得処理
-    user_id = ""
+async def newMemo(
+    data: MemoTableSchema,
+    user_id: str = Depends(get_current_user_id_str)
+):
+    # 認証されたユーザーIDを使用
+    data.user_id = user_id
+    response = memo_crud.create(data)
 
-    new_memo.user_id = user_id
-    success, new_memo, error = memo_crud.create(data)
-
-    if not success:
-        HTTPException(status_code=500, detail=error)
-    return new_memo
+    if not response["success"]:
+        HTTPException(status_code=500, detail=response["message"])
+    return response["data"]
 
 @router.put("/{memo_id}", response_model=list[MemoTableSchema])
 async def newUser(memo_id: str, data: MemoTableSchema):
-    success, updated_memos, error = memo_crud.update(
+    response = memo_crud.update(
         [
             ["id", "==", memo_id]
         ],
         data
     )
 
-    if not success:
-        HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        HTTPException(status_code=500, detail=response["message"])
 
-    return updated_memos
+    return response["data"]
 
 @router.delete("/{memo_id}", response_model=list[MemoTableSchema])
 async def newUser(memo_id: str):
-    success, deleted_memos, error = memo_crud.delete([
+    response = memo_crud.delete([
         ["id", "==", memo_id]
     ])
 
-    if not success:
-        HTTPException(status_code=500, detail=error)
+    if not response["success"]:
+        HTTPException(status_code=500, detail=response["message"])
     
-    return deleted_memos
+    return response["data"]
     
 

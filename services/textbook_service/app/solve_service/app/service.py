@@ -16,11 +16,17 @@ CODE_PROMPT_PATH = "./prompts/code_prompt.txt"
 EXPLANATION_PROMPT_PATH = "./prompts/explaination_prompt.txt"
 STYLE_PROMPT_PATH = "./shared/prompts/style_prompt.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # プロンプトの読み込み
-POINT_PROMPT = readText(POINT_PROMPT_PATH)
-CODE_PROMPT = readText(CODE_PROMPT_PATH)
-EXPLANATION_PROMPT = readText(EXPLANATION_PROMPT_PATH)
-STYLE_PROMPT = readText(STYLE_PROMPT_PATH)
+POINT_PROMPT = _read_text_or_raise(POINT_PROMPT_PATH)
+CODE_PROMPT = _read_text_or_raise(CODE_PROMPT_PATH)
+EXPLANATION_PROMPT = _read_text_or_raise(EXPLANATION_PROMPT_PATH)
+STYLE_PROMPT = _read_text_or_raise(STYLE_PROMPT_PATH)
 
 class PointSchema(BaseModel):
     variables: List[str] = Field(..., description="変数とその説明")
@@ -42,35 +48,33 @@ def create_point(question: str) -> PointSchema:
     )
 
     # 生成
-    netSuccess, netResponse, netError = llm_client.call("StructInvoke", {
+    net_response = llm_client.call("StructInvoke", {
         "input": inputs,
         "json_schema": PointSchema.model_json_schema(),
         "llm_model": LLM_MODEL
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return PointSchema(**serverRes)
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return PointSchema(**server_response["data"])
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
 
 
 def generate_code(question: str, point: PointSchema) -> str:
     # gRPCクラインアントの定義
     code_client = gRPC_Client("Code")
 
-    netSuccess, netResponse, netError = code_client.call("GenExecCode", {
+    net_response = code_client.call("GenExecCode", {
         "request": CODE_PROMPT,
         "query": f"Question:{question}\n\nPoint:\n{json.dumps(point.model_dump())}",
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return serverRes
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return server_response["data"]
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
 
 def generate_explanation(question: str, code_result: str, point: PointSchema):
     # クライアントの定義
@@ -82,18 +86,17 @@ def generate_explanation(question: str, code_result: str, point: PointSchema):
     )
 
     # 生成
-    netSuccess, netResponse, netError = llm_client.call("StructInvoke", {
+    net_response = llm_client.call("StructInvoke", {
         "input": inputs,
         "json_schema": AnswerSchema.model_json_schema(),
         "llm_model": LLM_MODEL
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return AnswerSchema(**serverRes)
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return AnswerSchema(**server_response["data"])
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
     
 def solve_question(question:str):
     # 問題構造化

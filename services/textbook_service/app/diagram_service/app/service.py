@@ -15,9 +15,15 @@ LLM_MODEL = os.getenv("LLM_MODEL", "local")
 OUTLINE_PROMPT_PATH = "./prompts/outline_prompt.txt"
 POINT_PROMPT_PATH = "./prompts/point_prompt.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # プロンプトの読み込み
-OUTLINE_PROMPT = readText(OUTLINE_PROMPT_PATH)
-POINT_PROMPT = readText(POINT_PROMPT_PATH)
+OUTLINE_PROMPT = _read_text_or_raise(OUTLINE_PROMPT_PATH)
+POINT_PROMPT = _read_text_or_raise(POINT_PROMPT_PATH)
 
 # 図表概要の生成
 def generate_outlint(persona: str, message: str) -> OutlineSchema:
@@ -30,18 +36,17 @@ def generate_outlint(persona: str, message: str) -> OutlineSchema:
     )
 
     # 問題の生成
-    netSuccess, netResponse, netError = llm_client.call("StructInvoke", {
+    net_response = llm_client.call("StructInvoke", {
         "input": inputs,
         "json_schema": OutlineSchema.model_json_schema(),
         "llm_model": LLM_MODEL
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return OutlineSchema(**serverRes)
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return OutlineSchema(**server_response["data"])
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
     
 
 # 図表設計の生成
@@ -55,18 +60,17 @@ def generate_point(outline: OutlineSchema) -> PointSchema:
     )
 
     # 問題の生成
-    netSuccess, netResponse, netError = llm_client.call("StructInvoke", {
+    net_response = llm_client.call("StructInvoke", {
         "input": inputs,
         "json_schema": PointSchema.model_json_schema(),
         "llm_model": LLM_MODEL
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return PointSchema(**serverRes)
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return PointSchema(**server_response["data"])
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
     
 
 def generate_vision(persona: str, message: str) -> dict:

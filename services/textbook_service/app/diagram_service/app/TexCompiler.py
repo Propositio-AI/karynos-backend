@@ -23,9 +23,15 @@ IMG_SAVE_FOLDER = "./temp_img/"
 TEX_HEADER_PATH = "./tex_template/header.txt"
 TEX_FOOTER_PATH = "./tex_template/footer.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # 読み込み
-TEX_HEADER = readText(TEX_HEADER_PATH)
-TEX_FOOTER = readText(TEX_FOOTER_PATH)
+TEX_HEADER = _read_text_or_raise(TEX_HEADER_PATH)
+TEX_FOOTER = _read_text_or_raise(TEX_FOOTER_PATH)
 
 class Compiler:           
     def add_deg(self, expr: str) -> str:

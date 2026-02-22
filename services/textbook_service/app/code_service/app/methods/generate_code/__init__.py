@@ -10,9 +10,15 @@ LLM_MODEL = os.getenv("LLM_MODEL", "local")
 CODE_PROMPT_PATH = "./methods/generate_code/prompts/code_prompt.txt"
 USER_TEMPLATE_PATH = "./methods/generate_code/prompts/user_template.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # プロンプトの読み込み
-CODE_PROMPT = readText(CODE_PROMPT_PATH)
-USER_TEMPLATE = readText(USER_TEMPLATE_PATH)
+CODE_PROMPT = _read_text_or_raise(CODE_PROMPT_PATH)
+USER_TEMPLATE = _read_text_or_raise(USER_TEMPLATE_PATH)
 
 class CodeSchema(BaseModel):
     code: str = Field(..., description="ソースコード")
@@ -30,15 +36,17 @@ def generate_code(request: str, query: str, code:str = "", error: str = "") -> s
 
     code = ""
 
-    for netSuccess, netResponse, netError in llm_client.call_server_stream("GeneralInvoke", {
+    for net_response in llm_client.call_server_stream("GeneralInvoke", {
         "input": inputs,
         "llm_model": LLM_MODEL
     }):
-        if netSuccess:
-            serverSuccess, serverRes, serverError = netResponse
-            
-            if serverSuccess:
-                code += serverRes
-        else: raise netError
+        if net_response["success"]:
+            server_response = net_response["data"]
+            if server_response["success"]:
+                code += server_response["data"]
+            else:
+                raise RuntimeError("\n".join(server_response["message"]))
+        else:
+            raise RuntimeError("\n".join(net_response["message"]))
 
     return code

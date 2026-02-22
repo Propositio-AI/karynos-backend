@@ -1,0 +1,9 @@
+# job_service - Job Recommendation Service
+# Additional libraries (beyond shared/requirements.txt)
+
+# Vector Search & AI
+chromadb
+sentence-transformers
+openai
+
+

@@ -80,3 +80,50 @@ class JobDetailResponse(BaseModel):
     interests: List[Interest] = Field(..., description="関連興味リスト")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ViewingHistoryItem(BaseModel):
+    """閲覧履歴の単一アイテム"""
+    history_id: UUID = Field(..., description="histories.history_id")
+    job_id: int = Field(..., description="jobs.job_id")
+    job_name: str = Field(..., description="jobs.name")
+    job_imgs: List[str] = Field(..., description="職業の画像リスト")
+    good: bool = Field(..., description="いいねフラグ")
+    bad: bool = Field(..., description="バッドフラグ")
+    save: bool = Field(..., description="保存フラグ")
+    created_at: str = Field(..., description="閲覧日時（ISO 8601形式）")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ViewingHistoryResponse(BaseModel):
+    """閲覧履歴一覧レスポンス"""
+    total_count: int = Field(..., description="総閲覧数")
+    items: List[ViewingHistoryItem] = Field(..., description="閲覧履歴アイテムリスト")
+    created_at: str = Field(..., description="レスポンス生成時刻（ISO 8601形式）")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class JobSearchResult(BaseModel):
+    """職業検索結果の単一アイテム"""
+    job_id: int = Field(..., description="jobs.job_id")
+    name: str = Field(..., description="jobs.name")
+    description: str = Field(..., description="jobs.description")
+    imgs: List[str] = Field(..., description="職業の画像リスト")
+    personality_traits: str = Field(..., description="求められる性格特性")
+    appeal_points: str = Field(..., description="アピールポイント")
+    growth_opportunities: str = Field(..., description="成長機会")
+    similarity_score: float = Field(..., description="検索クエリとの類似度スコア（0-100）")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class JobSearchResponse(BaseModel):
+    """職業検索レスポンス"""
+    query: str = Field(..., description="検索クエリ")
+    total_count: int = Field(..., description="マッチした職業数")
+    items: List[JobSearchResult] = Field(..., description="職業検索結果リスト")
+    created_at: str = Field(..., description="レスポンス生成時刻（ISO 8601形式）")
+
+    model_config = ConfigDict(from_attributes=True)

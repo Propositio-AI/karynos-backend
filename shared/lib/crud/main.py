@@ -60,12 +60,12 @@ class CRUD:
         --------
             >>> @router.post("/", response_model=ArchiveTableSchema)
             >>> async def _(data: ArchiveTableSchema):
-            >>>    success, result, error = archive_crud.create(data)
+            >>>    response = archive_crud.create(data)
 
-            >>>    if not success:
-            >>>        return HTTPException(status_code=500, detail=error)
+            >>>    if not response["success"]:
+            >>>        return HTTPException(status_code=500, detail=response["message"])
     
-            >>>    return result
+            >>>    return response["data"]
         
         """
 
@@ -97,7 +97,7 @@ class CRUD:
 
         Examples
         --------
-            >>> success, valid_tokens, error = auth_crud.read([
+            >>> response = auth_crud.read([
             >>>    ["token", "==", token],
             >>>    ["expires_at", ">=", get_utc_time()],
             >>>    ["used_at", "==", None]
@@ -144,7 +144,7 @@ class CRUD:
 
         Examples
         --------
-            >>> success, new_archive, error = archive_crud.update(
+            >>> response = archive_crud.update(
             >>>    [
             >>>        ["id", "==", data.id]
             >>>    ],
@@ -197,7 +197,7 @@ class CRUD:
 
         Examples
         ---------
-            >>> success, deleted_memos, error = memo_crud.delete([
+            >>> response = memo_crud.delete([
             >>>    ["id", "==", memo_id]
             >>> ])
         

@@ -37,6 +37,20 @@ class BasicError(Exception):
 
         super().__init__(f"[{self.code}] {self.message}")
 
+def _success_response(data):
+    return {
+        "success": True,
+        "message": [],
+        "data": data
+    }
+
+def _error_response(err: Exception):
+    return {
+        "success": False,
+        "message": [str(err)],
+        "data": None
+    }
+
 def errorWrapper(key: ErrorKey, service_prefix = os.getenv("ERROR_PREFIX", "")):
     """
     
@@ -62,20 +76,14 @@ def errorWrapper(key: ErrorKey, service_prefix = os.getenv("ERROR_PREFIX", "")):
             try:
                 result = func(*args, **kwargs)
 
-                return True, result, None
+                return _success_response(result)
             except BasicError as e:
                 print(e, flush=True)
-                return (
-                    False,
-                    None,
-                    e
-                )
+                return _error_response(e)
             except Exception as e:
                 print(e, flush=True)
 
-                return  (
-                    False,
-                    None,
+                return _error_response(
                     BasicError(
                         key,
                         code if service_prefix == "" else f"{service_prefix}-{code}",
@@ -109,23 +117,19 @@ def streamErrorWrapper(key: ErrorKey, service_prefix = os.getenv("ERROR_PREFIX",
 
             try:
                 for res in func(*args, **kwargs):
-                    yield True, res, None
+                    yield _success_response(res)
             except BasicError as e:
-                return (
-                    False,
-                    None,
-                    e
-                )
+                yield _error_response(e)
+                return
             except Exception as e:
-                return  (
-                    False,
-                    None,
+                yield _error_response(
                     BasicError(
                         key,
                         code if service_prefix == "" else f"{service_prefix}-{code}",
                         f"({message})\n{e}"
                     )
                 )
+                return
             
         return wrapper
     return decorator

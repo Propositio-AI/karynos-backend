@@ -16,10 +16,16 @@ ELEMENT_PROMPT_PATH = "./element/prompts/element_prompt.txt"#elementなしかも
 STYLE_PROMPT_PATH = "./shared/prompts/style_prompt.txt"
 USER_TEMPLATE_PATH = "./shared/prompts/section_user_template.txt"
 
+def _read_text_or_raise(path: str) -> str:
+    response = readText(path)
+    if response["success"]:
+        return response["data"]
+    raise RuntimeError("\n".join(response["message"]))
+
 # プロンプトの読み込み
-ELEMENT_PROMPT = readText(ELEMENT_PROMPT_PATH)
-STYLE_PROMPT = readText(STYLE_PROMPT_PATH)
-USER_TEMPLATE = readText(USER_TEMPLATE_PATH)
+ELEMENT_PROMPT = _read_text_or_raise(ELEMENT_PROMPT_PATH)
+STYLE_PROMPT = _read_text_or_raise(STYLE_PROMPT_PATH)
+USER_TEMPLATE = _read_text_or_raise(USER_TEMPLATE_PATH)
 
 @errorWrapper("Unclassified system exception")
 def generate_text(theme: str, persona: str, title: str, message: str, textbook: str) -> dict:
@@ -32,35 +38,33 @@ def generate_text(theme: str, persona: str, title: str, message: str, textbook: 
     )
 
     # 生成
-    netSuccess, netResponse, netError = llm_client.call("StructInvoke", {
+    net_response = llm_client.call("StructInvoke", {
         "input": inputs,
         "json_schema": BaseElementGenerateSchema.model_json_schema(),
         "llm_model": LLM_MODEL
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return serverRes
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return server_response["data"]
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
 
 def generate_fig(persona: str, message: List[str]) -> dict:
     # gRPCクライアント定義
     vision_client = gRPC_Client("Vision")
 
     # 図表の生成
-    netSuccess, netResponse, netError = vision_client.call("GenerateVision", {
+    net_response = vision_client.call("GenerateVision", {
         "persona": persona,
         "message": message,
     })
-    if netSuccess:
-        serverSuccess, serverRes, serverError = netResponse
-        
-        if serverSuccess:
-            return serverRes["urls"]
-        
-    else: raise netError
+    if net_response["success"]:
+        server_response = net_response["data"]
+        if server_response["success"]:
+            return server_response["data"]["urls"]
+        raise RuntimeError("\n".join(server_response["message"]))
+    raise RuntimeError("\n".join(net_response["message"]))
 
 def generate_element(theme:str, persona:str, title: str, message: str, textbook: str) -> dict:
     # 定義の文章生成
