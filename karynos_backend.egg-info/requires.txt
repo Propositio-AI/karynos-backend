@@ -1,0 +1,17 @@
+chromadb
+fastapi
+grpcio
+grpcio-tools
+openai
+prisma
+psycopg2-binary
+pydantic-settings
+python-dateutil
+python-dotenv
+python-multipart
+requests
+sentence-transformers
+sqlalchemy
+uuid6
+uvicorn
+websockets

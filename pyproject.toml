@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "karynos-backend"
+version = "0.1.0"
+description = "Unified backend application migrated from service-based structure"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "chromadb",
+  "fastapi",
+  "grpcio",
+  "grpcio-tools",
+  "openai",
+  "prisma",
+  "psycopg2-binary",
+  "pydantic-settings",
+  "python-dateutil",
+  "python-dotenv",
+  "python-multipart",
+  "requests",
+  "sentence-transformers",
+  "sqlalchemy",
+  "uuid6",
+  "uvicorn",
+  "websockets",
+]
+
+[tool.uv]
+package = false
+
+[tool.setuptools.packages.find]
+include = ["app*", "backend*", "algorithm*"]

@@ -1,12 +1,2 @@
 db-data/
 __pycache__/
-
-.chat_env
-.dreamer_env
-.job_env
-.mentor_env
-.notification_env
-.textbook_env
-.user_env
-.organization_env
-.env

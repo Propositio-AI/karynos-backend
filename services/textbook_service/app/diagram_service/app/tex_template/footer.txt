@@ -1,4 +1,0 @@
-\end{tikzpicture}
-\end{center}
-
-\end{document}

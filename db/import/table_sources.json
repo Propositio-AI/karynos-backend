@@ -1,0 +1,119 @@
+{
+  "tables": [
+    {
+      "table": "industries",
+      "url": "https://drive.google.com/file/d/1EUQOy-SXi9lONGuJoc0_Co6RWBhexhVY/view?usp=drive_link",
+      "truncate": false
+    },
+    {
+      "table": "job_categories",
+      "url": "https://drive.google.com/file/d/1afllfI-WhQoHFZp1igTTPoK8p9Ow2mbm/view?usp=drive_link",
+      "truncate": false
+    },
+    {
+      "table": "skills",
+      "url": "https://drive.google.com/file/d/104FQGYVl2fnHzWYi8vMYo9z8Uoz74im1/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "certifications",
+      "url": "https://drive.google.com/file/d/1xZFNTCxWOSFwNfvr4QQD2p1mswowOxVu/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "companies",
+      "url": "https://drive.google.com/file/d/1SupbZRkryQ5ipPeMn66xIaprt_I4MMFA/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "talents",
+      "url": "https://drive.google.com/file/d/1Dto8dxvpG2fXstJScfips-MsLcmmq5vq/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "interests",
+      "url": "https://drive.google.com/file/d/1ExA45p4tWKUD5Okqr4-WZ4EDnX5pD1ho/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "jobs",
+      "url": "https://drive.google.com/file/d/1ZwalmFT_eK2ZcSFt0bmdsHZte0rDDxBM/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "job_feedbacks",
+      "url": "https://drive.google.com/file/d/14dePspzPx7zWWEXj6SD2XsB8I-gWbXdG/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "feedback_skill",
+      "url": "https://drive.google.com/file/d/15Wzl5tly-fORy17CFYQv6hptLo5yQysq/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "feedback_certification",
+      "url": "https://drive.google.com/file/d/1BbL3THG1yLy_lj7zKSz3CNYWq4vnJXya/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "feedback_company",
+      "url": "https://drive.google.com/file/d/1f4NvJQPnlDBqJdUQcM55R513pTEHGz9j/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "feedback_talent",
+      "url": "https://drive.google.com/file/d/1Rx9TVxaIeuBW8ClmFojTWaNYPykjc5bO/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "feedback_interest",
+      "url": "https://drive.google.com/file/d/1hpWu1NqRPxL6p2kaC4TXYWDf-5b-CwDM/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "dreamers",
+      "url": "https://drive.google.com/file/d/1uOkpLX0DXF15fph_UCI7jnHprxLGADqE/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "dreamer_groups",
+      "url": "https://drive.google.com/file/d/1BNYXmtlzDnAjB4oQVb3BC1ts-wr-Ei1-/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "dreamer_group_members",
+      "url": "https://drive.google.com/file/d/10ZIFvlbWrWzbUpVA87cHnMS1fDwdvtc2/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "init_questions",
+      "url": "https://drive.google.com/file/d/1vfGZ06qPGzr66cz_AG3nsrWcDsn9b_zK/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "init_question_options",
+      "url": "https://drive.google.com/file/d/12OpLMDIjJENOlZZmwQFNP0irSjgb_z1t/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "user_initial_answers",
+      "url": "https://drive.google.com/file/d/1hmL7evNow3s67-ghfL_EW1pZSZayJuJF/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "conversations",
+      "url": "https://drive.google.com/file/d/1-uxmeIdP-R9bXpLavmu286foUNExbvQG/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "messages",
+      "url": "https://drive.google.com/file/d/1SP5KGqHbNOHkUpgXB6sMjM4qzx5AuU5m/view?usp=sharing",
+      "truncate": false
+    },
+    {
+      "table": "conversation_participants",
+      "url": "https://drive.google.com/file/d/1tTAwvfjbnOXLUDuylBuH4lxxumaVyHYk/view?usp=sharing",
+      "truncate": false
+    }
+  ]
+}

@@ -1,206 +1,82 @@
 services:
-  # Job Service
-  job-db:
-    container_name: "${JOB_DB_SERVER_NAME}" 
+  karynos-db:
+    container_name: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
     image: postgres:17.5
+    restart: unless-stopped
     networks:
       - karynos-network
-    env_file:
-      - ../../services/job_service/.job_env
+    environment:
+      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
+      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
+      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${KARYNOS_DB_USER:-karynos} -d ${KARYNOS_DB_NAME:-karynos}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
-      - ../../services/job_service/db/:/docker-entrypoint-initdb.d/
-      - ../../services/job_service/db-data:/var/lib/postgresql/data
+      - ../../db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ../../db-data/postgres:/var/lib/postgresql/data
 
-  job-service:
-    container_name: "job-service"
-    build:
-      context: ../../services/job_service
-    # ports:
-    #   - "${JOB_SERVICE_HOST_PORT}:${JOB_SERVICE_DOCKER_PORT}"
+  db-csv-import:
+    image: karynos/be-python-base:latest
+    container_name: db-csv-import
+    restart: "no"
     networks:
       - karynos-network
     depends_on:
-      - job-db
-    env_file:
-      - ../../services/job_service/.job_env
+      karynos-db:
+        condition: service_healthy
     environment:
-      - "POSTGRES_SERVER=${JOB_DB_SERVER_NAME}"
+      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
+      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
+      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
+      POSTGRES_SERVER: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
+      POSTGRES_PORT: "${KARYNOS_DB_PORT:-5432}"
+      CSV_IMPORT_CONFIG_JSON: "/opt/db_import/table_sources.json"
+      CSV_IMPORT_SKIP_IF_TABLE_HAS_DATA: "true"
     volumes:
-      - ../../services/job_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${JOB_SERVICE_DOCKER_PORT}", "--reload"]
+      - ../../db/import:/opt/db_import:ro
+    command: ["python", "/opt/db_import/import_from_gdrive.py"]
 
-  # Mentor Service
-  mentor-db:
-    container_name: "${MENTOR_DB_SERVER_NAME}" 
-    image: postgres:17.5
-    networks:
-      - karynos-network
-    env_file:
-      - ../../services/mentor_service/.mentor_env
-    volumes:
-      - ../../services/mentor_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ../../services/mentor_service/db-data:/var/lib/postgresql/data
-
-  mentor-service:
-    container_name: "mentor-service"
+  backend-app:
+    container_name: backend-app
     build:
-      context: ../../services/mentor_service
-    # ports:
-    #   - "${MENTOR_SERVICE_HOST_PORT}:${MENTOR_SERVICE_DOCKER_PORT}"
+      context: ../..
+      dockerfile: Dockerfile
+    restart: unless-stopped
     networks:
       - karynos-network
     depends_on:
-      - mentor-db
+      karynos-db:
+        condition: service_healthy
+      db-csv-import:
+        condition: service_completed_successfully
     env_file:
-      - ../../services/mentor_service/.mentor_env
+      - ../../.env.local
     environment:
-      - "POSTGRES_SERVER=${MENTOR_DB_SERVER_NAME}"
-    volumes:
-      - ../../services/mentor_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${MENTOR_SERVICE_DOCKER_PORT}", "--reload"]
-
-  # Dreamer Service
-  dreamer-db:
-    container_name: "${DREAMER_DB_SERVER_NAME}" 
-    image: postgres:17.5
-    networks:
-      - karynos-network
-    env_file:
-      - ../../services/dreamer_service/.dreamer_env
-    volumes:
-      - ../../services/dreamer_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ../../services/dreamer_service/db-data:/var/lib/postgresql/data
-
-  dreamer-service:
-    container_name: "dreamer-service"
-    build:
-      context: ../../services/dreamer_service
-    # ports:
-    #   - "${DREAMER_SERVICE_HOST_PORT}:${DREAMER_SERVICE_DOCKER_PORT}"
-    networks:
-      - karynos-network
-    depends_on:
-      - dreamer-db
-    env_file:
-      - ../../services/dreamer_service/.dreamer_env
-    environment:
-      - "POSTGRES_SERVER=${DREAMER_DB_SERVER_NAME}"
-    volumes:
-      - ../../services/dreamer_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${DREAMER_SERVICE_DOCKER_PORT}", "--reload"]
-
-  # Textbook Service
-  # textbook-db:
-  #   container_name: "${TEXTBOOK_DB_SERVER_NAME}" 
-  #   image: postgres:17.5
-  #   networks:
-  #     - karynos-network
-  #   env_file:
-  #     - ../../services/textbook_service/.textbook_env
-  #   volumes:
-  #     - ../../services/textbook_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  #     - ../../services/textbook_service/db-data:/var/lib/postgresql/data
-
-  # textbook-service:
-  #   container_name: "textbook-service"
-  #   build:
-  #     context: ../../services/textbook_service
-  #   ports:
-  #     - "${TEXTBOOK_SERVICE_HOST_PORT}:${TEXTBOOK_SERVICE_DOCKER_PORT}"
-  #   networks:
-  #     - karynos-network
-  #   depends_on:
-  #     - textbook-db
-  #   env_file:
-  #     - ../../services/textbook_service/.textbook_env
-  #   environment:
-  #     - "POSTGRES_SERVER=${TEXTBOOK_DB_SERVER_NAME}"
-  #   volumes:
-  #     - ../../services/textbook_service/app:/app
-  #     - ../../shared:/app/shared
-  #   command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${TEXTBOOK_SERVICE_DOCKER_PORT}", "--reload"]
-
-  # Chat Service
-  chat-db:
-    container_name: "${CHAT_DB_SERVER_NAME}" 
-    image: postgres:17.5
-    networks:
-      - karynos-network
-    env_file:
-      - ../../services/chat_service/.chat_env
-    volumes:
-      - ../../services/chat_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ../../services/chat_service/db-data:/var/lib/postgresql/data
-
-  chat-service:
-    container_name: "chat-service"
-    build:
-      context: ../../services/chat_service
-    # ports:
-    #   - "${CHAT_SERVICE_HOST_PORT}:${CHAT_SERVICE_DOCKER_PORT}"
-    networks:
-      - karynos-network
-    depends_on:
-      - chat-db
-    env_file:
-      - ../../services/chat_service/.chat_env
-    environment:
-      - "POSTGRES_SERVER=${CHAT_DB_SERVER_NAME}"
-    volumes:
-      - ../../services/chat_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${CHAT_SERVICE_DOCKER_PORT}", "--reload"]
-
-  # Organization Service
-  organization-db:
-    container_name: "${ORGANIZATION_DB_SERVER_NAME}" 
-    image: postgres:17.5
-    networks:
-      - karynos-network
-    env_file:
-      - ../../services/organization_service/.organization_env
-    volumes:
-      - ../../services/organization_service/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ../../services/organization_service/db-data:/var/lib/postgresql/data
-
-  organization-service:
-    container_name: "organization-service"
-    build:
-      context: ../../services/organization_service
-    # ports:
-    #   - "${ORGANIZATION_SERVICE_HOST_PORT}:${ORGANIZATION_SERVICE_DOCKER_PORT}"
-    networks:
-      - karynos-network
-    depends_on:
-      - organization-db
-    env_file:
-      - ../../services/organization_service/.organization_env
-    environment:
-      - "POSTGRES_SERVER=${ORGANIZATION_DB_SERVER_NAME}"
-    volumes:
-      - ../../services/organization_service/app:/app
-      - ../../shared:/app/shared
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${ORGANIZATION_SERVICE_DOCKER_PORT}", "--reload"]
-
-  api-gateway:
-    image: nginx:alpine
-    container_name: api-gateway
+      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
+      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
+      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
+      POSTGRES_SERVER: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
+      POSTGRES_PORT: "${KARYNOS_DB_PORT:-5432}"
+      DATABASE_URL: "postgresql://${KARYNOS_DB_USER:-karynos}:${KARYNOS_DB_PASSWORD:-karynos}@${KARYNOS_DB_SERVER_NAME:-karynos-db}:${KARYNOS_DB_PORT:-5432}/${KARYNOS_DB_NAME:-karynos}"
+      CHROMA_PERSIST_DIRECTORY: "/app/ChromaDB"
+      CHROMA_JOB_COLLECTION: "job_vector_db"
     ports:
-      - "8080:80"
+      - "8000:8000"
     volumes:
-      - ../../nginx/dev.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - job-service
-      - mentor-service
-      - dreamer-service
-      - chat-service
-      - organization-service
-    networks:
-      - karynos-network
+      - ../..:/app
+      - prisma-cache:/var/cache/karynos
+    command: ["sh", "/app/scripts/start-backend-dev.sh"]
 
 networks:
   karynos-network:
     driver: bridge
+
+volumes:
+  prisma-cache:
