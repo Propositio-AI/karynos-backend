@@ -1,19 +1,19 @@
 services:
   karynos-db:
-    container_name: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
+    container_name: "${POSTGRES_SERVER:-karynos-db}"
     image: postgres:17.5
     restart: unless-stopped
     networks:
       - karynos-network
     environment:
-      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
-      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
-      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
+      POSTGRES_USER: "${POSTGRES_USER:-karynos}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-karynos}"
+      POSTGRES_DB: "${POSTGRES_DB:-karynos}"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${KARYNOS_DB_USER:-karynos} -d ${KARYNOS_DB_NAME:-karynos}",
+          "pg_isready -U ${POSTGRES_USER:-karynos} -d ${POSTGRES_DB:-karynos}",
         ]
       interval: 5s
       timeout: 5s
@@ -22,56 +22,41 @@ services:
       - ../../db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - ../../db-data/postgres:/var/lib/postgresql/data
 
-  db-csv-import:
-    image: karynos/be-python-base:latest
-    container_name: db-csv-import
-    restart: "no"
+  qdrant:
+    container_name: karynos-qdrant
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
     networks:
       - karynos-network
-    depends_on:
-      karynos-db:
-        condition: service_healthy
-    environment:
-      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
-      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
-      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
-      POSTGRES_SERVER: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
-      POSTGRES_PORT: "${KARYNOS_DB_PORT:-5432}"
-      CSV_IMPORT_CONFIG_JSON: "/opt/db_import/table_sources.json"
-      CSV_IMPORT_SKIP_IF_TABLE_HAS_DATA: "true"
+    ports:
+      - "6333:6333"
     volumes:
-      - ../../db/import:/opt/db_import:ro
-    command: ["python", "/opt/db_import/import_from_gdrive.py"]
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333' 2>/dev/null"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
 
   backend-app:
     container_name: backend-app
-    build:
-      context: ../..
-      dockerfile: Dockerfile
+    image: karynos/be-python-base:latest
     restart: unless-stopped
     networks:
       - karynos-network
     depends_on:
       karynos-db:
         condition: service_healthy
-      db-csv-import:
-        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
     env_file:
       - ../../.env.local
-    environment:
-      POSTGRES_USER: "${KARYNOS_DB_USER:-karynos}"
-      POSTGRES_PASSWORD: "${KARYNOS_DB_PASSWORD:-karynos}"
-      POSTGRES_DB: "${KARYNOS_DB_NAME:-karynos}"
-      POSTGRES_SERVER: "${KARYNOS_DB_SERVER_NAME:-karynos-db}"
-      POSTGRES_PORT: "${KARYNOS_DB_PORT:-5432}"
-      DATABASE_URL: "postgresql://${KARYNOS_DB_USER:-karynos}:${KARYNOS_DB_PASSWORD:-karynos}@${KARYNOS_DB_SERVER_NAME:-karynos-db}:${KARYNOS_DB_PORT:-5432}/${KARYNOS_DB_NAME:-karynos}"
-      CHROMA_PERSIST_DIRECTORY: "/app/ChromaDB"
-      CHROMA_JOB_COLLECTION: "job_vector_db"
     ports:
       - "8000:8000"
     volumes:
       - ../..:/app
-      - prisma-cache:/var/cache/karynos
+      - prisma-binary:/root/.cache/prisma-python
     command: ["sh", "/app/scripts/start-backend-dev.sh"]
 
 networks:
@@ -79,4 +64,5 @@ networks:
     driver: bridge
 
 volumes:
-  prisma-cache:
+  prisma-binary:
+  qdrant-data:

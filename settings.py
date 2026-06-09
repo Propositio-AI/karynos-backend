@@ -3,23 +3,21 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     APP_NAME: str = "karynos-backend"
-    POSTGRES_USER: str = "karynos"
-    POSTGRES_PASSWORD: str = "karynos"
-    POSTGRES_DB: str = "karynos"
-    POSTGRES_SERVER: str = "localhost"
-    POSTGRES_PORT: str = "5432"
     CORS_ORIGINS: str = "http://localhost:3000"
+
+    DB_USER: str
+    DB_PASS: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
 
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
     @property
     def database_url(self) -> str:
-        return (
-            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-            f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+        return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
 settings = Settings()
