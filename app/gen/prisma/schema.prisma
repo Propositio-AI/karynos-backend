@@ -24,6 +24,23 @@ enum RoleType {
   @@map("role_type")
 }
 
+enum MaterialStatus {
+  DRAFT
+  REVIEWING
+  DISTRIBUTED
+
+  @@map("material_status")
+}
+
+enum GenerationJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+
+  @@map("generation_job_status")
+}
+
 model Industry {
   industry_id Int     @id @default(autoincrement())
   name        String
@@ -90,11 +107,12 @@ model Job {
   description   String?
   updated_at    DateTime      @default(now())
   created_at    DateTime      @default(now())
-  industry      Industry      @relation(fields: [industry_id], references: [industry_id], onDelete: Restrict)
-  category      JobCategory?  @relation(fields: [category_id], references: [category_id], onDelete: Restrict)
-  job_images    JobImage[]
-  job_feedbacks JobFeedback[]
-  histories     History[]
+  industry             Industry           @relation(fields: [industry_id], references: [industry_id], onDelete: Restrict)
+  category             JobCategory?       @relation(fields: [category_id], references: [category_id], onDelete: Restrict)
+  job_images           JobImage[]
+  job_feedbacks        JobFeedback[]
+  histories            History[]
+  generated_materials  GeneratedMaterial[]
 
   @@map("jobs")
 }
@@ -224,6 +242,7 @@ model History {
 model Dreamer {
   dreamer_id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   organization_id       Int?
+  cognito_sub           String?              @unique
   login_id              String
   name_family           String
   name_given            String
@@ -232,6 +251,8 @@ model Dreamer {
   updated_at            DateTime             @default(now())
   dreamer_group_members DreamerGroupMember[]
   user_initial_answers  UserInitialAnswer[]
+  enrollments           Enrollment[]
+  generated_materials   GeneratedMaterial[]
 
   @@map("dreamers")
 }
@@ -340,4 +361,115 @@ model ConversationParticipant {
   conversation    Conversation @relation(fields: [conversation_id], references: [conversation_id], onDelete: Restrict)
 
   @@map("conversation_participants")
+}
+
+model Mentor {
+  mentor_id     String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cognito_sub   String           @unique
+  login_id      String
+  name_family   String
+  name_given    String
+  email         String
+  last_login_at DateTime?
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @default(now())
+  school_classes   SchoolClass[]
+  lesson_materials LessonMaterial[]
+
+  @@map("mentors")
+}
+
+model SchoolClass {
+  class_id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mentor_id        String           @db.Uuid
+  name             String
+  subject          String?
+  description      String?
+  academic_year    Int?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @default(now())
+  mentor           Mentor           @relation(fields: [mentor_id], references: [mentor_id], onDelete: Cascade)
+  enrollments      Enrollment[]
+  lesson_materials LessonMaterial[]
+  generation_jobs  GenerationJob[]
+
+  @@map("classes")
+}
+
+model Enrollment {
+  enrollment_id String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_id      String      @db.Uuid
+  dreamer_id    String      @db.Uuid
+  enrolled_at   DateTime    @default(now())
+  created_at    DateTime    @default(now())
+  school_class  SchoolClass @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+  dreamer       Dreamer     @relation(fields: [dreamer_id], references: [dreamer_id], onDelete: Cascade)
+
+  @@unique([class_id, dreamer_id])
+  @@map("enrollments")
+}
+
+model LessonMaterial {
+  material_id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class_id             String              @db.Uuid
+  mentor_id            String              @db.Uuid
+  title                String
+  subject              String?
+  unit                 String?
+  description          String?
+  file_name            String
+  file_path            String
+  file_size            Int
+  mime_type            String
+  content_text         String?
+  content_hash         String?
+  is_deleted           Boolean             @default(false)
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @default(now())
+  school_class         SchoolClass         @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+  mentor               Mentor              @relation(fields: [mentor_id], references: [mentor_id], onDelete: Restrict)
+  generated_materials  GeneratedMaterial[]
+  generation_jobs      GenerationJob[]
+
+  @@map("lesson_materials")
+}
+
+model GeneratedMaterial {
+  generated_material_id String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lesson_material_id    String         @db.Uuid
+  dreamer_id            String         @db.Uuid
+  job_id                Int?
+  job_name              String
+  title                 String?
+  content               String?
+  status                MaterialStatus @default(DRAFT)
+  idempotency_key       String         @unique
+  is_read               Boolean        @default(false)
+  distributed_at        DateTime?
+  created_at            DateTime       @default(now())
+  updated_at            DateTime       @default(now())
+  lesson_material       LessonMaterial @relation(fields: [lesson_material_id], references: [material_id], onDelete: Restrict)
+  dreamer               Dreamer        @relation(fields: [dreamer_id], references: [dreamer_id], onDelete: Cascade)
+  job                   Job?           @relation(fields: [job_id], references: [job_id], onDelete: SetNull)
+
+  @@map("generated_materials")
+}
+
+model GenerationJob {
+  generation_job_id  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lesson_material_id String              @db.Uuid
+  class_id           String              @db.Uuid
+  status             GenerationJobStatus @default(PENDING)
+  progress           Int                 @default(0)
+  total_dreamers     Int                 @default(0)
+  completed_dreamers Int                 @default(0)
+  error_message      String?
+  started_at         DateTime?
+  completed_at       DateTime?
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now())
+  lesson_material    LessonMaterial      @relation(fields: [lesson_material_id], references: [material_id], onDelete: Cascade)
+  school_class       SchoolClass         @relation(fields: [class_id], references: [class_id], onDelete: Cascade)
+
+  @@map("generation_jobs")
 }

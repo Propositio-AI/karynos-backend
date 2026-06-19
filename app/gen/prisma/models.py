@@ -983,6 +983,7 @@ class Job(bases.BaseJob):
     job_images: Optional[List['models.JobImage']] = None
     job_feedbacks: Optional[List['models.JobFeedback']] = None
     histories: Optional[List['models.History']] = None
+    generated_materials: Optional[List['models.GeneratedMaterial']] = None
 
     # take *args and **kwargs so that other metaclasses can define arguments
     def __init_subclass__(
@@ -2205,6 +2206,7 @@ class Dreamer(bases.BaseDreamer):
 
     dreamer_id: _str
     organization_id: Optional[_int] = None
+    cognito_sub: Optional[_str] = None
     login_id: _str
     name_family: _str
     name_given: _str
@@ -2213,6 +2215,8 @@ class Dreamer(bases.BaseDreamer):
     updated_at: datetime.datetime
     dreamer_group_members: Optional[List['models.DreamerGroupMember']] = None
     user_initial_answers: Optional[List['models.UserInitialAnswer']] = None
+    enrollments: Optional[List['models.Enrollment']] = None
+    generated_materials: Optional[List['models.GeneratedMaterial']] = None
 
     # take *args and **kwargs so that other metaclasses can define arguments
     def __init_subclass__(
@@ -3419,6 +3423,848 @@ class ConversationParticipant(bases.BaseConversationParticipant):
         _created_partial_types.add(name)
 
 
+class Mentor(bases.BaseMentor):
+    """Represents a Mentor record"""
+
+    mentor_id: _str
+    cognito_sub: _str
+    login_id: _str
+    name_family: _str
+    name_given: _str
+    email: _str
+    last_login_at: Optional[datetime.datetime] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    school_classes: Optional[List['models.SchoolClass']] = None
+    lesson_materials: Optional[List['models.LessonMaterial']] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.MentorKeys']] = None,
+        exclude: Optional[Iterable['types.MentorKeys']] = None,
+        required: Optional[Iterable['types.MentorKeys']] = None,
+        optional: Optional[Iterable['types.MentorKeys']] = None,
+        relations: Optional[Mapping['types.MentorRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.MentorKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Mentor_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Mentor_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Mentor_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Mentor_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Mentor_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Mentor_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Mentor', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Mentor / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Mentor',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class SchoolClass(bases.BaseSchoolClass):
+    """Represents a SchoolClass record"""
+
+    class_id: _str
+    mentor_id: _str
+    name: _str
+    subject: Optional[_str] = None
+    description: Optional[_str] = None
+    academic_year: Optional[_int] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    mentor: Optional['models.Mentor'] = None
+    enrollments: Optional[List['models.Enrollment']] = None
+    lesson_materials: Optional[List['models.LessonMaterial']] = None
+    generation_jobs: Optional[List['models.GenerationJob']] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.SchoolClassKeys']] = None,
+        exclude: Optional[Iterable['types.SchoolClassKeys']] = None,
+        required: Optional[Iterable['types.SchoolClassKeys']] = None,
+        optional: Optional[Iterable['types.SchoolClassKeys']] = None,
+        relations: Optional[Mapping['types.SchoolClassRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.SchoolClassKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _SchoolClass_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _SchoolClass_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _SchoolClass_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _SchoolClass_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _SchoolClass_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _SchoolClass_relational_fields:
+                        raise errors.UnknownRelationalFieldError('SchoolClass', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid SchoolClass / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'SchoolClass',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class Enrollment(bases.BaseEnrollment):
+    """Represents a Enrollment record"""
+
+    enrollment_id: _str
+    class_id: _str
+    dreamer_id: _str
+    enrolled_at: datetime.datetime
+    created_at: datetime.datetime
+    school_class: Optional['models.SchoolClass'] = None
+    dreamer: Optional['models.Dreamer'] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.EnrollmentKeys']] = None,
+        exclude: Optional[Iterable['types.EnrollmentKeys']] = None,
+        required: Optional[Iterable['types.EnrollmentKeys']] = None,
+        optional: Optional[Iterable['types.EnrollmentKeys']] = None,
+        relations: Optional[Mapping['types.EnrollmentRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.EnrollmentKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _Enrollment_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _Enrollment_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _Enrollment_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _Enrollment_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _Enrollment_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _Enrollment_relational_fields:
+                        raise errors.UnknownRelationalFieldError('Enrollment', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid Enrollment / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'Enrollment',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class LessonMaterial(bases.BaseLessonMaterial):
+    """Represents a LessonMaterial record"""
+
+    material_id: _str
+    class_id: _str
+    mentor_id: _str
+    title: _str
+    subject: Optional[_str] = None
+    unit: Optional[_str] = None
+    description: Optional[_str] = None
+    file_name: _str
+    file_path: _str
+    file_size: _int
+    mime_type: _str
+    content_text: Optional[_str] = None
+    content_hash: Optional[_str] = None
+    is_deleted: _bool
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    school_class: Optional['models.SchoolClass'] = None
+    mentor: Optional['models.Mentor'] = None
+    generated_materials: Optional[List['models.GeneratedMaterial']] = None
+    generation_jobs: Optional[List['models.GenerationJob']] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.LessonMaterialKeys']] = None,
+        exclude: Optional[Iterable['types.LessonMaterialKeys']] = None,
+        required: Optional[Iterable['types.LessonMaterialKeys']] = None,
+        optional: Optional[Iterable['types.LessonMaterialKeys']] = None,
+        relations: Optional[Mapping['types.LessonMaterialRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.LessonMaterialKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _LessonMaterial_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _LessonMaterial_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _LessonMaterial_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _LessonMaterial_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _LessonMaterial_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _LessonMaterial_relational_fields:
+                        raise errors.UnknownRelationalFieldError('LessonMaterial', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid LessonMaterial / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'LessonMaterial',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class GeneratedMaterial(bases.BaseGeneratedMaterial):
+    """Represents a GeneratedMaterial record"""
+
+    generated_material_id: _str
+    lesson_material_id: _str
+    dreamer_id: _str
+    job_id: Optional[_int] = None
+    job_name: _str
+    title: Optional[_str] = None
+    content: Optional[_str] = None
+    status: 'enums.MaterialStatus'
+    idempotency_key: _str
+    is_read: _bool
+    distributed_at: Optional[datetime.datetime] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    lesson_material: Optional['models.LessonMaterial'] = None
+    dreamer: Optional['models.Dreamer'] = None
+    job: Optional['models.Job'] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.GeneratedMaterialKeys']] = None,
+        exclude: Optional[Iterable['types.GeneratedMaterialKeys']] = None,
+        required: Optional[Iterable['types.GeneratedMaterialKeys']] = None,
+        optional: Optional[Iterable['types.GeneratedMaterialKeys']] = None,
+        relations: Optional[Mapping['types.GeneratedMaterialRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.GeneratedMaterialKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _GeneratedMaterial_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _GeneratedMaterial_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _GeneratedMaterial_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _GeneratedMaterial_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _GeneratedMaterial_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _GeneratedMaterial_relational_fields:
+                        raise errors.UnknownRelationalFieldError('GeneratedMaterial', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid GeneratedMaterial / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'GeneratedMaterial',
+            }
+        )
+        _created_partial_types.add(name)
+
+
+class GenerationJob(bases.BaseGenerationJob):
+    """Represents a GenerationJob record"""
+
+    generation_job_id: _str
+    lesson_material_id: _str
+    class_id: _str
+    status: 'enums.GenerationJobStatus'
+    progress: _int
+    total_dreamers: _int
+    completed_dreamers: _int
+    error_message: Optional[_str] = None
+    started_at: Optional[datetime.datetime] = None
+    completed_at: Optional[datetime.datetime] = None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    lesson_material: Optional['models.LessonMaterial'] = None
+    school_class: Optional['models.SchoolClass'] = None
+
+    # take *args and **kwargs so that other metaclasses can define arguments
+    def __init_subclass__(
+        cls,
+        *args: Any,
+        warn_subclass: Optional[bool] = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init_subclass__()
+        if warn_subclass is not None:
+            warnings.warn(
+                'The `warn_subclass` argument is deprecated as it is no longer necessary and will be removed in the next release',
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+    @staticmethod
+    def create_partial(
+        name: str,
+        include: Optional[Iterable['types.GenerationJobKeys']] = None,
+        exclude: Optional[Iterable['types.GenerationJobKeys']] = None,
+        required: Optional[Iterable['types.GenerationJobKeys']] = None,
+        optional: Optional[Iterable['types.GenerationJobKeys']] = None,
+        relations: Optional[Mapping['types.GenerationJobRelationalFieldKeys', str]] = None,
+        exclude_relational_fields: bool = False,
+    ) -> None:
+        if not os.environ.get('PRISMA_GENERATOR_INVOCATION'):
+            raise RuntimeError(
+                'Attempted to create a partial type outside of client generation.'
+            )
+
+        if name in _created_partial_types:
+            raise ValueError(f'Partial type "{name}" has already been created.')
+
+        if include is not None:
+            if exclude is not None:
+                raise TypeError('Exclude and include are mutually exclusive.')
+            if exclude_relational_fields is True:
+                raise TypeError('Include and exclude_relational_fields=True are mutually exclusive.')
+
+        if required and optional:
+            shared = set(required) & set(optional)
+            if shared:
+                raise ValueError(f'Cannot make the same field(s) required and optional {shared}')
+
+        if exclude_relational_fields and relations:
+            raise ValueError(
+                'exclude_relational_fields and relations are mutually exclusive'
+            )
+
+        fields: Dict['types.GenerationJobKeys', PartialModelField] = OrderedDict()
+
+        try:
+            if include:
+                for field in include:
+                    fields[field] = _GenerationJob_fields[field].copy()
+            elif exclude:
+                for field in exclude:
+                    if field not in _GenerationJob_fields:
+                        raise KeyError(field)
+
+                fields = {
+                    key: data.copy()
+                    for key, data in _GenerationJob_fields.items()
+                    if key not in exclude
+                }
+            else:
+                fields = {
+                    key: data.copy()
+                    for key, data in _GenerationJob_fields.items()
+                }
+
+            if required:
+                for field in required:
+                    fields[field]['optional'] = False
+
+            if optional:
+                for field in optional:
+                    fields[field]['optional'] = True
+
+            if exclude_relational_fields:
+                fields = {
+                    key: data
+                    for key, data in fields.items()
+                    if key not in _GenerationJob_relational_fields
+                }
+
+            if relations:
+                for field, type_ in relations.items():
+                    if field not in _GenerationJob_relational_fields:
+                        raise errors.UnknownRelationalFieldError('GenerationJob', field)
+
+                    # TODO: this method of validating types is not ideal
+                    # as it means we cannot two create partial types that
+                    # reference each other
+                    if type_ not in _created_partial_types:
+                        raise ValueError(
+                            f'Unknown partial type: "{type_}". '
+                            f'Did you remember to generate the {type_} type before this one?'
+                        )
+
+                    # TODO: support non prisma.partials models
+                    info = fields[field]
+                    if info['is_list']:
+                        info['type'] = f'List[\'partials.{type_}\']'
+                    else:
+                        info['type'] = f'\'partials.{type_}\''
+        except KeyError as exc:
+            raise ValueError(
+                f'{exc.args[0]} is not a valid GenerationJob / {name} field.'
+            ) from None
+
+        models = partial_models_ctx.get()
+        models.append(
+            {
+                'name': name,
+                'fields': cast(Mapping[str, PartialModelField], fields),
+                'from_model': 'GenerationJob',
+            }
+        )
+        _created_partial_types.add(name)
+
+
 
 _Industry_relational_fields: Set[str] = {
         'jobs',
@@ -3666,6 +4512,7 @@ _Job_relational_fields: Set[str] = {
         'job_images',
         'job_feedbacks',
         'histories',
+        'generated_materials',
     }
 _Job_fields: Dict['types.JobKeys', PartialModelField] = OrderedDict(
     [
@@ -3762,6 +4609,14 @@ _Job_fields: Dict['types.JobKeys', PartialModelField] = OrderedDict(
             'is_list': True,
             'optional': True,
             'type': 'List[\'models.History\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('generated_materials', {
+            'name': 'generated_materials',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GeneratedMaterial\']',
             'is_relational': True,
             'documentation': None,
         }),
@@ -4461,6 +5316,8 @@ _History_fields: Dict['types.HistoryKeys', PartialModelField] = OrderedDict(
 _Dreamer_relational_fields: Set[str] = {
         'dreamer_group_members',
         'user_initial_answers',
+        'enrollments',
+        'generated_materials',
     }
 _Dreamer_fields: Dict['types.DreamerKeys', PartialModelField] = OrderedDict(
     [
@@ -4477,6 +5334,14 @@ _Dreamer_fields: Dict['types.DreamerKeys', PartialModelField] = OrderedDict(
             'is_list': False,
             'optional': True,
             'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('cognito_sub', {
+            'name': 'cognito_sub',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
             'is_relational': False,
             'documentation': None,
         }),
@@ -4541,6 +5406,22 @@ _Dreamer_fields: Dict['types.DreamerKeys', PartialModelField] = OrderedDict(
             'is_list': True,
             'optional': True,
             'type': 'List[\'models.UserInitialAnswer\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('enrollments', {
+            'name': 'enrollments',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Enrollment\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('generated_materials', {
+            'name': 'generated_materials',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GeneratedMaterial\']',
             'is_relational': True,
             'documentation': None,
         }),
@@ -5145,6 +6026,705 @@ _ConversationParticipant_fields: Dict['types.ConversationParticipantKeys', Parti
     ],
 )
 
+_Mentor_relational_fields: Set[str] = {
+        'school_classes',
+        'lesson_materials',
+    }
+_Mentor_fields: Dict['types.MentorKeys', PartialModelField] = OrderedDict(
+    [
+        ('mentor_id', {
+            'name': 'mentor_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('cognito_sub', {
+            'name': 'cognito_sub',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('login_id', {
+            'name': 'login_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name_family', {
+            'name': 'name_family',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name_given', {
+            'name': 'name_given',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('email', {
+            'name': 'email',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('last_login_at', {
+            'name': 'last_login_at',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updated_at', {
+            'name': 'updated_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('school_classes', {
+            'name': 'school_classes',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.SchoolClass\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('lesson_materials', {
+            'name': 'lesson_materials',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LessonMaterial\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_SchoolClass_relational_fields: Set[str] = {
+        'mentor',
+        'enrollments',
+        'lesson_materials',
+        'generation_jobs',
+    }
+_SchoolClass_fields: Dict['types.SchoolClassKeys', PartialModelField] = OrderedDict(
+    [
+        ('class_id', {
+            'name': 'class_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('mentor_id', {
+            'name': 'mentor_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('name', {
+            'name': 'name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('subject', {
+            'name': 'subject',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('description', {
+            'name': 'description',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('academic_year', {
+            'name': 'academic_year',
+            'is_list': False,
+            'optional': True,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updated_at', {
+            'name': 'updated_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('mentor', {
+            'name': 'mentor',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Mentor',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('enrollments', {
+            'name': 'enrollments',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.Enrollment\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('lesson_materials', {
+            'name': 'lesson_materials',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.LessonMaterial\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('generation_jobs', {
+            'name': 'generation_jobs',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GenerationJob\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_Enrollment_relational_fields: Set[str] = {
+        'school_class',
+        'dreamer',
+    }
+_Enrollment_fields: Dict['types.EnrollmentKeys', PartialModelField] = OrderedDict(
+    [
+        ('enrollment_id', {
+            'name': 'enrollment_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('class_id', {
+            'name': 'class_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('dreamer_id', {
+            'name': 'dreamer_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('enrolled_at', {
+            'name': 'enrolled_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('school_class', {
+            'name': 'school_class',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.SchoolClass',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('dreamer', {
+            'name': 'dreamer',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Dreamer',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_LessonMaterial_relational_fields: Set[str] = {
+        'school_class',
+        'mentor',
+        'generated_materials',
+        'generation_jobs',
+    }
+_LessonMaterial_fields: Dict['types.LessonMaterialKeys', PartialModelField] = OrderedDict(
+    [
+        ('material_id', {
+            'name': 'material_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('class_id', {
+            'name': 'class_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('mentor_id', {
+            'name': 'mentor_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('title', {
+            'name': 'title',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('subject', {
+            'name': 'subject',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('unit', {
+            'name': 'unit',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('description', {
+            'name': 'description',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('file_name', {
+            'name': 'file_name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('file_path', {
+            'name': 'file_path',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('file_size', {
+            'name': 'file_size',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('mime_type', {
+            'name': 'mime_type',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('content_text', {
+            'name': 'content_text',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('content_hash', {
+            'name': 'content_hash',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('is_deleted', {
+            'name': 'is_deleted',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updated_at', {
+            'name': 'updated_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('school_class', {
+            'name': 'school_class',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.SchoolClass',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('mentor', {
+            'name': 'mentor',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Mentor',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('generated_materials', {
+            'name': 'generated_materials',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GeneratedMaterial\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('generation_jobs', {
+            'name': 'generation_jobs',
+            'is_list': True,
+            'optional': True,
+            'type': 'List[\'models.GenerationJob\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_GeneratedMaterial_relational_fields: Set[str] = {
+        'lesson_material',
+        'dreamer',
+        'job',
+    }
+_GeneratedMaterial_fields: Dict['types.GeneratedMaterialKeys', PartialModelField] = OrderedDict(
+    [
+        ('generated_material_id', {
+            'name': 'generated_material_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('lesson_material_id', {
+            'name': 'lesson_material_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('dreamer_id', {
+            'name': 'dreamer_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('job_id', {
+            'name': 'job_id',
+            'is_list': False,
+            'optional': True,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('job_name', {
+            'name': 'job_name',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('title', {
+            'name': 'title',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('content', {
+            'name': 'content',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('status', {
+            'name': 'status',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.MaterialStatus',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('idempotency_key', {
+            'name': 'idempotency_key',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('is_read', {
+            'name': 'is_read',
+            'is_list': False,
+            'optional': False,
+            'type': '_bool',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('distributed_at', {
+            'name': 'distributed_at',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updated_at', {
+            'name': 'updated_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('lesson_material', {
+            'name': 'lesson_material',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.LessonMaterial',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('dreamer', {
+            'name': 'dreamer',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Dreamer',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('job', {
+            'name': 'job',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.Job',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
+_GenerationJob_relational_fields: Set[str] = {
+        'lesson_material',
+        'school_class',
+    }
+_GenerationJob_fields: Dict['types.GenerationJobKeys', PartialModelField] = OrderedDict(
+    [
+        ('generation_job_id', {
+            'name': 'generation_job_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('lesson_material_id', {
+            'name': 'lesson_material_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('class_id', {
+            'name': 'class_id',
+            'is_list': False,
+            'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('status', {
+            'name': 'status',
+            'is_list': False,
+            'optional': False,
+            'type': 'enums.GenerationJobStatus',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('progress', {
+            'name': 'progress',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('total_dreamers', {
+            'name': 'total_dreamers',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('completed_dreamers', {
+            'name': 'completed_dreamers',
+            'is_list': False,
+            'optional': False,
+            'type': '_int',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('error_message', {
+            'name': 'error_message',
+            'is_list': False,
+            'optional': True,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('started_at', {
+            'name': 'started_at',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('completed_at', {
+            'name': 'completed_at',
+            'is_list': False,
+            'optional': True,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('created_at', {
+            'name': 'created_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('updated_at', {
+            'name': 'updated_at',
+            'is_list': False,
+            'optional': False,
+            'type': 'datetime.datetime',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('lesson_material', {
+            'name': 'lesson_material',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.LessonMaterial',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('school_class', {
+            'name': 'school_class',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.SchoolClass',
+            'is_relational': True,
+            'documentation': None,
+        }),
+    ],
+)
+
 
 
 # we have to import ourselves as relation types are namespaced to models
@@ -5177,3 +6757,9 @@ model_rebuild(UserInitialAnswer)
 model_rebuild(Conversation)
 model_rebuild(Message)
 model_rebuild(ConversationParticipant)
+model_rebuild(Mentor)
+model_rebuild(SchoolClass)
+model_rebuild(Enrollment)
+model_rebuild(LessonMaterial)
+model_rebuild(GeneratedMaterial)
+model_rebuild(GenerationJob)

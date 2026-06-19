@@ -324,3 +324,63 @@ class BaseConversationParticipant(_PrismaModel):
         return actions.ConversationParticipantActions[_PrismaModelT](client or get_client(), cls)
 
 
+class BaseMentor(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['Mentor']] = 'Mentor'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.MentorActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.MentorActions[_PrismaModelT](client or get_client(), cls)
+
+
+class BaseSchoolClass(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['SchoolClass']] = 'SchoolClass'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.SchoolClassActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.SchoolClassActions[_PrismaModelT](client or get_client(), cls)
+
+
+class BaseEnrollment(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['Enrollment']] = 'Enrollment'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.EnrollmentActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.EnrollmentActions[_PrismaModelT](client or get_client(), cls)
+
+
+class BaseLessonMaterial(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['LessonMaterial']] = 'LessonMaterial'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.LessonMaterialActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.LessonMaterialActions[_PrismaModelT](client or get_client(), cls)
+
+
+class BaseGeneratedMaterial(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['GeneratedMaterial']] = 'GeneratedMaterial'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.GeneratedMaterialActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.GeneratedMaterialActions[_PrismaModelT](client or get_client(), cls)
+
+
+class BaseGenerationJob(_PrismaModel):
+    __prisma_model__: ClassVar[Literal['GenerationJob']] = 'GenerationJob'  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    @classmethod
+    def prisma(cls: Type[_PrismaModelT], client: Optional['Prisma'] = None) -> 'actions.GenerationJobActions[_PrismaModelT]':
+        from .client import get_client
+
+        return actions.GenerationJobActions[_PrismaModelT](client or get_client(), cls)
+
+

@@ -312,3 +312,155 @@ CREATE INDEX IF NOT EXISTS idx_init_questions_category ON init_questions(categor
 CREATE INDEX IF NOT EXISTS idx_init_question_options_question_id ON init_question_options(question_id);
 CREATE INDEX IF NOT EXISTS idx_user_initial_answers_dreamer_id ON user_initial_answers(dreamer_id);
 CREATE INDEX IF NOT EXISTS idx_user_initial_answers_question_version ON user_initial_answers(question_version);
+
+-- ─────────────────────────────────────────────────────────────
+-- Mentor / Dream Action ドメイン
+-- ─────────────────────────────────────────────────────────────
+
+DO $$
+BEGIN
+  CREATE TYPE material_status AS ENUM ('DRAFT', 'REVIEWING', 'DISTRIBUTED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+
+DO $$
+BEGIN
+  CREATE TYPE generation_job_status AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END
+$$;
+
+-- dreamers に Cognito サブを追加（既存列がなければ追加）
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name='dreamers' AND column_name='cognito_sub'
+  ) THEN
+    ALTER TABLE dreamers ADD COLUMN cognito_sub TEXT UNIQUE;
+  END IF;
+END
+$$;
+
+CREATE TABLE IF NOT EXISTS mentors (
+  mentor_id   UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  cognito_sub TEXT        NOT NULL UNIQUE,
+  login_id    TEXT        NOT NULL,
+  name_family TEXT        NOT NULL,
+  name_given  TEXT        NOT NULL,
+  email       TEXT        NOT NULL,
+  last_login_at TIMESTAMP,
+  created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS classes (
+  class_id      UUID      DEFAULT gen_random_uuid() PRIMARY KEY,
+  mentor_id     UUID      NOT NULL REFERENCES mentors(mentor_id) ON DELETE CASCADE,
+  name          TEXT      NOT NULL,
+  subject       TEXT,
+  description   TEXT,
+  academic_year INTEGER,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS enrollments (
+  enrollment_id UUID      DEFAULT gen_random_uuid() PRIMARY KEY,
+  class_id      UUID      NOT NULL REFERENCES classes(class_id) ON DELETE CASCADE,
+  dreamer_id    UUID      NOT NULL REFERENCES dreamers(dreamer_id) ON DELETE CASCADE,
+  enrolled_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(class_id, dreamer_id)
+);
+
+CREATE TABLE IF NOT EXISTS lesson_materials (
+  material_id    UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  class_id       UUID    NOT NULL REFERENCES classes(class_id) ON DELETE CASCADE,
+  mentor_id      UUID    NOT NULL REFERENCES mentors(mentor_id) ON DELETE RESTRICT,
+  title          TEXT    NOT NULL,
+  subject        TEXT,
+  unit           TEXT,
+  description    TEXT,
+  file_name      TEXT    NOT NULL,
+  file_path      TEXT    NOT NULL,
+  file_size      INTEGER NOT NULL,
+  mime_type      TEXT    NOT NULL,
+  content_text   TEXT,
+  content_hash   TEXT,
+  is_deleted     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS generated_materials (
+  generated_material_id UUID           DEFAULT gen_random_uuid() PRIMARY KEY,
+  lesson_material_id    UUID           NOT NULL REFERENCES lesson_materials(material_id) ON DELETE RESTRICT,
+  dreamer_id            UUID           NOT NULL REFERENCES dreamers(dreamer_id) ON DELETE CASCADE,
+  job_id                INTEGER        REFERENCES jobs(job_id) ON DELETE SET NULL,
+  job_name              TEXT           NOT NULL,
+  title                 TEXT,
+  content               TEXT,
+  status                material_status NOT NULL DEFAULT 'DRAFT',
+  idempotency_key       TEXT           NOT NULL UNIQUE,
+  is_read               BOOLEAN        NOT NULL DEFAULT FALSE,
+  distributed_at        TIMESTAMP,
+  created_at            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS generation_jobs (
+  generation_job_id    UUID                 DEFAULT gen_random_uuid() PRIMARY KEY,
+  lesson_material_id   UUID                 NOT NULL REFERENCES lesson_materials(material_id) ON DELETE CASCADE,
+  class_id             UUID                 NOT NULL REFERENCES classes(class_id) ON DELETE CASCADE,
+  status               generation_job_status NOT NULL DEFAULT 'PENDING',
+  progress             INTEGER              NOT NULL DEFAULT 0,
+  total_dreamers       INTEGER              NOT NULL DEFAULT 0,
+  completed_dreamers   INTEGER              NOT NULL DEFAULT 0,
+  error_message        TEXT,
+  started_at           TIMESTAMP,
+  completed_at         TIMESTAMP,
+  created_at           TIMESTAMP            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at           TIMESTAMP            NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- トリガー
+DROP TRIGGER IF EXISTS update_mentors_timestamp ON mentors;
+CREATE TRIGGER update_mentors_timestamp
+BEFORE UPDATE ON mentors
+FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+DROP TRIGGER IF EXISTS update_classes_timestamp ON classes;
+CREATE TRIGGER update_classes_timestamp
+BEFORE UPDATE ON classes
+FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+DROP TRIGGER IF EXISTS update_lesson_materials_timestamp ON lesson_materials;
+CREATE TRIGGER update_lesson_materials_timestamp
+BEFORE UPDATE ON lesson_materials
+FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+DROP TRIGGER IF EXISTS update_generated_materials_timestamp ON generated_materials;
+CREATE TRIGGER update_generated_materials_timestamp
+BEFORE UPDATE ON generated_materials
+FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+DROP TRIGGER IF EXISTS update_generation_jobs_timestamp ON generation_jobs;
+CREATE TRIGGER update_generation_jobs_timestamp
+BEFORE UPDATE ON generation_jobs
+FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
+
+-- インデックス
+CREATE INDEX IF NOT EXISTS idx_classes_mentor_id ON classes(mentor_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class_id ON enrollments(class_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_dreamer_id ON enrollments(dreamer_id);
+CREATE INDEX IF NOT EXISTS idx_lesson_materials_class_id ON lesson_materials(class_id);
+CREATE INDEX IF NOT EXISTS idx_lesson_materials_is_deleted ON lesson_materials(is_deleted);
+CREATE INDEX IF NOT EXISTS idx_generated_materials_dreamer_id ON generated_materials(dreamer_id);
+CREATE INDEX IF NOT EXISTS idx_generated_materials_lesson_material_id ON generated_materials(lesson_material_id);
+CREATE INDEX IF NOT EXISTS idx_generated_materials_status ON generated_materials(status);
+CREATE INDEX IF NOT EXISTS idx_generation_jobs_lesson_material_id ON generation_jobs(lesson_material_id);
+CREATE INDEX IF NOT EXISTS idx_generation_jobs_class_id ON generation_jobs(class_id);

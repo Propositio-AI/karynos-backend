@@ -88,7 +88,7 @@ log: logging.Logger = logging.getLogger(__name__)
 SCHEMA_PATH = Path('/app/app/gen/prisma/schema.prisma')
 PACKAGED_SCHEMA_PATH = Path(__file__).parent.joinpath('schema.prisma')
 ENGINE_TYPE: EngineType = EngineType.binary
-BINARY_PATHS = model_parse(BinaryPaths, {'queryEngine': {'linux-arm64-openssl-3.0.x': '/root/.cache/prisma-python/binaries/5.17.0/393aa359c9ad4a4bb28630fb5613f9c281cde053/node_modules/prisma/query-engine-linux-arm64-openssl-3.0.x'}, 'introspectionEngine': {}, 'migrationEngine': {}, 'libqueryEngine': {}, 'prismaFmt': {}})
+BINARY_PATHS = model_parse(BinaryPaths, {'queryEngine': {'debian-openssl-3.0.x': '/root/.cache/prisma-python/binaries/5.17.0/393aa359c9ad4a4bb28630fb5613f9c281cde053/node_modules/prisma/query-engine-debian-openssl-3.0.x'}, 'introspectionEngine': {}, 'migrationEngine': {}, 'libqueryEngine': {}, 'prismaFmt': {}})
 
 
 class Prisma(AsyncBasePrisma):
@@ -119,6 +119,12 @@ class Prisma(AsyncBasePrisma):
     conversation: 'actions.ConversationActions[models.Conversation]'
     message: 'actions.MessageActions[models.Message]'
     conversationparticipant: 'actions.ConversationParticipantActions[models.ConversationParticipant]'
+    mentor: 'actions.MentorActions[models.Mentor]'
+    schoolclass: 'actions.SchoolClassActions[models.SchoolClass]'
+    enrollment: 'actions.EnrollmentActions[models.Enrollment]'
+    lessonmaterial: 'actions.LessonMaterialActions[models.LessonMaterial]'
+    generatedmaterial: 'actions.GeneratedMaterialActions[models.GeneratedMaterial]'
+    generationjob: 'actions.GenerationJobActions[models.GenerationJob]'
 
     __slots__ = (
         'industry',
@@ -146,6 +152,12 @@ class Prisma(AsyncBasePrisma):
         'conversation',
         'message',
         'conversationparticipant',
+        'mentor',
+        'schoolclass',
+        'enrollment',
+        'lessonmaterial',
+        'generatedmaterial',
+        'generationjob',
     )
 
     def __init__(
@@ -201,6 +213,12 @@ class Prisma(AsyncBasePrisma):
         self.conversation = actions.ConversationActions[models.Conversation](self, models.Conversation)
         self.message = actions.MessageActions[models.Message](self, models.Message)
         self.conversationparticipant = actions.ConversationParticipantActions[models.ConversationParticipant](self, models.ConversationParticipant)
+        self.mentor = actions.MentorActions[models.Mentor](self, models.Mentor)
+        self.schoolclass = actions.SchoolClassActions[models.SchoolClass](self, models.SchoolClass)
+        self.enrollment = actions.EnrollmentActions[models.Enrollment](self, models.Enrollment)
+        self.lessonmaterial = actions.LessonMaterialActions[models.LessonMaterial](self, models.LessonMaterial)
+        self.generatedmaterial = actions.GeneratedMaterialActions[models.GeneratedMaterial](self, models.GeneratedMaterial)
+        self.generationjob = actions.GenerationJobActions[models.GenerationJob](self, models.GenerationJob)
 
         if auto_register:
             register(self)
@@ -376,6 +394,12 @@ class Batch:
     conversation: 'ConversationBatchActions'
     message: 'MessageBatchActions'
     conversationparticipant: 'ConversationParticipantBatchActions'
+    mentor: 'MentorBatchActions'
+    schoolclass: 'SchoolClassBatchActions'
+    enrollment: 'EnrollmentBatchActions'
+    lessonmaterial: 'LessonMaterialBatchActions'
+    generatedmaterial: 'GeneratedMaterialBatchActions'
+    generationjob: 'GenerationJobBatchActions'
 
     def __init__(self, client: Prisma) -> None:
         self.__client = client
@@ -406,6 +430,12 @@ class Batch:
         self.conversation = ConversationBatchActions(self)
         self.message = MessageBatchActions(self)
         self.conversationparticipant = ConversationParticipantBatchActions(self)
+        self.mentor = MentorBatchActions(self)
+        self.schoolclass = SchoolClassBatchActions(self)
+        self.enrollment = EnrollmentBatchActions(self)
+        self.lessonmaterial = LessonMaterialBatchActions(self)
+        self.generatedmaterial = GeneratedMaterialBatchActions(self)
+        self.generationjob = GenerationJobBatchActions(self)
 
     def _add(self, **kwargs: Any) -> None:
         builder = QueryBuilder(
@@ -3227,6 +3257,672 @@ class ConversationParticipantBatchActions:
         self._batcher._add(
             method='delete_many',
             model=models.ConversationParticipant,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class MentorBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.MentorCreateInput,
+        include: Optional[types.MentorInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Mentor,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.MentorCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Mentor,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.MentorWhereUniqueInput,
+        include: Optional[types.MentorInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Mentor,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.MentorUpdateInput,
+        where: types.MentorWhereUniqueInput,
+        include: Optional[types.MentorInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Mentor,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.MentorWhereUniqueInput,
+        data: types.MentorUpsertInput,
+        include: Optional[types.MentorInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Mentor,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.MentorUpdateManyMutationInput,
+        where: types.MentorWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Mentor,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.MentorWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Mentor,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class SchoolClassBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.SchoolClassCreateInput,
+        include: Optional[types.SchoolClassInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.SchoolClass,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.SchoolClassCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.SchoolClass,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.SchoolClassWhereUniqueInput,
+        include: Optional[types.SchoolClassInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.SchoolClass,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.SchoolClassUpdateInput,
+        where: types.SchoolClassWhereUniqueInput,
+        include: Optional[types.SchoolClassInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.SchoolClass,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.SchoolClassWhereUniqueInput,
+        data: types.SchoolClassUpsertInput,
+        include: Optional[types.SchoolClassInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.SchoolClass,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.SchoolClassUpdateManyMutationInput,
+        where: types.SchoolClassWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.SchoolClass,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.SchoolClassWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.SchoolClass,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class EnrollmentBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.EnrollmentCreateInput,
+        include: Optional[types.EnrollmentInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.Enrollment,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.EnrollmentCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.Enrollment,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.EnrollmentWhereUniqueInput,
+        include: Optional[types.EnrollmentInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.Enrollment,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.EnrollmentUpdateInput,
+        where: types.EnrollmentWhereUniqueInput,
+        include: Optional[types.EnrollmentInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.Enrollment,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.EnrollmentWhereUniqueInput,
+        data: types.EnrollmentUpsertInput,
+        include: Optional[types.EnrollmentInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.Enrollment,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.EnrollmentUpdateManyMutationInput,
+        where: types.EnrollmentWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.Enrollment,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.EnrollmentWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.Enrollment,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class LessonMaterialBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.LessonMaterialCreateInput,
+        include: Optional[types.LessonMaterialInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.LessonMaterial,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.LessonMaterialCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.LessonMaterial,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.LessonMaterialWhereUniqueInput,
+        include: Optional[types.LessonMaterialInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.LessonMaterial,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.LessonMaterialUpdateInput,
+        where: types.LessonMaterialWhereUniqueInput,
+        include: Optional[types.LessonMaterialInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.LessonMaterial,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.LessonMaterialWhereUniqueInput,
+        data: types.LessonMaterialUpsertInput,
+        include: Optional[types.LessonMaterialInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.LessonMaterial,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.LessonMaterialUpdateManyMutationInput,
+        where: types.LessonMaterialWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.LessonMaterial,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.LessonMaterialWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.LessonMaterial,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class GeneratedMaterialBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.GeneratedMaterialCreateInput,
+        include: Optional[types.GeneratedMaterialInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.GeneratedMaterial,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.GeneratedMaterialCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.GeneratedMaterial,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.GeneratedMaterialWhereUniqueInput,
+        include: Optional[types.GeneratedMaterialInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.GeneratedMaterial,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.GeneratedMaterialUpdateInput,
+        where: types.GeneratedMaterialWhereUniqueInput,
+        include: Optional[types.GeneratedMaterialInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.GeneratedMaterial,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.GeneratedMaterialWhereUniqueInput,
+        data: types.GeneratedMaterialUpsertInput,
+        include: Optional[types.GeneratedMaterialInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.GeneratedMaterial,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.GeneratedMaterialUpdateManyMutationInput,
+        where: types.GeneratedMaterialWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.GeneratedMaterial,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.GeneratedMaterialWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.GeneratedMaterial,
+            arguments={'where': where},
+            root_selection=['count'],
+        )
+
+
+
+# NOTE: some arguments are meaningless in this context but are included
+# for completeness sake
+class GenerationJobBatchActions:
+    def __init__(self, batcher: Batch) -> None:
+        self._batcher = batcher
+
+    def create(
+        self,
+        data: types.GenerationJobCreateInput,
+        include: Optional[types.GenerationJobInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='create',
+            model=models.GenerationJob,
+            arguments={
+                'data': data,
+                'include': include,
+            },
+        )
+
+    def create_many(
+        self,
+        data: List[types.GenerationJobCreateWithoutRelationsInput],
+        *,
+        skip_duplicates: Optional[bool] = None,
+    ) -> None:
+        if skip_duplicates and self._batcher._active_provider in CREATE_MANY_SKIP_DUPLICATES_UNSUPPORTED:
+            raise errors.UnsupportedDatabaseError(self._batcher._active_provider, 'create_many_skip_duplicates')
+
+        self._batcher._add(
+            method='create_many',
+            model=models.GenerationJob,
+            arguments={
+                'data': data,
+                'skipDuplicates': skip_duplicates,
+            },
+            root_selection=['count'],
+        )
+
+    def delete(
+        self,
+        where: types.GenerationJobWhereUniqueInput,
+        include: Optional[types.GenerationJobInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete',
+            model=models.GenerationJob,
+            arguments={
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def update(
+        self,
+        data: types.GenerationJobUpdateInput,
+        where: types.GenerationJobWhereUniqueInput,
+        include: Optional[types.GenerationJobInclude] = None
+    ) -> None:
+        self._batcher._add(
+            method='update',
+            model=models.GenerationJob,
+            arguments={
+                'data': data,
+                'where': where,
+                'include': include,
+            },
+        )
+
+    def upsert(
+        self,
+        where: types.GenerationJobWhereUniqueInput,
+        data: types.GenerationJobUpsertInput,
+        include: Optional[types.GenerationJobInclude] = None,
+    ) -> None:
+        self._batcher._add(
+            method='upsert',
+            model=models.GenerationJob,
+            arguments={
+                'where': where,
+                'include': include,
+                'create': data.get('create'),
+                'update': data.get('update'),
+            },
+        )
+
+    def update_many(
+        self,
+        data: types.GenerationJobUpdateManyMutationInput,
+        where: types.GenerationJobWhereInput,
+    ) -> None:
+        self._batcher._add(
+            method='update_many',
+            model=models.GenerationJob,
+            arguments={'data': data, 'where': where,},
+            root_selection=['count'],
+        )
+
+    def delete_many(
+        self,
+        where: Optional[types.GenerationJobWhereInput] = None,
+    ) -> None:
+        self._batcher._add(
+            method='delete_many',
+            model=models.GenerationJob,
             arguments={'where': where},
             root_selection=['count'],
         )

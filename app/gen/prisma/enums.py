@@ -50,3 +50,14 @@ class RoleType(StrEnum):
     assistant = 'assistant'
     system = 'system'
 
+class MaterialStatus(StrEnum):
+    DRAFT = 'DRAFT'
+    REVIEWING = 'REVIEWING'
+    DISTRIBUTED = 'DISTRIBUTED'
+
+class GenerationJobStatus(StrEnum):
+    PENDING = 'PENDING'
+    PROCESSING = 'PROCESSING'
+    COMPLETED = 'COMPLETED'
+    FAILED = 'FAILED'
+

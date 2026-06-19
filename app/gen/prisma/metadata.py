@@ -31,6 +31,12 @@ PRISMA_MODELS: set[str] = {
     'Conversation',
     'Message',
     'ConversationParticipant',
+    'Mentor',
+    'SchoolClass',
+    'Enrollment',
+    'LessonMaterial',
+    'GeneratedMaterial',
+    'GenerationJob',
 }
 
 RELATIONAL_FIELD_MAPPINGS: dict[str, dict[str, str]] = {
@@ -61,6 +67,7 @@ RELATIONAL_FIELD_MAPPINGS: dict[str, dict[str, str]] = {
         'job_images': 'JobImage',
         'job_feedbacks': 'JobFeedback',
         'histories': 'History',
+        'generated_materials': 'GeneratedMaterial',
     },
     'JobImage': {
         'job': 'Job',
@@ -99,6 +106,8 @@ RELATIONAL_FIELD_MAPPINGS: dict[str, dict[str, str]] = {
     'Dreamer': {
         'dreamer_group_members': 'DreamerGroupMember',
         'user_initial_answers': 'UserInitialAnswer',
+        'enrollments': 'Enrollment',
+        'generated_materials': 'GeneratedMaterial',
     },
     'DreamerGroup': {
         'dreamer_group_members': 'DreamerGroupMember',
@@ -129,6 +138,35 @@ RELATIONAL_FIELD_MAPPINGS: dict[str, dict[str, str]] = {
     },
     'ConversationParticipant': {
         'conversation': 'Conversation',
+    },
+    'Mentor': {
+        'school_classes': 'SchoolClass',
+        'lesson_materials': 'LessonMaterial',
+    },
+    'SchoolClass': {
+        'mentor': 'Mentor',
+        'enrollments': 'Enrollment',
+        'lesson_materials': 'LessonMaterial',
+        'generation_jobs': 'GenerationJob',
+    },
+    'Enrollment': {
+        'school_class': 'SchoolClass',
+        'dreamer': 'Dreamer',
+    },
+    'LessonMaterial': {
+        'school_class': 'SchoolClass',
+        'mentor': 'Mentor',
+        'generated_materials': 'GeneratedMaterial',
+        'generation_jobs': 'GenerationJob',
+    },
+    'GeneratedMaterial': {
+        'lesson_material': 'LessonMaterial',
+        'dreamer': 'Dreamer',
+        'job': 'Job',
+    },
+    'GenerationJob': {
+        'lesson_material': 'LessonMaterial',
+        'school_class': 'SchoolClass',
     },
 }
 
