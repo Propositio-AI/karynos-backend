@@ -29,6 +29,9 @@ class DreamerGateway(BasePrismaGateway):
     def get_dreamer(self, dreamer_id: str) -> GatewayResult[list[Dreamer]]:
         return self.find_many(self.DREAMER, {"dreamer_id": str(dreamer_id)})
 
+    def get_dreamer_by_sub(self, cognito_sub: str) -> GatewayResult[list[Dreamer]]:
+        return self.find_many(self.DREAMER, {"cognito_sub": cognito_sub})
+
     def update_dreamer(
         self,
         dreamer_id: str,
