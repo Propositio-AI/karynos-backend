@@ -4,7 +4,7 @@
 karynos-backend/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py
+│   ├── main.py                   ← ルーター登録・統一エラーハンドラ
 │   ├── algorithm/
 │   │   └── job_suggestion/
 │   │       ├── __init__.py
@@ -15,8 +15,10 @@ karynos-backend/
 │   ├── gateways/
 │   │   ├── __init__.py
 │   │   ├── chat_gateway.py
+│   │   ├── dream_action_gateway.py  ← GeneratedMaterial / GenerationJob
 │   │   ├── dreamer_gateway.py
 │   │   ├── job_gateway.py
+│   │   ├── mentor_gateway.py        ← Mentor / Class / Enrollment / LessonMaterial
 │   │   ├── result.py
 │   │   └── db/
 │   │       ├── base_prisma_gateway.py
@@ -24,12 +26,18 @@ karynos-backend/
 │   ├── gen/
 │   │   └── prisma/               ← 自動生成（編集禁止）
 │   ├── lib/
-│   │   └── auth.py
+│   │   └── auth.py               ← Cognito JWT 検証・ロール判定・依存関係
+│   ├── prompts/
+│   │   └── dream_action/
+│   │       ├── generate_material.txt   ← 補助教材生成プロンプト
+│   │       └── moderation_check.txt    ← モデレーションチェックプロンプト
 │   ├── router/
 │   │   ├── chats.py
+│   │   ├── dream_action.py       ← Dreamer 向け Dream Action エンドポイント
 │   │   ├── dreamers.py
 │   │   ├── jobs.py
 │   │   ├── matching.py
+│   │   ├── mentor.py             ← Mentor 向け全エンドポイント（Class / 生徒 / 資料 / Dream Action）
 │   │   └── onboarding.py
 │   ├── schemas/
 │   │   ├── chats.py
@@ -37,57 +45,43 @@ karynos-backend/
 │   │   └── jobs.py
 │   ├── services/
 │   │   ├── chat/
-│   │   │   ├── character.py
-│   │   │   ├── context.py
-│   │   │   ├── conversation.py
-│   │   │   ├── job_api.py
-│   │   │   ├── names.json
-│   │   │   ├── openai_client.py
-│   │   │   └── prompts/
-│   │   │       └── character_prompt.txt
-│   │   ├── dreamer/
-│   │   │   ├── schemas.py
-│   │   │   └── service.py
-│   │   ├── job/
-│   │   │   ├── schema.py
-│   │   │   └── service.py
-│   │   ├── matching/
+│   │   ├── dream_action/
 │   │   │   ├── __init__.py
-│   │   │   ├── schemas.py
-│   │   │   └── service.py
+│   │   │   ├── schemas.py        ← GenerationJob / GeneratedMaterial スキーマ
+│   │   │   └── service.py        ← 生成パイプライン・配布・Dreamer 向け取得
+│   │   ├── dreamer/
+│   │   ├── job/
+│   │   ├── matching/
+│   │   ├── mentor/
+│   │   │   ├── schemas.py        ← Class / Student / LessonMaterial スキーマ
+│   │   │   └── service.py        ← クラス管理・生徒管理・資料管理・集計
 │   │   └── onboarding/
-│   │       ├── __init__.py
-│   │       ├── schemas.py
-│   │       └── service.py
 │   └── utils/
+│       ├── file_storage.py       ← ファイル検証・保存・テキスト抽出
+│       ├── prompt_loader.py      ← プロンプトテンプレートのロードと変数差し込み
 │       └── security.py
 ├── db/
-│   ├── init.sql
+│   ├── init.sql                  ← スキーマの唯一の正（Mentor / Dream Action テーブル含む）
 │   └── import/
-│       ├── import_from_gdrive.py
-│       └── table_sources.json
+├── docs/
+│   ├── api.md                    ← API 仕様（エンドポイント一覧）
+│   ├── architecture.md           ← システム構成・Dream Action パイプライン
+│   ├── auth.md                   ← 認証・認可設計・JWT クレーム設計
+│   ├── database.md               ← データモデル・ER 図
+│   ├── development.md
+│   ├── directory-structure.md    ← このファイル
+│   └── environment-variables.md
 ├── docker/
-│   ├── base/
-│   │   └── Dockerfile
-│   ├── dev/
-│   │   └── docker-compose.yml
-│   └── prod/
-│       └── docker-compose.yml
 ├── scripts/
-│   ├── ensure-prisma-binary.py
-│   ├── generate-prisma-artifacts.py
-│   ├── patch-prisma-platform.py
-│   ├── start-backend-dev.sh
-│   ├── start-backend.sh
-│   └── sync-job-vectordb.py
-├── .env.example
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-├── alembic.ini
-├── Makefile
-├── openapi.json
-├── openapi.py
+│   ├── seed_dev_data.py          ← 開発用シードデータ投入
+│   ├── sync-job-vectordb.py
+│   └── ...
+├── tests/
+│   ├── __init__.py
+│   ├── test_auth.py              ← 認証ユーティリティのユニットテスト
+│   ├── test_dream_action_service.py  ← Dream Action サービスのユニットテスト
+│   └── test_mentor_service.py    ← Mentor サービスのユニットテスト
+├── Makefile                      ← seed / test ターゲット追加
 ├── pyproject.toml
 └── settings.py
 ```

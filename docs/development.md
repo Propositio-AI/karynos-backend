@@ -12,6 +12,119 @@
 | uv | 最新推奨 | ローカルの lint ツールインストール |
 | Node.js (任意) | 18+ | `npx openapi-markdown` による API ドキュメント生成 |
 
+---
+
+## Windows での実行方法
+
+このプロジェクトは `Makefile` をタスクランナーとして使用している。Windows では `make` がデフォルトで利用できないため、以下のいずれかの方法で対応すること。
+
+### 方法 A: make をインストールして使う（推奨）
+
+**Chocolatey を使う場合**（PowerShell を管理者権限で実行）:
+```powershell
+choco install make
+```
+
+**Scoop を使う場合**:
+```powershell
+scoop install make
+```
+
+インストール後はターミナルを再起動し、通常通り `make <target>` を実行できる。
+
+### 方法 B: PowerShell で直接実行する
+
+`make` をインストールしない場合は、以下の PowerShell コマンドを使用する。
+
+> `$DEV_COMPOSE` は共通変数として最初に定義しておくと便利。
+
+```powershell
+$DEV_COMPOSE = "docker compose -f ./docker/dev/docker-compose.yml --env-file .env.local"
+```
+
+#### コード品質
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make fmt` | `uvx black .` |
+| `make lint` | `uvx ruff check .` |
+
+#### イメージビルド
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make build-base` | `docker build -f ./docker/base/Dockerfile -t karynos/be-python-base:latest .` |
+| `make build` | `Invoke-Expression "$DEV_COMPOSE build"` |
+
+#### Docker 起動 / 停止
+
+`make up` は複数のステップを順に実行する。以下を順番に実行すること:
+
+```powershell
+# 1. コンテナ起動
+Invoke-Expression "$DEV_COMPOSE up -d"
+
+# 2. Prisma クライアント再生成
+Invoke-Expression "$DEV_COMPOSE run --rm --no-deps backend-app sh -c 'prisma generate --schema /app/app/gen/prisma/schema.prisma && prisma py fetch'"
+
+# 3. DB データインポート
+Invoke-Expression "$DEV_COMPOSE run --rm backend-app python /app/db/import/import_from_gdrive.py"
+
+# 4. Qdrant 同期
+Invoke-Expression "$DEV_COMPOSE run --rm backend-app sh -c 'PYTHONPATH=/app python /app/scripts/sync-job-vectordb.py'"
+```
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make down` | `Invoke-Expression "$DEV_COMPOSE down"` |
+
+#### Shell アクセス / ログ
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make shell-app` | `Invoke-Expression "$DEV_COMPOSE exec backend-app sh"` |
+| `make shell-db` | `Invoke-Expression "$DEV_COMPOSE exec karynos-db psql -U karynos -d karynos"` |
+| `make logs` | `Invoke-Expression "$DEV_COMPOSE logs -f backend-app"` |
+
+#### Prisma
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make prisma` | `Invoke-Expression "$DEV_COMPOSE run --rm --no-deps backend-app sh -c 'prisma generate --schema /app/app/gen/prisma/schema.prisma && prisma py fetch'"` |
+
+#### DB データ操作
+
+`make db-clean`（`rm -rf` は PowerShell では `Remove-Item` を使用）:
+
+```powershell
+Invoke-Expression "$DEV_COMPOSE down"
+Remove-Item -Recurse -Force ./db-data/postgres
+Invoke-Expression "$DEV_COMPOSE up -d"
+```
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make db-import` | `Invoke-Expression "$DEV_COMPOSE run --rm backend-app python /app/db/import/import_from_gdrive.py"` |
+
+#### Qdrant 操作
+
+`make qdrant-clean`（`xargs` は使えないため個別に対応）:
+
+```powershell
+Invoke-Expression "$DEV_COMPOSE stop qdrant"
+Invoke-Expression "$DEV_COMPOSE rm -sf qdrant"
+# qdrant-data ボリュームを削除
+docker volume ls --filter name=qdrant-data -q | ForEach-Object { docker volume rm $_ }
+Invoke-Expression "$DEV_COMPOSE up -d qdrant"
+```
+
+| Makefile | PowerShell 相当 |
+|---|---|
+| `make sync-vectordb` | `Invoke-Expression "$DEV_COMPOSE run --rm backend-app sh -c 'PYTHONPATH=/app python /app/scripts/sync-job-vectordb.py'"` |
+| `make sync-vectordb-rebuild` | `Invoke-Expression "$DEV_COMPOSE run --rm backend-app sh -c 'PYTHONPATH=/app python /app/scripts/sync-job-vectordb.py --rebuild'"` |
+
+---
+
 ### 初回セットアップ
 
 ```bash

@@ -12,6 +12,8 @@
 
 ## テーブル一覧
 
+### Dream Matching ドメイン
+
 | テーブル名 | 主な用途 |
 |---|---|
 | `industries` | 業種マスター |
@@ -29,16 +31,27 @@
 | `feedback_company` | job_feedback と companies の中間テーブル |
 | `feedback_talent` | job_feedback と talents の中間テーブル |
 | `feedback_interest` | job_feedback と interests の中間テーブル |
-| `histories` | ユーザーの職業閲覧履歴（good / bad / save フラグ付き） |
-| `dreamers` | ユーザー（Dreamer）エンティティ |
+| `histories` | ユーザーの職業閲覧履歴（good / bad / save フラグ付き）|
+| `dreamers` | ユーザー（Dreamer）エンティティ（`cognito_sub` 列追加）|
 | `dreamer_groups` | Dreamer のグループ |
 | `dreamer_group_members` | Dreamer とグループの中間テーブル |
-| `init_questions` | 初期診断の質問（バージョン管理・有効フラグ付き） |
+| `init_questions` | 初期診断の質問（バージョン管理・有効フラグ付き）|
 | `init_question_options` | 初期診断質問の選択肢 |
 | `user_initial_answers` | ユーザーの診断回答 |
 | `conversations` | AI チャットの会話セッション |
-| `messages` | 会話内のメッセージ（user / assistant / system） |
+| `messages` | 会話内のメッセージ（user / assistant / system）|
 | `conversation_participants` | 会話の参加者 |
+
+### Mentor / Dream Action ドメイン（追加）
+
+| テーブル名 | 主な用途 |
+|---|---|
+| `mentors` | 教員エンティティ（`cognito_sub` でログイン識別）|
+| `classes` | クラスエンティティ（Mentor に紐づく）|
+| `enrollments` | Class と Dreamer の履修関係 |
+| `lesson_materials` | 教員がアップロードした授業資料（ソフトデリート対応）|
+| `generated_materials` | AI が生成した補助教材（生徒ごと・冪等キー付き）|
+| `generation_jobs` | 非同期生成ジョブの進捗管理 |
 
 ---
 
@@ -217,6 +230,113 @@ CREATE INDEX idx_user_initial_answers_question_version ON user_initial_answers(q
 |---|---|
 | `share_type` | `PRIVATE`, `PUBLIC` |
 | `role_type` | `user`, `assistant`, `system` |
+| `material_status` | `DRAFT`, `REVIEWING`, `DISTRIBUTED` |
+| `generation_job_status` | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED` |
+
+### material_status 遷移
+
+```
+生成完了 → DRAFT → (教員確認) → DISTRIBUTED → 生徒が閲覧可
+                 └→ REVIEWING (将来の拡張)
+```
+
+### generation_job_status 遷移
+
+```
+作成 → PENDING → PROCESSING → COMPLETED
+                            └→ FAILED
+```
+
+---
+
+## Mentor / Dream Action ドメイン ER 図
+
+```
+mentors (1)──< classes (1)──< enrollments >──< dreamers
+                    │
+                    └──< lesson_materials (1)──< generated_materials ──> dreamers
+                    │                      └──< generation_jobs
+                    └──< generation_jobs
+```
+
+### mentors
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `mentor_id` | UUID PK | |
+| `cognito_sub` | TEXT UNIQUE | Cognito ユーザーサブ（認証識別子）|
+| `login_id` | TEXT | ログイン ID |
+| `name_family` | TEXT | 苗字 |
+| `name_given` | TEXT | 名前 |
+| `email` | TEXT | メールアドレス |
+
+### classes
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `class_id` | UUID PK | |
+| `mentor_id` | UUID FK → mentors | ON DELETE CASCADE |
+| `name` | TEXT | クラス名（例: 3年A組）|
+| `subject` | TEXT? | 科目（例: 数学）|
+| `academic_year` | INTEGER? | 年度 |
+
+### enrollments
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `enrollment_id` | UUID PK | |
+| `class_id` | UUID FK → classes | ON DELETE CASCADE |
+| `dreamer_id` | UUID FK → dreamers | ON DELETE CASCADE |
+| UNIQUE | (class_id, dreamer_id) | 重複履修防止 |
+
+### lesson_materials
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `material_id` | UUID PK | |
+| `class_id` | UUID FK → classes | |
+| `mentor_id` | UUID FK → mentors | |
+| `title` | TEXT | 資料タイトル |
+| `subject` | TEXT? | 科目 |
+| `unit` | TEXT? | 単元 |
+| `file_name` | TEXT | 元のファイル名 |
+| `file_path` | TEXT | ローカル保存パス |
+| `file_size` | INTEGER | バイト数 |
+| `mime_type` | TEXT | MIME タイプ |
+| `content_text` | TEXT? | 抽出されたテキスト（LLM に渡す）|
+| `content_hash` | TEXT? | SHA-256 ハッシュ（変更検知用）|
+| `is_deleted` | BOOLEAN | ソフトデリートフラグ |
+
+### generated_materials
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `generated_material_id` | UUID PK | |
+| `lesson_material_id` | UUID FK → lesson_materials | |
+| `dreamer_id` | UUID FK → dreamers | |
+| `job_id` | INTEGER? FK → jobs | 生徒の仮の夢（job_id）|
+| `job_name` | TEXT | 職業名（キャッシュ）|
+| `title` | TEXT? | 教材タイトル |
+| `content` | TEXT? | AI 生成 Markdown 本文 |
+| `status` | material_status | DRAFT / REVIEWING / DISTRIBUTED |
+| `idempotency_key` | TEXT UNIQUE | `{material_id}:{dreamer_id}` |
+| `is_read` | BOOLEAN | 生徒既読フラグ |
+| `distributed_at` | TIMESTAMP? | 配布日時 |
+
+### generation_jobs
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `generation_job_id` | UUID PK | |
+| `lesson_material_id` | UUID FK → lesson_materials | |
+| `class_id` | UUID FK → classes | |
+| `status` | generation_job_status | ジョブ状態 |
+| `progress` | INTEGER | 進捗 % (0-100) |
+| `total_dreamers` | INTEGER | 対象生徒数 |
+| `completed_dreamers` | INTEGER | 処理完了生徒数 |
+| `error_message` | TEXT? | 失敗時のエラーメッセージ |
+| `started_at` | TIMESTAMP? | 処理開始日時 |
+| `completed_at` | TIMESTAMP? | 処理完了日時 |
 
 ---
 

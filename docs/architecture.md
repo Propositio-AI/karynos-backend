@@ -3,19 +3,19 @@
 ## システム構成
 
 ```
-                   ┌────────────────────────────┐
-  クライアント      │        backend-app          │
-  (Next.js)  ──▶│     FastAPI / Uvicorn       │◀── :8000
-                   │      (Python 3.12)          │
-                   └──────────┬─────────────────┘
+                   ┌─────────────────────────────────────────┐
+  クライアント      │             backend-app                  │
+  (Next.js)  ──▶│          FastAPI / Uvicorn              │◀── :8000
+                   │          (Python 3.12)                   │
+                   └──────────┬──────────────────────────────┘
                               │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-       ┌─────────────┐ ┌─────────────┐ ┌──────────────┐
-       │ PostgreSQL  │ │   Qdrant    │ │  OpenAI API  │
-       │   17.5      │ │ (vector DB) │ │ gpt-4o       │
-       │ :5432       │ │ :6333       │ │ text-emb-3-s │
-       └─────────────┘ └─────────────┘ └──────────────┘
+              ┌───────────────┼───────────────┬───────────────┐
+              ▼               ▼               ▼               ▼
+       ┌─────────────┐ ┌─────────────┐ ┌──────────────┐ ┌──────────┐
+       │ PostgreSQL  │ │   Qdrant    │ │  OpenAI API  │ │  AWS     │
+       │   17.5      │ │ (vector DB) │ │ gpt-4o       │ │ Cognito  │
+       │ :5432       │ │ :6333       │ │ text-emb-3-s │ │ (JWT 認証)│
+       └─────────────┘ └─────────────┘ └──────────────┘ └──────────┘
 ```
 
 すべてのコンポーネントは `karynos-network` ブリッジネットワーク内に存在する（開発環境）。
@@ -42,36 +42,136 @@ Router  →  Service  →  Gateway  →  Prisma Client  →  PostgreSQL
 
 ## ドメイン設計
 
-アプリケーションは 5 つのドメインに分割されている。
+アプリケーションは 7 つのドメインに分割されている。
 
 ### 1. Dreamer（ユーザー管理）
 - `app/router/dreamers.py` → `app/services/dreamer/`
 - Dreamer（ユーザー）エンティティとグループの CRUD
-- 認証・プロファイル以外の一切の横断的関心事を持たない
 
 ### 2. Onboarding（初期診断）
 - `app/router/onboarding.py` → `app/services/onboarding/`
-- バージョン管理付き質問票の提供
-- ユーザー回答の保存・履歴取得
-- Matching ドメインとは完全に独立
+- バージョン管理付き質問票の提供と回答の保存
 
-### 3. Matching（マッチング）
+### 3. Matching（Dream Matching）
 - `app/router/matching.py` → `app/services/matching/`
 - Onboarding 回答 + 閲覧履歴 → プロファイルテキスト生成
 - Algorithm 層の `VectorSearchRecommender` でベクトル類似検索
-- Job 情報は gateway 経由で取得し、Matching 内で完結させる
 
 ### 4. Job（職業情報）
 - `app/router/jobs.py` → `app/services/job/`
-- 職業詳細・閲覧履歴・意味検索（ユーザー入力テキスト → Qdrant）
-- Qdrant への職業データ同期（管理者用 `/admin/sync-vectordb`）
-- マッチング（プロファイルベースの推薦）は担当しない
+- 職業詳細・閲覧履歴・テキスト意味検索・Qdrant 同期
 
 ### 5. Chat（AI チャット）
 - `app/router/chats.py` → `app/services/chat/`
-- 職業担当者 AI との会話作成・メッセージ送受信
-- OpenAI Chat Completions API でストリーミング応答
-- 会話・メッセージの永続化（PostgreSQL）
+- 職業担当者 AI との会話・OpenAI Streaming 応答
+
+### 6. Mentor（教員管理）
+- `app/router/mentor.py` → `app/services/mentor/`
+- クラス・履修生徒・授業資料の管理（CRUD）
+- クラス単位の集計（関心分野・教材配布状況）
+- Dream Action トリガー・生成ジョブ管理・教材配布
+
+### 7. Dream Action（補助教材生成・配布）
+- Mentor 向け: `app/router/mentor.py` (prefix `/mentor/classes/{id}/dream-action/`)
+- Dreamer 向け: `app/router/dream_action.py` (prefix `/dream-action/`)
+- `app/services/dream_action/service.py`
+- 授業資料 + 生徒の仮の夢 → LLM → 補助教材 生成パイプライン
+- `BackgroundTasks` による非同期処理
+- `GenerationJob` テーブルで進捗管理
+- モデレーションチェック → 教員確認 → 配布 の状態遷移
+
+---
+
+## 認証・認可
+
+### 認証方式
+
+Amazon Cognito + JWT（RS256）。詳細は [`docs/auth.md`](auth.md) を参照。
+
+```
+クライアント → Authorization: Bearer <JWT>
+                    ↓
+         app/lib/auth.py (FastAPI 依存関係)
+              ├── JWKS から公開鍵を取得（lru_cache でキャッシュ）
+              ├── RS256 署名検証
+              ├── iss / aud / exp 検証
+              ├── cognito:groups → Role 判定（Dreamer / Mentor）
+              └── cognito_sub → DB の dreamer_id / mentor_id に解決
+```
+
+### モックモード
+
+`COGNITO_USER_POOL_ID` が未設定の場合、モック認証が有効になる。
+- Dreamer: 固定 UUID `00000000-0000-0000-0000-000000000001`
+- Mentor: cognito_sub `mock-mentor-sub` → `00000000-0000-0000-0000-000000000002`
+
+---
+
+## Dream Action パイプライン
+
+```
+Mentor: POST /mentor/classes/{class_id}/dream-action/generate
+            │
+            ▼
+    DreamActionService.trigger_generation()
+            ├── クラス帰属・資料帰属を確認
+            ├── GenerationJob を PENDING で作成
+            └── BackgroundTasks に _run_generation_job を登録
+                        │
+                        ▼ (非同期実行)
+            _run_generation_job()
+                ├── GenerationJob → PROCESSING
+                ├── 履修生徒を取得（または指定 dreamer_ids）
+                └── 各生徒 (_generate_for_dreamer):
+                        ├── 冪等キー確認（force_regenerate でスキップ可）
+                        ├── 生徒の仮の夢（liked job）を取得
+                        ├── プロンプトテンプレート差し込み（prompts/dream_action/）
+                        ├── OpenAI gpt-4o で教材生成
+                        ├── モデレーションチェック（不合格は保存しない）
+                        └── GeneratedMaterial を DRAFT で保存
+
+Mentor: POST /mentor/classes/{class_id}/dream-action/distribute
+            └── GeneratedMaterial → DISTRIBUTED（配布済み）
+
+Dreamer: GET /dream-action/materials
+            └── 自分宛ての DISTRIBUTED 教材のみ閲覧可
+```
+
+### プロンプト管理
+
+LLM プロンプトはコードから分離し `app/prompts/dream_action/` で管理する。
+
+| テンプレート | 変数 | 用途 |
+|---|---|---|
+| `generate_material.txt` | `student_name`, `job_name`, `job_description`, `subject`, `unit`, `material_title`, `lesson_content` | 補助教材生成 |
+| `moderation_check.txt` | `content` | 適切性チェック（JSON 出力） |
+
+---
+
+## 統一エラーレスポンス形式
+
+全エンドポイントのエラーレスポンスは以下の形式で統一される。
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "クラスが見つかりません",
+    "detail": null
+  }
+}
+```
+
+| HTTP ステータス | code |
+|---|---|
+| 400 | `BAD_REQUEST` |
+| 401 | `UNAUTHORIZED` |
+| 403 | `FORBIDDEN` |
+| 404 | `NOT_FOUND` |
+| 409 | `CONFLICT` |
+| 413 | `PAYLOAD_TOO_LARGE` |
+| 422 | `VALIDATION_ERROR` |
+| 500 | `INTERNAL_SERVER_ERROR` |
 
 ---
 
@@ -81,88 +181,20 @@ Router  →  Service  →  Gateway  →  Prisma Client  →  PostgreSQL
 
 ```python
 # GatewayResult は常に {"success": bool, "message": list, "data": T} の形を返す
-result = dreamer_gateway.get_dreamer(dreamer_id)
+result = mentor_gateway.get_class(class_id)
 if not result["success"] or not result["data"]:
     raise HTTPException(...)
-dreamer = result["data"][0]
+cls = result["data"][0]
 ```
-
-すべての DB アクセスは Gateway を経由し、Service は直接 Prisma を呼び出さない。
 
 ### Prisma の同期実行
 
-FastAPI は同期エンドポイント（`def`）で動作しており、Prisma Client は非同期 API しか持たない。
-この差異を吸収するため `app/gateways/db/prisma_client.py` でデディケートスレッド上のイベントループを起動し、`asyncio.run_coroutine_threadsafe` で同期的に呼び出している。
+FastAPI の同期エンドポイントと Prisma の非同期 API を橋渡しするため、
+`app/gateways/db/prisma_client.py` でデディケートスレッド上のイベントループを起動し、
+`asyncio.run_coroutine_threadsafe` で同期的に呼び出している。
 
 ```
 FastAPI (sync)  →  run_prisma()  →  専用イベントループスレッド  →  Prisma (async)
-```
-
-### Algorithm 層の純粋性
-
-`app/algorithm/` 配下のモジュールは **外部 I/O を持たない純粋計算** として設計されている。
-
-- `VectorSearchRecommender`: Qdrant クライアントを保持するが、データ取得のロジックは Service 層が担う
-- `RuleBasedProfileGenerator`: 入力 dict → プロファイルテキストの変換のみ
-- `RecommendationProcessor`: 閲覧済みジョブのフィルタリングのみ
-
-Gateway 呼び出し・HTTP 呼び出しを Algorithm 層に追加してはならない。
-
----
-
-## リクエスト処理フロー
-
-### マッチングリクエストの例
-
-```
-GET /api/v1/matching/recommend
-        │
-        ▼
-app/router/matching.py
-  └── matching_service.recommend(dreamer_id)
-              │
-              ├── dreamer_gateway.list_answer_history(dreamer_id)   → PostgreSQL
-              │      └── dreamer_gateway.get_answer_question(id)    → PostgreSQL
-              │      └── dreamer_gateway.get_answer_option(id)      → PostgreSQL
-              │
-              ├── job_gateway.get_history(dreamer_id)               → PostgreSQL
-              │      └── job_gateway.get_job(job_id) × N           → PostgreSQL
-              │
-              ├── RuleBasedProfileGenerator.generate_profile(...)   → (純粋計算)
-              │
-              └── VectorSearchRecommender.search_jobs(profile)      → Qdrant
-                         └── OpenAI.embeddings.create(profile)      → OpenAI API
-```
-
-### チャットメッセージ送信の例
-
-```
-POST /api/v1/chat/message/{conversation_id}
-        │
-        ▼
-app/router/chats.py (StreamingResponse)
-  └── conversation_service.create_ai_response_stream(...)
-              │
-              ├── chat_gateway.create_message(user_msg)             → PostgreSQL
-              ├── chat_gateway.update_conversation(last_msg_at)     → PostgreSQL
-              ├── get_job_data(job_id)                              → 自己 API
-              ├── build_openai_messages(conversation_id, ...)       → PostgreSQL
-              └── OpenAIClient.chat_stream(messages)                → OpenAI API (SSE)
-```
-
----
-
-## 依存関係
-
-```
-router
-  └── service
-        ├── gateway  ──── prisma_client ──── gen/prisma (自動生成)
-        ├── algorithm.recommendation  ──── Qdrant
-        └── chat.openai_client  ──── OpenAI API
-
-設定: settings.py  ←── pydantic-settings  ←── .env.local
-認証: app/lib/auth.py  (TODO: 現在はハードコードされたダミー UUID)
 ```
 
 ---
@@ -170,9 +202,11 @@ router
 ## 設計思想
 
 1. **責務の明確な分離**: Router は HTTP のみ、Service はビジネスロジックのみ、Gateway は DB のみ担当する。
-2. **Algorithm の純粋性**: アルゴリズム層は I/O を持たず、単体テストが容易な構造を目指す。
-3. **Gateway Result の統一**: すべての DB アクセスは `{"success", "message", "data"}` 形式で返り、Service 層での一貫したエラーハンドリングを実現する。
-4. **ドメイン間の独立性**: Onboarding と Matching は同一データを扱うが、サービスクラスを分離し直接依存しない設計とする。Matching が Onboarding のデータを必要とする場合は Gateway 経由でアクセスする。
+2. **プロンプトのコード分離**: LLM プロンプトはコードに直書きせず `app/prompts/` で管理する。
+3. **教員が最終判断者**: AI 生成教材は必ず DRAFT 状態で保存し、教員が確認・配布するまで生徒に見えない。
+4. **未成年データの最小権限**: Mentor が参照できる生徒情報は教育目的に必要な範囲（基本情報 + 関心傾向）に限定する。
+5. **Gateway Result の統一**: すべての DB アクセスは `{"success", "message", "data"}` 形式で返す。
+6. **冪等な生成**: `idempotency_key = "{material_id}:{dreamer_id}"` で重複生成を防ぐ。
 
 ---
 
@@ -180,8 +214,7 @@ router
 
 | 項目 | 状況 |
 |---|---|
-| 認証・認可 | `app/lib/auth.py` がハードコードされたダミー UUID を返している。実装が必要。 |
 | 本番環境の Qdrant | `docker/prod/docker-compose.yml` に Qdrant サービスが存在しない。追加が必要。 |
-| 自動テスト | テストコードが存在しない。 |
-| 型チェック | mypy / pyright が CI に組み込まれていない。 |
 | Chat の自己 API 呼び出し | `app/services/chat/job_api.py` が `http://backend-app:8000` に HTTP リクエストしている。Gateway 経由に変更すべき。 |
+| Alembic マイグレーション | `alembic.ini` はあるが `migrations/` が未作成。現在は `db/init.sql` で初期化。 |
+| アクセスログ | 教員による生徒データアクセスのログ記録は未実装。 |
