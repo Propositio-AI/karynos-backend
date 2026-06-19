@@ -1,0 +1,9 @@
+# シェルスクリプトは必ず LF で管理（Windows の CRLF 変換を防ぐ）
+*.sh    text eol=lf
+
+# Dockerfile も LF
+Dockerfile*  text eol=lf
+docker/**    text eol=lf
+
+# その他テキストファイルはデフォルト動作
+*           text=auto
