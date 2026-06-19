@@ -5,7 +5,7 @@ DEV_COMPOSE := docker compose -f ./docker/dev/docker-compose.yml --env-file .env
 
 SCHEMA_PATH := /app/app/gen/prisma/schema.prisma
 
-.PHONY: build-base build up down shell-app shell-db logs prisma db-clean db-import sync-vectordb sync-vectordb-rebuild qdrant-clean fmt lint
+.PHONY: build-base build up down shell-app shell-db logs prisma db-clean db-import sync-vectordb sync-vectordb-rebuild qdrant-clean fmt lint seed test
 
 # ────────────────────────────────────────────
 # イメージビルド
@@ -107,3 +107,11 @@ sync-vectordb:
 ## 職業データを Qdrant に全件再構築（スキーマ変更・データ完全刷新時）
 sync-vectordb-rebuild:
 	$(DEV_COMPOSE) run --rm backend-app sh -c "PYTHONPATH=/app python /app/scripts/sync-job-vectordb.py --rebuild"
+
+## 開発用シードデータ投入（Mentor / Class / Dreamer / Enrollment / LessonMaterial）
+seed:
+	$(DEV_COMPOSE) run --rm backend-app sh -c "PYTHONPATH=/app python /app/scripts/seed_dev_data.py"
+
+## ユニットテスト実行
+test:
+	$(DEV_COMPOSE) run --rm --no-deps backend-app sh -c "PYTHONPATH=/app python -m pytest tests/ -v"
