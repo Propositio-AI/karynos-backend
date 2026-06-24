@@ -1,185 +1,144 @@
-# karynos-backend
+# Karynos Backend
 
-[システム設計](https://www.notion.so/Karynos-backend-module-1b39a9038f388050816afe733aa3cdfc?source=copy_link)
+職業診断・マッチング・AIチャットを提供する FastAPI バックエンドサービス。
 
-## フォルダ構成
+## 主な機能
 
-```
-├─app                             // 統合 FastAPI アプリ
-│  ├─router                       // ドメイン別ルータ
-│  ├─gateways                     // DB ゲートウェイ公開層
-│  ├─schemas                      // ルート集約スキーマ
-│  └─services                     // 既存実装を保った各機能群
-├─algorithm                       // レコメンド・探索ロジック
-├─backend                         // 共通ライブラリ・ユーティリティ
-├─db                              // 単一DB初期化・データ投入
-│  ├─init.sql                     // 全テーブル定義（初回のみ実行）
-│  └─import
-│     ├─import_from_gdrive.py     // Google Drive CSV -> DBインポート
-│     └─table_sources.json        // テーブルごとのCSV URL設定
-├─db-data                         // PostgreSQL 永続ボリューム
-├─docker                          // docker-compose関連
-│  ├─dev                          // 開発用
-│  └─prod                         // 本番用
-├─migrations                      // マイグレーション関連
-├─shared                          // Prisma スキーマなど移行中の共有資産
-└─services                        // 旧構成の参照用コピー
-```
+| 機能 | エンドポイント接頭辞 | 概要 |
+|---|---|---|
+| **初期診断 (Onboarding)** | `/api/v1/onboarding` | バージョン付き質問票へのユーザー回答を収集・保存 |
+| **マッチング (Matching)** | `/api/v1/matching` | 回答と閲覧履歴からプロファイルを生成し Qdrant でベクトル類似検索 |
+| **職業情報 (Job)** | `/api/v1/job` | 職業詳細・意味検索・閲覧履歴管理・Qdrant 同期 |
+| **AI チャット (Chat)** | `/api/v1/chat` | 職業担当者 AI とのリアルタイム会話（OpenAI Streaming） |
+| **Dreamer 管理** | `/api/v1/dreamer` | ユーザー (Dreamer) とグループの CRUD |
 
-## 環境構築方法
-1. ### Gitからダウンロード
+詳細な API 仕様は `docs/api.md` を参照（生成方法は後述）。
 
-    ```cmd
-    git clone https://github.com/Propositio-AI/karynos-backend.git
-    cd karynos-backend
-    ```
+## 技術スタック
 
-2. ### .envファイルのダウンロード
+| カテゴリ | 採用技術 |
+|---|---|
+| Web フレームワーク | FastAPI + Uvicorn |
+| 言語 | Python 3.12 |
+| ORM | Prisma (prisma-py) |
+| DB | PostgreSQL 17.5 |
+| ベクトル DB | Qdrant |
+| AI | OpenAI API (gpt-4o / text-embedding-3-small) |
+| コンテナ | Docker / Docker Compose |
+| Lint / Format | Ruff / Black |
 
-    ルートの `.env.local` を配置してください。最低限、以下があれば統合バックエンドは起動できます。
+## セットアップ
 
-    ```env
-    APP_NAME=karynos-backend
-    DATABASE_URL=postgresql://karynos:karynos@karynos-db:5432/karynos
-    CORS_ORIGINS=http://localhost:3000
-    ```
+### 前提条件
 
-3. ### 共通イメージのビルド
+- Docker Desktop がインストールされていること
+- `OPENAI_API_KEY` を取得済みであること
 
-    ```cmd
-    docker build -t karynos/be-python-base:latest -f ./docker/python-base.Dockerfile .
-    ```
+### 手順
 
-## 開発環境の起動方法
+```bash
+# 1. 環境変数ファイルを作成
+cp .env.example .env.local
+vi .env.local        # OPENAI_API_KEY を設定する
 
-```cmd
-docker compose -f ./docker/dev/docker-compose.yml up --build
+# 2. ベースイメージをビルド（初回 / pyproject.toml 変更時のみ）
+make build-base
+
+# 3. アプリイメージをビルド
+make build
 ```
 
-または Make コマンドで Docker 実行に統一できます。
+## 起動方法
 
-```cmd
-make run
-```
-
-`backend-app` は `shared/prisma/schema.prisma` のハッシュを見て、変更があったときだけ `prisma generate` を実行します。
-強制的に再生成したい場合は `FORCE_PRISMA_GENERATE=1` を指定して起動してください。
-
-## 新しいアーキテクチャ（単一DB + 単一バックエンド + Prisma）
-
-- DBは `karynos-db` の1コンテナのみです。
-- 初回起動時に `db/init.sql` が自動実行され、全テーブルが作成されます。
-- `db-csv-import` が `db/import/table_sources.json` を読み、Google Drive CSVをインポートします。
-- `backend-app` が `app.main:app` を起動し、`/job` `/dreamer` `/mentor` `/organization` `/chat` を1プロセスで提供します。
-- Prisma Client Python は `shared/prisma/schema.prisma` をソースに生成します。
-
-## Google Drive CSVインポート設定
-
-1. `db/import/table_sources.json` の `REPLACE_WITH_FILE_ID` を実ファイルIDに置換
-2. CSVヘッダーはDBのカラム名と一致させる
-3. 既存データがあるテーブルはデフォルトでスキップ（`truncate: true` の場合は再投入）
-
-## 環境変数（単一DB）
-
-`docker/dev/docker-compose.yml` では以下を利用します（未指定時はデフォルト値あり）。
-
-- `KARYNOS_DB_SERVER_NAME`
-- `KARYNOS_DB_USER`
-- `KARYNOS_DB_PASSWORD`
-- `KARYNOS_DB_NAME`
-- `KARYNOS_DB_PORT`
-- `CHROMA_PERSIST_DIRECTORY`（既定: `/app/ChromaDB`）
-
-## 補足
-
-- `app/`, `backend/`, `algorithm/` が新しいルート構成です。
-- `services/` と `shared/` には移管元コードも残してあり、差分確認や段階的削除に使えます。
-
-## Docker 内での開発用コマンド
-
-以下はすべて Docker コンテナ内で実行されます。
-
-1. Prisma Client の生成
-
-```cmd
-make prisma
-```
-
-1. OpenAPI 設定ファイル（`openapi.json`）の生成
-
-```cmd
-make openapi
-```
-
-1. 職業データから ChromaDB（ベクトルDB）を再構築
-
-```cmd
-make sync-job-vectordb
-```
-
-1. Google Drive CSV からDBへ再インポート
-
-```cmd
-docker compose -f ./docker/dev/docker-compose.yml run --rm db-csv-import
-```
-
-1. バックグラウンド起動・停止・ログ
-
-```cmd
+```bash
 make up
-make logs
-make down
 ```
 
-## Windows (PowerShell) 用コマンド
+`make up` は以下を順番に実行する。
 
-Windows で `make` が使えない場合は、以下の `docker compose` を直接実行してください。
+1. コンテナ起動（PostgreSQL + Qdrant + backend-app）
+2. Prisma クライアント再生成
+3. Google Drive からマスターデータをインポート
+4. 職業データを Qdrant へ同期
 
-1. Prisma Client の生成
+起動後 `http://localhost:8000/docs` で Swagger UI を確認できる。
 
-```powershell
-docker compose -f .\docker\dev\docker-compose.yml build backend-app
-docker compose -f .\docker\dev\docker-compose.yml run --rm --no-deps backend-app prisma generate --schema /app/app/gen/prisma/schema.prisma
+### よく使うコマンド
+
+```bash
+make down                    # コンテナ停止
+make logs                    # backend-app のログを tail
+make shell-app               # backend-app コンテナに入る
+make shell-db                # PostgreSQL に psql で接続
+make prisma                  # schema.prisma 変更後にクライアント再生成
+make db-clean                # DB データ完全削除（コンテナ再起動）
+make qdrant-clean            # Qdrant データ削除（コンテナ再起動）
+make sync-vectordb-rebuild   # Qdrant に全件再構築
 ```
 
-1. OpenAPI 設定ファイル（`openapi.json`）の生成
-
-```powershell
-docker compose -f .\docker\dev\docker-compose.yml build backend-app
-docker compose -f .\docker\dev\docker-compose.yml run --rm --no-deps backend-app python /app/openapi.py
-```
-
-1. 職業データから ChromaDB（ベクトルDB）を再構築
-
-```powershell
-docker compose -f .\docker\dev\docker-compose.yml build backend-app
-docker compose -f .\docker\dev\docker-compose.yml run --rm backend-app sh -lc "set -e; prisma generate --schema /app/app/gen/prisma/schema.prisma; PYTHONPATH=/app python /app/scripts/sync_job_chromadb.py"
-```
-
-1. Google Drive CSV からDBへ再インポート
-
-```powershell
-docker compose -f .\docker\dev\docker-compose.yml run --rm db-csv-import
-```
-
-1. 起動・ログ・停止
-
-```powershell
-docker compose -f .\docker\dev\docker-compose.yml up -d --build
-docker compose -f .\docker\dev\docker-compose.yml logs -f backend-app
-docker compose -f .\docker\dev\docker-compose.yml down
-```
-
-## 共通イメージの内容
+## ディレクトリ構成（簡易版）
 
 ```
-FROM python:3.12-slim
-
-WORKDIR /app
-
-COPY . .
-
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir .
+karynos-backend/
+├── app/
+│   ├── main.py               # FastAPI アプリ・ルーター登録
+│   ├── router/               # HTTP エンドポイント定義
+│   ├── services/             # ビジネスロジック（5 ドメイン）
+│   ├── gateways/             # DB アクセス層（Prisma ラッパー）
+│   ├── algorithm/            # ベクトル検索・プロファイル生成（純粋計算）
+│   ├── lib/                  # 認証など共通ユーティリティ
+│   └── gen/prisma/           # Prisma 自動生成コード（編集禁止）
+├── db/
+│   ├── init.sql              # DDL・テーブル定義（スキーマの唯一の正）
+│   └── import/               # Google Drive からのマスターデータインポート
+├── docker/
+│   ├── base/Dockerfile       # ベースイメージ（pip + Prisma CLI）
+│   ├── dev/docker-compose.yml
+│   └── prod/docker-compose.yml
+├── scripts/                  # 起動・Prisma バイナリ取得・Qdrant 同期スクリプト
+├── .env.example              # 環境変数テンプレート
+├── pyproject.toml            # 依存パッケージ・ツール設定
+└── Makefile                  # 全作業の入口
 ```
 
+詳細は [docs/directory-structure.md](docs/directory-structure.md) を参照。
+
+## ドキュメント一覧
+
+| ドキュメント | 内容 |
+|---|---|
+| [docs/architecture.md](docs/architecture.md) | システム構成・レイヤ設計・リクエストフロー |
+| [docs/database.md](docs/database.md) | テーブル一覧・リレーション・DDL・運用 |
+| [docs/development.md](docs/development.md) | 開発環境構築・Lint・CI/CD・デプロイ |
+| [docs/environment-variables.md](docs/environment-variables.md) | 環境変数一覧・必須/任意・利用箇所 |
+| [docs/directory-structure.md](docs/directory-structure.md) | 各ディレクトリの責務・依存関係 |
+| docs/api.md | API 仕様（下記コマンドで生成） |
+
+### API ドキュメントの生成
+
+```bash
+# openapi.json を最新化（エンドポイント変更時は必ず実行）
+PYTHONPATH=. python openapi.py
+
+# Markdown に変換
+npx openapi-markdown openapi.json > docs/api.md
+```
+
+## Push 前チェックリスト
+
+CI (`develop` / `main` ブランチへの push・PR) で自動実行されるもの：
+
+- [ ] **Black フォーマットチェック通過** — `uvx black --check .`
+- [ ] **Ruff lint チェック通過** — `uvx ruff check .`
+
+ローカルで確認すること：
+
+- [ ] **Docker build 成功** — `make build-base && make build`
+- [ ] **openapi.json 更新済み** — エンドポイント変更時は `PYTHONPATH=. python openapi.py` を実行
+- [ ] **db/init.sql と Prisma スキーマが整合している** — テーブル追加・変更時に確認
+
+> 自動テスト・型チェック (mypy / pyright) は現時点で CI に含まれていない。
+
+## ライセンス
+
+TODO: ライセンスを設定すること。

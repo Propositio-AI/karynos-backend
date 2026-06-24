@@ -1,2 +1,40 @@
-db-data/
+# ── 環境・シークレット ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Python ──────────────────────────────────────────
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── ランタイムデータ (Dockerボリューム) ─────────────
+db-data/
+ChromaDB/
+
+# ── 生成ファイル ────────────────────────────────────
+openapi.json
+karynos-backend-client/
+
+# ── Prisma バイナリ ──────────────────────────────────
+**/prisma-query-engine-*
+
+# ── OS / エディタ ────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

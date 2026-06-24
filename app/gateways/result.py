@@ -1,9 +1,7 @@
-from typing import Generic, TypeVar, TypedDict
-
-T = TypeVar("T")
+from typing import TypedDict
 
 
-class GatewayResult(TypedDict, Generic[T]):
+class GatewayResult[T](TypedDict):
     success: bool
     message: list[str]
     data: T | None

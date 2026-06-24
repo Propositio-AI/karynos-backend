@@ -64,73 +64,95 @@ class JobGateway(BasePrismaGateway):
             skill = getattr(item, "skill", None)
             if skill is None:
                 continue
-            skills.append(
-                {
-                    "skill_id": getattr(skill, "skill_id", None),
-                    "name": getattr(skill, "name", None),
-                    "is_required": getattr(item, "is_required", False),
-                }
-            )
+            skill_id = getattr(skill, "skill_id", None)
+            name = getattr(skill, "name", None)
+            if skill_id is not None and name is not None:
+                skills.append(
+                    {
+                        "skill_id": skill_id,
+                        "name": name,
+                        "is_required": getattr(item, "is_required", False),
+                    }
+                )
 
         certifications = []
         for item in list(getattr(feedback, "feedback_certification", []) or []):
             cert = getattr(item, "certification", None)
             if cert is None:
                 continue
-            certifications.append(
-                {
-                    "certification_id": getattr(cert, "certification_id", None),
-                    "name": getattr(cert, "name", None),
-                    "is_required": getattr(item, "is_required", False),
-                }
-            )
+            cert_id = getattr(cert, "certification_id", None)
+            name = getattr(cert, "name", None)
+            if cert_id is not None and name is not None:
+                certifications.append(
+                    {
+                        "certification_id": cert_id,
+                        "name": name,
+                        "is_required": getattr(item, "is_required", False),
+                    }
+                )
 
         companies = []
         for item in list(getattr(feedback, "feedback_company", []) or []):
             company = getattr(item, "company", None)
             if company is None:
                 continue
-            companies.append(
-                {
-                    "company_id": getattr(company, "company_id", None),
-                    "name": getattr(company, "name", None),
-                }
-            )
+            company_id = getattr(company, "company_id", None)
+            name = getattr(company, "name", None)
+            if company_id is not None and name is not None:
+                companies.append(
+                    {
+                        "company_id": company_id,
+                        "name": name,
+                    }
+                )
 
         talents = []
         for item in list(getattr(feedback, "feedback_talent", []) or []):
             talent = getattr(item, "talent", None)
             if talent is None:
                 continue
-            talents.append(
-                {
-                    "talent_id": getattr(talent, "talent_id", None),
-                    "name": getattr(talent, "name", None),
-                    "is_required": getattr(item, "is_required", False),
-                }
-            )
+            talent_id = getattr(talent, "talent_id", None)
+            name = getattr(talent, "name", None)
+            if talent_id is not None and name is not None:
+                talents.append(
+                    {
+                        "talent_id": talent_id,
+                        "name": name,
+                        "is_required": getattr(item, "is_required", False),
+                    }
+                )
 
         interests = []
         for item in list(getattr(feedback, "feedback_interest", []) or []):
             interest = getattr(item, "interest", None)
             if interest is None:
                 continue
-            interests.append(
-                {
-                    "interest_id": getattr(interest, "interest_id", None),
-                    "name": getattr(interest, "name", None),
-                    "is_required": getattr(item, "is_required", False),
-                }
-            )
+            interest_id = getattr(interest, "interest_id", None)
+            name = getattr(interest, "name", None)
+            if interest_id is not None and name is not None:
+                interests.append(
+                    {
+                        "interest_id": interest_id,
+                        "name": name,
+                        "is_required": getattr(item, "is_required", False),
+                    }
+                )
 
         return JobProjection(
             job_id=getattr(job, "job_id", None),
             name=getattr(job, "name", "") or "",
             description=getattr(job, "description", "") or "",
-            imgs=[getattr(image, "img_url", "") for image in list(getattr(job, "job_images", []) or [])],
+            imgs=[
+                getattr(image, "img_url", "")
+                for image in list(getattr(job, "job_images", []) or [])
+            ],
             salary=_val("salary", 0),
             level=_val("level", 0),
-            end_time=(getattr(feedback, "end_time", None).isoformat() if feedback and getattr(feedback, "end_time", None) else ""),
+            end_time=(
+                getattr(feedback, "end_time", None).isoformat()
+                if feedback and getattr(feedback, "end_time", None)
+                else ""
+            ),
             holiday=_val("holiday", 0),
             overtime_hours=_val("overtime_hours", 0),
             age=_val("age", 0),
@@ -197,12 +219,26 @@ class JobGateway(BasePrismaGateway):
     def get_history(self, dreamer_id: Any) -> GatewayResult[list[History]]:
         return self.find_many(self.HISTORY, {"dreamer_id": str(dreamer_id)})
 
+    def create_history(self, dreamer_id: Any, job_id: int) -> GatewayResult[History]:
+        return self.create(
+            self.HISTORY,
+            {
+                "job_id": job_id,
+                "dreamer_id": str(dreamer_id),
+                "good": False,
+                "bad": False,
+                "save": False,
+            },
+        )
+
     def update_history(
         self,
         history_id: Any,
         payload: prisma_types.HistoryUpdateInput | dict[str, Any],
     ) -> GatewayResult[list[History]]:
-        return self.update_many_and_fetch(self.HISTORY, {"history_id": str(history_id)}, payload)
+        return self.update_many_and_fetch(
+            self.HISTORY, {"history_id": str(history_id)}, payload
+        )
 
 
 job_gateway = JobGateway()

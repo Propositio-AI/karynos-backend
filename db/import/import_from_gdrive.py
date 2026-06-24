@@ -4,13 +4,12 @@ import re
 import tempfile
 import time
 from pathlib import Path
-from urllib.parse import unquote, urlparse
 from typing import Any
+from urllib.parse import unquote, urlparse
 
 import psycopg2
 import requests
-from psycopg2 import sql
-from psycopg2 import OperationalError
+from psycopg2 import OperationalError, sql
 
 
 def env(name: str, default: str = "") -> str:
@@ -50,7 +49,12 @@ def resolve_local_csv_path(raw_url: str) -> str | None:
     if text.startswith("file://"):
         parsed = urlparse(text)
         local_path = unquote(parsed.path or "")
-        if os.name == "nt" and local_path.startswith("/") and len(local_path) >= 3 and local_path[2] == ":":
+        if (
+            os.name == "nt"
+            and local_path.startswith("/")
+            and len(local_path) >= 3
+            and local_path[2] == ":"
+        ):
             local_path = local_path[1:]
         if local_path and os.path.exists(local_path):
             return local_path
@@ -146,7 +150,9 @@ def copy_csv(
     # Load CSV into a temporary unconstrained table first.
     # This allows a safe upsert into the real table and skips duplicate keys.
     staging_table_name = f"tmp_import_{table_name}"
-    cur.execute(sql.SQL("DROP TABLE IF EXISTS {};").format(sql.Identifier(staging_table_name)))
+    cur.execute(
+        sql.SQL("DROP TABLE IF EXISTS {};").format(sql.Identifier(staging_table_name))
+    )
     cur.execute(
         sql.SQL("CREATE TEMP TABLE {} AS SELECT {} FROM {} WITH NO DATA;").format(
             sql.Identifier(staging_table_name),
@@ -160,14 +166,20 @@ def copy_csv(
         sql.SQL(", ").join(sql.Identifier(header.strip()) for header in headers),
     )
 
-    with open(csv_path, "r", encoding="utf-8") as f:
+    with open(csv_path, encoding="utf-8") as f:
         cur.copy_expert(copy_query.as_string(cur.connection), f)
 
-    cur.execute(sql.SQL("SELECT COUNT(*) FROM {};").format(sql.Identifier(staging_table_name)))
+    cur.execute(
+        sql.SQL("SELECT COUNT(*) FROM {};").format(sql.Identifier(staging_table_name))
+    )
     staged_rows = int(cur.fetchone()[0])
 
     if truncate:
-        cur.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(sql.Identifier(table_name)))
+        cur.execute(
+            sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE;").format(
+                sql.Identifier(table_name)
+            )
+        )
 
     insert_query = sql.SQL(
         "INSERT INTO {} ({}) SELECT {} FROM {} ON CONFLICT DO NOTHING;"
@@ -190,7 +202,7 @@ def load_config(config_path: str) -> list[dict[str, Any]]:
 
     import json
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         data = json.load(f)
 
     tables = data.get("tables", [])
@@ -201,7 +213,9 @@ def load_config(config_path: str) -> list[dict[str, Any]]:
 
 def main() -> None:
     config_path = env("CSV_IMPORT_CONFIG_JSON", "/opt/db_import/table_sources.json")
-    skip_if_has_data = parse_bool(env("CSV_IMPORT_SKIP_IF_TABLE_HAS_DATA", "true"), default=True)
+    skip_if_has_data = parse_bool(
+        env("CSV_IMPORT_SKIP_IF_TABLE_HAS_DATA", "true"), default=True
+    )
     table_configs = load_config(config_path)
 
     if not table_configs:
@@ -223,7 +237,9 @@ def main() -> None:
                     continue
 
                 if is_placeholder_url(csv_url):
-                    print(f"[csv-import] placeholder url for table '{table_name}'. skip.")
+                    print(
+                        f"[csv-import] placeholder url for table '{table_name}'. skip."
+                    )
                     continue
 
                 if not table_exists(cur, table_name):
@@ -232,12 +248,16 @@ def main() -> None:
 
                 current_count = table_row_count(cur, table_name)
                 if skip_if_has_data and current_count > 0 and not truncate:
-                    print(f"[csv-import] table '{table_name}' already has {current_count} rows. skip.")
+                    print(
+                        f"[csv-import] table '{table_name}' already has {current_count} rows. skip."
+                    )
                     continue
 
                 tmp_csv_path, is_temp_file = download_csv(csv_url)
                 try:
-                    new_count, staged_rows, inserted_rows = copy_csv(cur, table_name, tmp_csv_path, truncate)
+                    new_count, staged_rows, inserted_rows = copy_csv(
+                        cur, table_name, tmp_csv_path, truncate
+                    )
                     conn.commit()
                     skipped_rows = max(staged_rows - inserted_rows, 0)
                     print(
