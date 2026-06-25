@@ -12,6 +12,8 @@ from app.services.dreamer.schemas import (
     NewDreamerGroupResponse,
     NewDreamerRequest,
     NewDreamerResponse,
+    TestLoginRequest,
+    TestLoginResponse,
     UpdateDreamerGroupRequest,
     UpdateDreamerRequest,
 )
@@ -30,6 +32,29 @@ class DreamerService:
         )
         self._ensure_success(create_response)
         return NewDreamerResponse.model_validate(create_response["data"])
+
+    def test_login(self, request: TestLoginRequest) -> TestLoginResponse:
+        name = request.name.strip()
+        grade = request.grade.strip()
+
+        existing_response = dreamer_gateway.find_by_identity(
+            name_family="", name_given=name, grade=grade
+        )
+        self._ensure_success(existing_response)
+        if existing_response["data"]:
+            return TestLoginResponse.model_validate(existing_response["data"][0])
+
+        create_response = dreamer_gateway.create_dreamer(
+            {
+                "organization_id": None,
+                "name_family": "",
+                "name_given": name,
+                "grade": grade,
+                "login_id": random_string(),
+            }
+        )
+        self._ensure_success(create_response)
+        return TestLoginResponse.model_validate(create_response["data"])
 
     def get_dreamer(self, dreamer_id: str):
         dreamer_response = dreamer_gateway.get_dreamer(dreamer_id)

@@ -1,7 +1,11 @@
+from contextlib import asynccontextmanager
+
+import posthog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRouter
 
+from app.middleware import PostHogMiddleware
 from app.router.chats import router as chat_router
 from app.router.dreamers import router as dreamer_router
 from app.router.jobs import router as job_router
@@ -9,8 +13,22 @@ from app.router.matching import router as matching_router
 from app.router.onboarding import router as onboarding_router
 from settings import settings
 
-app = FastAPI(title=settings.APP_NAME)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not settings.POSTHOG_DISABLED and settings.POSTHOG_PROJECT_TOKEN:
+        posthog.api_key = settings.POSTHOG_PROJECT_TOKEN
+        posthog.host = settings.POSTHOG_HOST
+
+    yield
+
+    if not settings.POSTHOG_DISABLED and settings.POSTHOG_PROJECT_TOKEN:
+        posthog.flush()
+
+
+app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
+
+app.add_middleware(PostHogMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,

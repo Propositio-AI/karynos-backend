@@ -21,6 +21,17 @@ class UpdateDreamerRequest(BaseModel):
     name_given: str = Field(None, description="名前")
 
 
+class TestLoginRequest(BaseModel):
+    name: str = Field(..., description="お名前")
+    grade: str = Field(..., description="学年")
+
+
+class TestLoginResponse(BaseModel):
+    dreamer_id: UUID = Field(..., description="dreamer ID")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DreamerGroupSummary(BaseModel):
     name: str = Field(..., description="グループ名")
     group_id: UUID = Field(..., description="グループID")
