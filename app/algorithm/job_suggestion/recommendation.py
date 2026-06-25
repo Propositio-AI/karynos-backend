@@ -1,4 +1,6 @@
 import os
+from collections import Counter
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
@@ -21,18 +23,17 @@ class RuleBasedProfileGenerator:
             x.get("option_text", "") for x in init_answers if x.get("option_text")
         ]
         liked = [x for x in recent_jobs if x.get("good")]
-        disliked = [x for x in recent_jobs if x.get("bad")]
 
+        # NOTE: 「興味なし」にした職業名はあえて埋め込みテキストに含めない。
+        # コサイン類似度検索は否定のニュアンスを理解できないため、disliked job の名前を
+        # テキストに含めても「似た職業」を引き寄せる方向に働いてしまい、逆効果になる。
+        # 興味なしの本当の反映は generate_recommendations 側のカテゴリ除外で行う。
         parts = []
         if answer_texts:
             parts.append("初期診断の傾向: " + " / ".join(answer_texts[:5]))
         if liked:
             parts.append(
                 "好む職業: " + ", ".join([x.get("name", "") for x in liked[:3]])
-            )
-        if disliked:
-            parts.append(
-                "避けたい職業: " + ", ".join([x.get("name", "") for x in disliked[:3]])
             )
 
         profile = "。".join([x for x in parts if x]).strip()
@@ -201,24 +202,92 @@ class VectorSearchRecommender:
 
 
 class RecommendationProcessor:
+    # 同一カテゴリが興味なしと判定される閾値（1回のミスタップでカテゴリ全体を
+    # 排除しないための余裕を持たせている）
+    _DISLIKE_CATEGORY_THRESHOLD = 2
+    # 1回のレコメンドに同一カテゴリが何件まで含まれてよいか
+    _MAX_PER_CATEGORY = 3
+
     def __init__(self, recommender: VectorSearchRecommender):
         self.recommender = recommender
 
+    @staticmethod
+    def _disliked_categories(recent_jobs: list[dict[str, Any]]) -> set[int]:
+        bad_category_counts = Counter(
+            x.get("category_id")
+            for x in recent_jobs
+            if x.get("bad") and x.get("category_id") is not None
+        )
+        return {
+            category_id
+            for category_id, count in bad_category_counts.items()
+            if count >= RecommendationProcessor._DISLIKE_CATEGORY_THRESHOLD
+        }
+
     def generate_recommendations(
-        self, profile: str, recent_jobs: list[dict[str, Any]], top_k: int = 10
+        self,
+        profile: str,
+        recent_jobs: list[dict[str, Any]],
+        top_k: int = 10,
+        category_lookup_fn: Callable[[list[int]], dict[int, int | None]] | None = None,
     ):
         viewed_ids = {int(x.get("job_id", 0)) for x in recent_jobs if x.get("job_id")}
         raw = self.recommender.search_jobs(profile=profile, top_k=top_k * 3)
 
+        # 候補上位 top_k*3 件が全部既読の場合（ユーザーがそのプロファイル付近を
+        # すでに見尽くしている場合）に備えて、未読が見つかるまで検索範囲を広げる。
+        if all(int(row.get("job_id", 0) or 0) in viewed_ids for row in raw):
+            for widened_top_k in (top_k * 10, top_k * 30):
+                wider = self.recommender.search_jobs(
+                    profile=profile, top_k=widened_top_k
+                )
+                if any(
+                    int(row.get("job_id", 0) or 0) not in viewed_ids for row in wider
+                ):
+                    raw = wider
+                    break
+
+        category_lookup: dict[int, int | None] = {}
+        if category_lookup_fn is not None:
+            candidate_ids = [int(row.get("job_id", 0) or 0) for row in raw]
+            category_lookup = category_lookup_fn(candidate_ids)
+
+        disliked_categories = self._disliked_categories(recent_jobs)
+
         output = []
+        category_counts: Counter = Counter()
         for row in raw:
             job_id = int(row.get("job_id", 0) or 0)
             if job_id in viewed_ids:
                 continue
+
+            category_id = category_lookup.get(job_id)
+            if category_id is not None:
+                if category_id in disliked_categories:
+                    continue
+                if category_counts[category_id] >= self._MAX_PER_CATEGORY:
+                    continue
+                category_counts[category_id] += 1
+
             output.append(row)
             if len(output) >= top_k:
                 break
 
+        # フィルタが厳しすぎて top_k に届かない場合は、カテゴリ制限を緩めて
+        # 「未読」であることだけを条件に残りを埋める（既読を絶対に出さない）。
+        if len(output) < top_k:
+            picked_ids = {int(row.get("job_id", 0) or 0) for row in output}
+            for row in raw:
+                if len(output) >= top_k:
+                    break
+                job_id = int(row.get("job_id", 0) or 0)
+                if job_id in viewed_ids or job_id in picked_ids:
+                    continue
+                output.append(row)
+                picked_ids.add(job_id)
+
+        # それでも 1 件も無い場合（top_k*3 件すべてが既読）だけ、最後の手段として
+        # 既読を含む raw 上位を返す（推薦を必ず返すための安全弁）。
         if not output:
             output = raw[:top_k]
         return output
