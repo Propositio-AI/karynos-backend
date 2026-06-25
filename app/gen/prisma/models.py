@@ -2208,6 +2208,7 @@ class Dreamer(bases.BaseDreamer):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: Optional[_str] = None
     last_login_at: Optional[datetime.datetime] = None
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -4500,6 +4501,14 @@ _Dreamer_fields: Dict['types.DreamerKeys', PartialModelField] = OrderedDict(
             'name': 'name_given',
             'is_list': False,
             'optional': False,
+            'type': '_str',
+            'is_relational': False,
+            'documentation': None,
+        }),
+        ('grade', {
+            'name': 'grade',
+            'is_list': False,
+            'optional': True,
             'type': '_str',
             'is_relational': False,
             'documentation': None,

@@ -227,6 +227,7 @@ model Dreamer {
   login_id              String
   name_family           String
   name_given            String
+  grade                 String?
   last_login_at         DateTime?
   created_at            DateTime             @default(now())
   updated_at            DateTime             @default(now())

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -94,7 +94,7 @@ class OnboardingService:
                     "question_id": str(answer_request.question_id),
                     "option_id": str(answer_request.option_id),
                     "question_version": answer_request.question_version,
-                    "answered_at": datetime.now(),
+                    "answered_at": datetime.now(timezone.utc),
                 }
             )
             self._ensure_success(save_response)

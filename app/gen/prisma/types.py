@@ -52307,6 +52307,7 @@ class DreamerOptionalCreateInput(TypedDict, total=False):
     """Optional arguments to the Dreamer create method"""
     dreamer_id: _str
     organization_id: Optional[_int]
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52328,6 +52329,7 @@ class DreamerOptionalCreateWithoutRelationsInput(TypedDict, total=False):
     """Optional arguments to the Dreamer create method, without relations"""
     dreamer_id: _str
     organization_id: Optional[_int]
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52372,6 +52374,7 @@ class DreamerUpdateInput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52386,6 +52389,7 @@ class DreamerUpdateManyMutationInput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52463,6 +52467,14 @@ _Dreamer_name_given_OrderByInput = TypedDict(
     total=True
 )
 
+_Dreamer_grade_OrderByInput = TypedDict(
+    '_Dreamer_grade_OrderByInput',
+    {
+        'grade': 'SortOrder',
+    },
+    total=True
+)
+
 _Dreamer_last_login_at_OrderByInput = TypedDict(
     '_Dreamer_last_login_at_OrderByInput',
     {
@@ -52511,6 +52523,7 @@ DreamerOrderByInput = Union[
     '_Dreamer_login_id_OrderByInput',
     '_Dreamer_name_family_OrderByInput',
     '_Dreamer_name_given_OrderByInput',
+    '_Dreamer_grade_OrderByInput',
     '_Dreamer_last_login_at_OrderByInput',
     '_Dreamer_created_at_OrderByInput',
     '_Dreamer_updated_at_OrderByInput',
@@ -55273,6 +55286,7 @@ class DreamerWhereInput(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55293,6 +55307,7 @@ class DreamerWhereInputRecursive1(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55313,6 +55328,7 @@ class DreamerWhereInputRecursive2(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55333,6 +55349,7 @@ class DreamerWhereInputRecursive3(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55353,6 +55370,7 @@ class DreamerWhereInputRecursive4(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55373,6 +55391,7 @@ class DreamerScalarWhereWithAggregatesInput(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55389,6 +55408,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55405,6 +55425,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55421,6 +55442,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55437,6 +55459,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55449,6 +55472,7 @@ class DreamerGroupByOutput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: _str
     last_login_at: datetime.datetime
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -55476,6 +55500,7 @@ class DreamerScalarAggregateOutput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: _str
     last_login_at: datetime.datetime
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -55492,6 +55517,7 @@ class DreamerMaxAggregateInput(TypedDict, total=False):
     login_id: bool
     name_family: bool
     name_given: bool
+    grade: bool
     last_login_at: bool
     created_at: bool
     updated_at: bool
@@ -55504,6 +55530,7 @@ class DreamerMinAggregateInput(TypedDict, total=False):
     login_id: bool
     name_family: bool
     name_given: bool
+    grade: bool
     last_login_at: bool
     created_at: bool
     updated_at: bool
@@ -55526,6 +55553,7 @@ DreamerCountAggregateInput = TypedDict(
         'login_id': bool,
         'name_family': bool,
         'name_given': bool,
+        'grade': bool,
         'last_login_at': bool,
         'created_at': bool,
         'updated_at': bool,
@@ -55542,6 +55570,7 @@ DreamerCountAggregateOutput = TypedDict(
         'login_id': int,
         'name_family': int,
         'name_given': int,
+        'grade': int,
         'last_login_at': int,
         'created_at': int,
         'updated_at': int,
@@ -55557,6 +55586,7 @@ DreamerKeys = Literal[
     'login_id',
     'name_family',
     'name_given',
+    'grade',
     'last_login_at',
     'created_at',
     'updated_at',
@@ -55569,6 +55599,7 @@ DreamerScalarFieldKeys = Literal[
     'login_id',
     'name_family',
     'name_given',
+    'grade',
     'last_login_at',
     'created_at',
     'updated_at',
