@@ -15,6 +15,9 @@ _EMBED_BATCH = 100  # OpenAI API に一度に投げる最大テキスト数
 
 
 class RuleBasedProfileGenerator:
+    # 初期診断の設問数（現在7問）。設問が増減した場合はここを合わせて変更する。
+    _MAX_INIT_ANSWERS = 7
+
     @staticmethod
     def generate_profile(
         init_answers: list[dict[str, Any]], recent_jobs: list[dict[str, Any]]
@@ -30,7 +33,12 @@ class RuleBasedProfileGenerator:
         # 興味なしの本当の反映は generate_recommendations 側のカテゴリ除外で行う。
         parts = []
         if answer_texts:
-            parts.append("初期診断の傾向: " + " / ".join(answer_texts[:5]))
+            parts.append(
+                "初期診断の傾向: "
+                + " / ".join(
+                    answer_texts[: RuleBasedProfileGenerator._MAX_INIT_ANSWERS]
+                )
+            )
         if liked:
             parts.append(
                 "好む職業: " + ", ".join([x.get("name", "") for x in liked[:3]])

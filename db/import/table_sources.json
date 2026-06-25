@@ -92,13 +92,13 @@
     },
     {
       "table": "init_questions",
-      "url": "https://drive.google.com/file/d/1lmSb66ax2EGpVvvXhWZcQmzKciV_3FQS/view?usp=drive_link",
-      "truncate": false
+      "url": "https://drive.google.com/file/d/1LfmC2TpfQAhWQw7q2Nd0TtuXNGS1aQxU/view?usp=drive_link",
+      "truncate": true
     },
     {
       "table": "init_question_options",
-      "url": "https://drive.google.com/file/d/1yujnKI_Pij5M86TvlcBJYmXHLejgphK2/view?usp=drive_link",
-      "truncate": false
+      "url": "https://drive.google.com/file/d/1mrXtmxibqDtVcjON7oCz0ma1daq3lDie/view?usp=drive_link",
+      "truncate": true
     },
     {
       "table": "user_initial_answers",
