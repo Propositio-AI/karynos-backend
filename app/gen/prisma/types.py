@@ -29335,10 +29335,10 @@ class JobFeedbackOptionalCreateInput(TypedDict, total=False):
     salary: Optional[_int]
     level: Optional[_int]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[_int]
+    holiday: Optional[_float]
     overtime_hours: Optional[_int]
     age: Optional[_int]
-    tenure_years: Optional[_int]
+    tenure_years: Optional[_float]
     marriage_age: Optional[_int]
     gender_ratio: Optional[_float]
     romance_rate: Optional[_float]
@@ -29380,10 +29380,10 @@ class JobFeedbackOptionalCreateWithoutRelationsInput(TypedDict, total=False):
     salary: Optional[_int]
     level: Optional[_int]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[_int]
+    holiday: Optional[_float]
     overtime_hours: Optional[_int]
     age: Optional[_int]
-    tenure_years: Optional[_int]
+    tenure_years: Optional[_float]
     marriage_age: Optional[_int]
     gender_ratio: Optional[_float]
     romance_rate: Optional[_float]
@@ -29440,10 +29440,10 @@ class JobFeedbackUpdateInput(TypedDict, total=False):
     salary: Optional[Union[AtomicIntInput, _int]]
     level: Optional[Union[AtomicIntInput, _int]]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[Union[AtomicIntInput, _int]]
+    holiday: Optional[Union[AtomicFloatInput, _float]]
     overtime_hours: Optional[Union[AtomicIntInput, _int]]
     age: Optional[Union[AtomicIntInput, _int]]
-    tenure_years: Optional[Union[AtomicIntInput, _int]]
+    tenure_years: Optional[Union[AtomicFloatInput, _float]]
     marriage_age: Optional[Union[AtomicIntInput, _int]]
     gender_ratio: Optional[Union[AtomicFloatInput, _float]]
     romance_rate: Optional[Union[AtomicFloatInput, _float]]
@@ -29477,10 +29477,10 @@ class JobFeedbackUpdateManyMutationInput(TypedDict, total=False):
     salary: Optional[Union[AtomicIntInput, _int]]
     level: Optional[Union[AtomicIntInput, _int]]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[Union[AtomicIntInput, _int]]
+    holiday: Optional[Union[AtomicFloatInput, _float]]
     overtime_hours: Optional[Union[AtomicIntInput, _int]]
     age: Optional[Union[AtomicIntInput, _int]]
-    tenure_years: Optional[Union[AtomicIntInput, _int]]
+    tenure_years: Optional[Union[AtomicFloatInput, _float]]
     marriage_age: Optional[Union[AtomicIntInput, _int]]
     gender_ratio: Optional[Union[AtomicFloatInput, _float]]
     romance_rate: Optional[Union[AtomicFloatInput, _float]]
@@ -32568,10 +32568,10 @@ class JobFeedbackWhereInput(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32612,10 +32612,10 @@ class JobFeedbackWhereInputRecursive1(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32656,10 +32656,10 @@ class JobFeedbackWhereInputRecursive2(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32700,10 +32700,10 @@ class JobFeedbackWhereInputRecursive3(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32744,10 +32744,10 @@ class JobFeedbackWhereInputRecursive4(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32788,10 +32788,10 @@ class JobFeedbackScalarWhereWithAggregatesInput(TypedDict, total=False):
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32824,10 +32824,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32860,10 +32860,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32896,10 +32896,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32932,10 +32932,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32964,10 +32964,10 @@ class JobFeedbackGroupByOutput(TypedDict, total=False):
     salary: _int
     level: _int
     end_time: datetime.datetime
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
@@ -33015,10 +33015,10 @@ class JobFeedbackSumAggregateOutput(TypedDict, total=False):
     job_id: _int
     salary: _int
     level: _int
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
@@ -33033,10 +33033,10 @@ class JobFeedbackScalarAggregateOutput(TypedDict, total=False):
     salary: _int
     level: _int
     end_time: datetime.datetime
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
