@@ -4,7 +4,7 @@ import os
 import re
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -18,8 +18,10 @@ from psycopg2 import OperationalError, sql
 # Postgres' COPY treats this as raw text, not a SQL keyword, so it must be
 # substituted with a real value before loading.
 _PLACEHOLDER_SUBSTITUTIONS = {
-    "CURRENT_TIMESTAMP": lambda: datetime.now(timezone.utc).isoformat(sep=" ", timespec="seconds"),
-    "NOW()": lambda: datetime.now(timezone.utc).isoformat(sep=" ", timespec="seconds"),
+    "CURRENT_TIMESTAMP": lambda: datetime.now(UTC).isoformat(
+        sep=" ", timespec="seconds"
+    ),
+    "NOW()": lambda: datetime.now(UTC).isoformat(sep=" ", timespec="seconds"),
 }
 
 
@@ -32,10 +34,14 @@ def sanitize_csv_text(raw_text: str) -> str:
     if not rows:
         return raw_text
 
-    resolved = {token: factory() for token, factory in _PLACEHOLDER_SUBSTITUTIONS.items()}
+    resolved = {
+        token: factory() for token, factory in _PLACEHOLDER_SUBSTITUTIONS.items()
+    }
     header, *data_rows = rows
     timestamp_columns = {
-        i for i, name in enumerate(header) if name.strip().lower() in _TIMESTAMP_COLUMN_NAMES
+        i
+        for i, name in enumerate(header)
+        if name.strip().lower() in _TIMESTAMP_COLUMN_NAMES
     }
     now_value = resolved["CURRENT_TIMESTAMP"]
 
@@ -48,8 +54,7 @@ def sanitize_csv_text(raw_text: str) -> str:
         return cell
 
     cleaned_rows = [
-        [clean_cell(i, cell) for i, cell in enumerate(row)]
-        for row in data_rows
+        [clean_cell(i, cell) for i, cell in enumerate(row)] for row in data_rows
     ]
 
     out = io.StringIO()
