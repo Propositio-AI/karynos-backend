@@ -1248,10 +1248,10 @@ class JobFeedback(bases.BaseJobFeedback):
     salary: Optional[_int] = None
     level: Optional[_int] = None
     end_time: Optional[datetime.datetime] = None
-    holiday: Optional[_int] = None
+    holiday: Optional[_float] = None
     overtime_hours: Optional[_int] = None
     age: Optional[_int] = None
-    tenure_years: Optional[_int] = None
+    tenure_years: Optional[_float] = None
     marriage_age: Optional[_int] = None
     gender_ratio: Optional[_float] = None
     romance_rate: Optional[_float] = None
@@ -3878,7 +3878,7 @@ _JobFeedback_fields: Dict['types.JobFeedbackKeys', PartialModelField] = OrderedD
             'name': 'holiday',
             'is_list': False,
             'optional': True,
-            'type': '_int',
+            'type': '_float',
             'is_relational': False,
             'documentation': None,
         }),
@@ -3902,7 +3902,7 @@ _JobFeedback_fields: Dict['types.JobFeedbackKeys', PartialModelField] = OrderedD
             'name': 'tenure_years',
             'is_list': False,
             'optional': True,
-            'type': '_int',
+            'type': '_float',
             'is_relational': False,
             'documentation': None,
         }),

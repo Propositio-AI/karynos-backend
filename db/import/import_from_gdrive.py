@@ -1,8 +1,10 @@
 import csv
+import io
 import os
 import re
 import tempfile
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -10,6 +12,51 @@ from urllib.parse import unquote, urlparse
 import psycopg2
 import requests
 from psycopg2 import OperationalError, sql
+
+# Some source spreadsheets export placeholder formula text instead of an
+# evaluated value (e.g. a cell literally containing "CURRENT_TIMESTAMP").
+# Postgres' COPY treats this as raw text, not a SQL keyword, so it must be
+# substituted with a real value before loading.
+_PLACEHOLDER_SUBSTITUTIONS = {
+    "CURRENT_TIMESTAMP": lambda: datetime.now(timezone.utc).isoformat(sep=" ", timespec="seconds"),
+    "NOW()": lambda: datetime.now(timezone.utc).isoformat(sep=" ", timespec="seconds"),
+}
+
+
+_TIMESTAMP_COLUMN_NAMES = {"created_at", "updated_at"}
+
+
+def sanitize_csv_text(raw_text: str) -> str:
+    reader = csv.reader(io.StringIO(raw_text))
+    rows = list(reader)
+    if not rows:
+        return raw_text
+
+    resolved = {token: factory() for token, factory in _PLACEHOLDER_SUBSTITUTIONS.items()}
+    header, *data_rows = rows
+    timestamp_columns = {
+        i for i, name in enumerate(header) if name.strip().lower() in _TIMESTAMP_COLUMN_NAMES
+    }
+    now_value = resolved["CURRENT_TIMESTAMP"]
+
+    def clean_cell(index: int, cell: str) -> str:
+        stripped = cell.strip()
+        if stripped in resolved:
+            return resolved[stripped]
+        if index in timestamp_columns and stripped == "":
+            return now_value
+        return cell
+
+    cleaned_rows = [
+        [clean_cell(i, cell) for i, cell in enumerate(row)]
+        for row in data_rows
+    ]
+
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(header)
+    writer.writerows(cleaned_rows)
+    return out.getvalue()
 
 
 def env(name: str, default: str = "") -> str:
@@ -67,14 +114,41 @@ def resolve_local_csv_path(raw_url: str) -> str | None:
     return None
 
 
+def _extract_confirm_token(response: requests.Response) -> str | None:
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            return value
+    match = re.search(r"confirm=([0-9A-Za-z_]+)", response.text)
+    if match:
+        return match.group(1)
+    return None
+
+
 def download_csv(url: str) -> tuple[str, bool]:
     local_csv = resolve_local_csv_path(url)
     if local_csv:
         return local_csv, False
 
     resolved_url = convert_google_drive_url(url)
-    response = requests.get(resolved_url, timeout=60)
+    session = requests.Session()
+    response = session.get(resolved_url, timeout=60)
     response.raise_for_status()
+
+    content_type = response.headers.get("Content-Type", "")
+    if "text/html" in content_type:
+        token = _extract_confirm_token(response)
+        if not token:
+            raise RuntimeError(
+                f"Failed to bypass Google Drive download warning for {url}"
+            )
+        file_id_match = re.search(r"id=([^&]+)", resolved_url)
+        file_id = file_id_match.group(1) if file_id_match else ""
+        response = session.get(
+            "https://drive.google.com/uc",
+            params={"export": "download", "id": file_id, "confirm": token},
+            timeout=60,
+        )
+        response.raise_for_status()
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
     tmp.write(response.content)
@@ -143,7 +217,7 @@ def copy_csv(
     csv_path: str,
     truncate: bool,
 ) -> tuple[int, int, int]:
-    with open(csv_path, newline="", encoding="utf-8") as f:
+    with open(csv_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.reader(f)
         headers = next(reader)
 
@@ -166,8 +240,9 @@ def copy_csv(
         sql.SQL(", ").join(sql.Identifier(header.strip()) for header in headers),
     )
 
-    with open(csv_path, encoding="utf-8") as f:
-        cur.copy_expert(copy_query.as_string(cur.connection), f)
+    with open(csv_path, encoding="utf-8-sig") as f:
+        sanitized = sanitize_csv_text(f.read())
+    cur.copy_expert(copy_query.as_string(cur.connection), io.StringIO(sanitized))
 
     cur.execute(
         sql.SQL("SELECT COUNT(*) FROM {};").format(sql.Identifier(staging_table_name))
@@ -255,15 +330,22 @@ def main() -> None:
 
                 tmp_csv_path, is_temp_file = download_csv(csv_url)
                 try:
-                    new_count, staged_rows, inserted_rows = copy_csv(
-                        cur, table_name, tmp_csv_path, truncate
-                    )
-                    conn.commit()
-                    skipped_rows = max(staged_rows - inserted_rows, 0)
-                    print(
-                        f"[csv-import] imported table '{table_name}' rows={new_count} "
-                        f"(staged={staged_rows}, inserted={inserted_rows}, skipped_duplicates={skipped_rows})"
-                    )
+                    try:
+                        new_count, staged_rows, inserted_rows = copy_csv(
+                            cur, table_name, tmp_csv_path, truncate
+                        )
+                        conn.commit()
+                        skipped_rows = max(staged_rows - inserted_rows, 0)
+                        print(
+                            f"[csv-import] imported table '{table_name}' rows={new_count} "
+                            f"(staged={staged_rows}, inserted={inserted_rows}, skipped_duplicates={skipped_rows})"
+                        )
+                    except Exception as table_exc:
+                        conn.rollback()
+                        print(
+                            f"[csv-import] WARNING: failed to import table '{table_name}': "
+                            f"{table_exc}. skipping and continuing."
+                        )
                 finally:
                     if is_temp_file and os.path.exists(tmp_csv_path):
                         os.remove(tmp_csv_path)
