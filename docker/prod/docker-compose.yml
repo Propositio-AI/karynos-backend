@@ -1,4 +1,35 @@
+# 本番用 Docker Compose (EC2 Single + EBS)
+#
+# 起動例 (EC2 上):
+#   docker compose --env-file ../../.env -f docker-compose.yml up -d --build
+#
+# 構成:
+#   caddy        : api.karynos.com の TLS 終端 + リバースプロキシ (80/443 公開)
+#   backend-app  : FastAPI / uvicorn (8000)。外部公開は Caddy 経由のみ
+#   karynos-db   : PostgreSQL 17.5 (EBS 永続化: pgdata ボリューム)
+#   qdrant       : ベクトル検索 (EBS 永続化: qdrant-data ボリューム)
+#
+# シークレット (.env) は SSM Parameter Store から取得して生成する想定。
+
 services:
+  caddy:
+    image: caddy:2
+    container_name: karynos-caddy
+    restart: unless-stopped
+    networks:
+      - karynos-network
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: "${API_DOMAIN:-api.karynos.com}"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - backend-app
+
   karynos-db:
     container_name: "${POSTGRES_SERVER:-karynos-db}"
     image: postgres:17.5
@@ -20,24 +51,50 @@ services:
       retries: 10
     volumes:
       - ../../db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-      - ../../db-data/postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+
+  qdrant:
+    container_name: karynos-qdrant
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    networks:
+      - karynos-network
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/6333' 2>/dev/null"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
 
   backend-app:
     container_name: backend-app
     image: karynos/be-app:latest
+    build:
+      context: ../..
+      dockerfile: docker/prod/Dockerfile
     restart: unless-stopped
     networks:
       - karynos-network
     depends_on:
       karynos-db:
         condition: service_healthy
+      qdrant:
+        condition: service_healthy
     env_file:
       - ../../.env
+    # 外部へは公開せず、ローカルデバッグ用にホストの localhost のみへバインド。
+    # 公開アクセスは Caddy (443) 経由。
     ports:
-      - "8000:8000"
-    volumes:
-      - ../../ChromaDB:/app/ChromaDB
+      - "127.0.0.1:8000:8000"
 
 networks:
   karynos-network:
     driver: bridge
+
+volumes:
+  pgdata:
+  qdrant-data:
+  caddy-data:
+  caddy-config:

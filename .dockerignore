@@ -1,0 +1,47 @@
+# Git / メタ
+.git
+.github
+.gitignore
+.dockerignore
+
+# 環境・シークレット (イメージに焼き込まない)
+.env
+.env.*
+!.env.example
+
+# ランタイムデータ (Docker ボリューム / バインドマウント)
+db-data/
+ChromaDB/
+
+# 旧マイクロサービスの残骸 (stale。本番イメージに含めない)
+services/
+
+# Python キャッシュ・仮想環境・ビルド成果物
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Prisma エンジンバイナリ (ビルド時に取得し直すため不要)
+**/prisma-query-engine-*
+
+# 生成クライアント (orval/openapi 出力。バックエンドでは未使用)
+karynos-backend-client/
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

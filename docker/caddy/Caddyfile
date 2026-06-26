@@ -1,0 +1,22 @@
+# Caddy: api.karynos.com の TLS 終端 + リバースプロキシ
+#
+# - TLS 証明書は Let's Encrypt で自動取得・自動更新される
+#   (80/443 が公開され、DNS が EC2 の Elastic IP を指している必要がある)。
+# - チャットの SSE ストリーミングが途切れないよう、レスポンスバッファリングを
+#   無効化する (flush_interval -1)。
+#
+# 環境変数 (docker compose の environment 経由で渡す):
+#   API_DOMAIN : 公開ドメイン (デフォルト api.karynos.com)
+#
+# 補足: Let's Encrypt の通知用メールを設定したい場合は、下のサイトブロック内に
+#   `tls your-email@example.com` を追記する (任意。未設定でも証明書は取得できる)。
+
+{$API_DOMAIN:api.karynos.com} {
+	encode zstd gzip
+
+	reverse_proxy backend-app:8000 {
+		# SSE / ストリーミング対応: レスポンスを即時フラッシュし、
+		# プロキシ側のバッファリングによるチャット切断を防ぐ。
+		flush_interval -1
+	}
+}
