@@ -75,6 +75,7 @@ class MatchingService:
             item = {
                 "job_id": int(job_id),
                 "name": getattr(job, "name", "") or "" if job else "",
+                "category_id": getattr(job, "category_id", None) if job else None,
                 "good": bool(getattr(history, "good", False)),
                 "bad": bool(getattr(history, "bad", False)),
                 "save": bool(getattr(history, "save", False)),
@@ -95,6 +96,16 @@ class MatchingService:
         }
         return recent_jobs, summary
 
+    def _category_lookup_fn(self, job_ids: list[int]) -> dict[int, int | None]:
+        response = job_gateway.get_jobs_by_ids(job_ids)
+        if not response.get("success"):
+            return {}
+        return {
+            int(job.job_id): job.category_id
+            for job in response.get("data") or []
+            if job.job_id is not None
+        }
+
     def _build_recommender(self) -> VectorSearchRecommender:
         recommender = VectorSearchRecommender()
         if not recommender.is_ready():
@@ -113,7 +124,10 @@ class MatchingService:
 
         recommender = self._build_recommender()
         results = RecommendationProcessor(recommender).generate_recommendations(
-            profile=profile_text, recent_jobs=recent_jobs, top_k=10
+            profile=profile_text,
+            recent_jobs=recent_jobs,
+            top_k=10,
+            category_lookup_fn=self._category_lookup_fn,
         )
 
         if not results:
@@ -161,7 +175,10 @@ class MatchingService:
 
         recommender = self._build_recommender()
         results = RecommendationProcessor(recommender).generate_recommendations(
-            profile=profile_text, recent_jobs=recent_jobs, top_k=10
+            profile=profile_text,
+            recent_jobs=recent_jobs,
+            top_k=10,
+            category_lookup_fn=self._category_lookup_fn,
         )
 
         return MatchingDebugResponse(

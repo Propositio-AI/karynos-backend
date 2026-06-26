@@ -116,10 +116,10 @@ model JobFeedback {
   salary                 Int?
   level                  Int?
   end_time               DateTime?               @db.Time(6)
-  holiday                Int?
+  holiday                Float?
   overtime_hours         Int?
   age                    Int?
-  tenure_years           Int?
+  tenure_years           Float?
   marriage_age           Int?
   gender_ratio           Float?
   romance_rate           Float?
@@ -227,6 +227,7 @@ model Dreamer {
   login_id              String
   name_family           String
   name_given            String
+  grade                 String?
   last_login_at         DateTime?
   created_at            DateTime             @default(now())
   updated_at            DateTime             @default(now())

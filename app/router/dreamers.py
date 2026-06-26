@@ -9,12 +9,19 @@ from app.services.dreamer.schemas import (
     NewDreamerGroupResponse,
     NewDreamerRequest,
     NewDreamerResponse,
+    TestLoginRequest,
+    TestLoginResponse,
     UpdateDreamerGroupRequest,
     UpdateDreamerRequest,
 )
 from app.services.dreamer.service import dreamer_service
 
 router = APIRouter()
+
+
+@router.post("/test-login", response_model=TestLoginResponse)
+async def test_login(request: TestLoginRequest):
+    return dreamer_service.test_login(request)
 
 
 @router.post("/admin/new", response_model=NewDreamerResponse)

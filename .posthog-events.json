@@ -1,0 +1,67 @@
+[
+  {
+    "event_name": "dreamer_logged_in",
+    "event_description": "Fired when a dreamer authenticates via the test-login endpoint.",
+    "file": "app/router/dreamers.py"
+  },
+  {
+    "event_name": "dreamer_created",
+    "event_description": "Fired when a new dreamer account is created.",
+    "file": "app/router/dreamers.py"
+  },
+  {
+    "event_name": "dreamer_updated",
+    "event_description": "Fired when a dreamer's profile is updated.",
+    "file": "app/router/dreamers.py"
+  },
+  {
+    "event_name": "group_created",
+    "event_description": "Fired when a new dreamer group is created.",
+    "file": "app/router/dreamers.py"
+  },
+  {
+    "event_name": "dreamer_added_to_group",
+    "event_description": "Fired when a dreamer is added to a group.",
+    "file": "app/router/dreamers.py"
+  },
+  {
+    "event_name": "onboarding_answers_submitted",
+    "event_description": "Fired when a dreamer completes onboarding by submitting their answers.",
+    "file": "app/router/onboarding.py"
+  },
+  {
+    "event_name": "job_recommendations_requested",
+    "event_description": "Fired when a dreamer requests AI-powered job recommendations via vector search.",
+    "file": "app/router/matching.py"
+  },
+  {
+    "event_name": "job_searched",
+    "event_description": "Fired when a dreamer performs a keyword search for jobs.",
+    "file": "app/router/jobs.py"
+  },
+  {
+    "event_name": "job_marked_good",
+    "event_description": "Fired when a dreamer marks a job recommendation as good (interested).",
+    "file": "app/router/jobs.py"
+  },
+  {
+    "event_name": "job_marked_bad",
+    "event_description": "Fired when a dreamer marks a job recommendation as bad (not interested).",
+    "file": "app/router/jobs.py"
+  },
+  {
+    "event_name": "job_saved",
+    "event_description": "Fired when a dreamer saves a job for later review.",
+    "file": "app/router/jobs.py"
+  },
+  {
+    "event_name": "chat_conversation_created",
+    "event_description": "Fired when a dreamer starts a new AI chat conversation.",
+    "file": "app/router/chats.py"
+  },
+  {
+    "event_name": "chat_message_sent",
+    "event_description": "Fired when a dreamer sends a message in an AI chat conversation.",
+    "file": "app/router/chats.py"
+  }
+]

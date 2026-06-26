@@ -29335,10 +29335,10 @@ class JobFeedbackOptionalCreateInput(TypedDict, total=False):
     salary: Optional[_int]
     level: Optional[_int]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[_int]
+    holiday: Optional[_float]
     overtime_hours: Optional[_int]
     age: Optional[_int]
-    tenure_years: Optional[_int]
+    tenure_years: Optional[_float]
     marriage_age: Optional[_int]
     gender_ratio: Optional[_float]
     romance_rate: Optional[_float]
@@ -29380,10 +29380,10 @@ class JobFeedbackOptionalCreateWithoutRelationsInput(TypedDict, total=False):
     salary: Optional[_int]
     level: Optional[_int]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[_int]
+    holiday: Optional[_float]
     overtime_hours: Optional[_int]
     age: Optional[_int]
-    tenure_years: Optional[_int]
+    tenure_years: Optional[_float]
     marriage_age: Optional[_int]
     gender_ratio: Optional[_float]
     romance_rate: Optional[_float]
@@ -29440,10 +29440,10 @@ class JobFeedbackUpdateInput(TypedDict, total=False):
     salary: Optional[Union[AtomicIntInput, _int]]
     level: Optional[Union[AtomicIntInput, _int]]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[Union[AtomicIntInput, _int]]
+    holiday: Optional[Union[AtomicFloatInput, _float]]
     overtime_hours: Optional[Union[AtomicIntInput, _int]]
     age: Optional[Union[AtomicIntInput, _int]]
-    tenure_years: Optional[Union[AtomicIntInput, _int]]
+    tenure_years: Optional[Union[AtomicFloatInput, _float]]
     marriage_age: Optional[Union[AtomicIntInput, _int]]
     gender_ratio: Optional[Union[AtomicFloatInput, _float]]
     romance_rate: Optional[Union[AtomicFloatInput, _float]]
@@ -29477,10 +29477,10 @@ class JobFeedbackUpdateManyMutationInput(TypedDict, total=False):
     salary: Optional[Union[AtomicIntInput, _int]]
     level: Optional[Union[AtomicIntInput, _int]]
     end_time: Optional[datetime.datetime]
-    holiday: Optional[Union[AtomicIntInput, _int]]
+    holiday: Optional[Union[AtomicFloatInput, _float]]
     overtime_hours: Optional[Union[AtomicIntInput, _int]]
     age: Optional[Union[AtomicIntInput, _int]]
-    tenure_years: Optional[Union[AtomicIntInput, _int]]
+    tenure_years: Optional[Union[AtomicFloatInput, _float]]
     marriage_age: Optional[Union[AtomicIntInput, _int]]
     gender_ratio: Optional[Union[AtomicFloatInput, _float]]
     romance_rate: Optional[Union[AtomicFloatInput, _float]]
@@ -32568,10 +32568,10 @@ class JobFeedbackWhereInput(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32612,10 +32612,10 @@ class JobFeedbackWhereInputRecursive1(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32656,10 +32656,10 @@ class JobFeedbackWhereInputRecursive2(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32700,10 +32700,10 @@ class JobFeedbackWhereInputRecursive3(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32744,10 +32744,10 @@ class JobFeedbackWhereInputRecursive4(TypedDict, total=False):
     salary: Union[None, _int, 'types.IntFilter']
     level: Union[None, _int, 'types.IntFilter']
     end_time: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    holiday: Union[None, _int, 'types.IntFilter']
+    holiday: Union[None, _float, 'types.FloatFilter']
     overtime_hours: Union[None, _int, 'types.IntFilter']
     age: Union[None, _int, 'types.IntFilter']
-    tenure_years: Union[None, _int, 'types.IntFilter']
+    tenure_years: Union[None, _float, 'types.FloatFilter']
     marriage_age: Union[None, _int, 'types.IntFilter']
     gender_ratio: Union[None, _float, 'types.FloatFilter']
     romance_rate: Union[None, _float, 'types.FloatFilter']
@@ -32788,10 +32788,10 @@ class JobFeedbackScalarWhereWithAggregatesInput(TypedDict, total=False):
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32824,10 +32824,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32860,10 +32860,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32896,10 +32896,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32932,10 +32932,10 @@ class JobFeedbackScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False
     salary: Union[_int, 'types.IntWithAggregatesFilter']
     level: Union[_int, 'types.IntWithAggregatesFilter']
     end_time: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
-    holiday: Union[_int, 'types.IntWithAggregatesFilter']
+    holiday: Union[_float, 'types.FloatWithAggregatesFilter']
     overtime_hours: Union[_int, 'types.IntWithAggregatesFilter']
     age: Union[_int, 'types.IntWithAggregatesFilter']
-    tenure_years: Union[_int, 'types.IntWithAggregatesFilter']
+    tenure_years: Union[_float, 'types.FloatWithAggregatesFilter']
     marriage_age: Union[_int, 'types.IntWithAggregatesFilter']
     gender_ratio: Union[_float, 'types.FloatWithAggregatesFilter']
     romance_rate: Union[_float, 'types.FloatWithAggregatesFilter']
@@ -32964,10 +32964,10 @@ class JobFeedbackGroupByOutput(TypedDict, total=False):
     salary: _int
     level: _int
     end_time: datetime.datetime
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
@@ -33015,10 +33015,10 @@ class JobFeedbackSumAggregateOutput(TypedDict, total=False):
     job_id: _int
     salary: _int
     level: _int
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
@@ -33033,10 +33033,10 @@ class JobFeedbackScalarAggregateOutput(TypedDict, total=False):
     salary: _int
     level: _int
     end_time: datetime.datetime
-    holiday: _int
+    holiday: _float
     overtime_hours: _int
     age: _int
-    tenure_years: _int
+    tenure_years: _float
     marriage_age: _int
     gender_ratio: _float
     romance_rate: _float
@@ -52307,6 +52307,7 @@ class DreamerOptionalCreateInput(TypedDict, total=False):
     """Optional arguments to the Dreamer create method"""
     dreamer_id: _str
     organization_id: Optional[_int]
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52328,6 +52329,7 @@ class DreamerOptionalCreateWithoutRelationsInput(TypedDict, total=False):
     """Optional arguments to the Dreamer create method, without relations"""
     dreamer_id: _str
     organization_id: Optional[_int]
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52372,6 +52374,7 @@ class DreamerUpdateInput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52386,6 +52389,7 @@ class DreamerUpdateManyMutationInput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: Optional[_str]
     last_login_at: Optional[datetime.datetime]
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -52463,6 +52467,14 @@ _Dreamer_name_given_OrderByInput = TypedDict(
     total=True
 )
 
+_Dreamer_grade_OrderByInput = TypedDict(
+    '_Dreamer_grade_OrderByInput',
+    {
+        'grade': 'SortOrder',
+    },
+    total=True
+)
+
 _Dreamer_last_login_at_OrderByInput = TypedDict(
     '_Dreamer_last_login_at_OrderByInput',
     {
@@ -52511,6 +52523,7 @@ DreamerOrderByInput = Union[
     '_Dreamer_login_id_OrderByInput',
     '_Dreamer_name_family_OrderByInput',
     '_Dreamer_name_given_OrderByInput',
+    '_Dreamer_grade_OrderByInput',
     '_Dreamer_last_login_at_OrderByInput',
     '_Dreamer_created_at_OrderByInput',
     '_Dreamer_updated_at_OrderByInput',
@@ -55273,6 +55286,7 @@ class DreamerWhereInput(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55293,6 +55307,7 @@ class DreamerWhereInputRecursive1(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55313,6 +55328,7 @@ class DreamerWhereInputRecursive2(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55333,6 +55349,7 @@ class DreamerWhereInputRecursive3(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55353,6 +55370,7 @@ class DreamerWhereInputRecursive4(TypedDict, total=False):
     login_id: Union[_str, 'types.StringFilter']
     name_family: Union[_str, 'types.StringFilter']
     name_given: Union[_str, 'types.StringFilter']
+    grade: Union[None, _str, 'types.StringFilter']
     last_login_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeFilter']
@@ -55373,6 +55391,7 @@ class DreamerScalarWhereWithAggregatesInput(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55389,6 +55408,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive1(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55405,6 +55425,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive2(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55421,6 +55442,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive3(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55437,6 +55459,7 @@ class DreamerScalarWhereWithAggregatesInputRecursive4(TypedDict, total=False):
     login_id: Union[_str, 'types.StringWithAggregatesFilter']
     name_family: Union[_str, 'types.StringWithAggregatesFilter']
     name_given: Union[_str, 'types.StringWithAggregatesFilter']
+    grade: Union[_str, 'types.StringWithAggregatesFilter']
     last_login_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     created_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
     updated_at: Union[datetime.datetime, 'types.DateTimeWithAggregatesFilter']
@@ -55449,6 +55472,7 @@ class DreamerGroupByOutput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: _str
     last_login_at: datetime.datetime
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -55476,6 +55500,7 @@ class DreamerScalarAggregateOutput(TypedDict, total=False):
     login_id: _str
     name_family: _str
     name_given: _str
+    grade: _str
     last_login_at: datetime.datetime
     created_at: datetime.datetime
     updated_at: datetime.datetime
@@ -55492,6 +55517,7 @@ class DreamerMaxAggregateInput(TypedDict, total=False):
     login_id: bool
     name_family: bool
     name_given: bool
+    grade: bool
     last_login_at: bool
     created_at: bool
     updated_at: bool
@@ -55504,6 +55530,7 @@ class DreamerMinAggregateInput(TypedDict, total=False):
     login_id: bool
     name_family: bool
     name_given: bool
+    grade: bool
     last_login_at: bool
     created_at: bool
     updated_at: bool
@@ -55526,6 +55553,7 @@ DreamerCountAggregateInput = TypedDict(
         'login_id': bool,
         'name_family': bool,
         'name_given': bool,
+        'grade': bool,
         'last_login_at': bool,
         'created_at': bool,
         'updated_at': bool,
@@ -55542,6 +55570,7 @@ DreamerCountAggregateOutput = TypedDict(
         'login_id': int,
         'name_family': int,
         'name_given': int,
+        'grade': int,
         'last_login_at': int,
         'created_at': int,
         'updated_at': int,
@@ -55557,6 +55586,7 @@ DreamerKeys = Literal[
     'login_id',
     'name_family',
     'name_given',
+    'grade',
     'last_login_at',
     'created_at',
     'updated_at',
@@ -55569,6 +55599,7 @@ DreamerScalarFieldKeys = Literal[
     'login_id',
     'name_family',
     'name_given',
+    'grade',
     'last_login_at',
     'created_at',
     'updated_at',

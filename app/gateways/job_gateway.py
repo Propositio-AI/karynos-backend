@@ -11,6 +11,7 @@ from app.gen.prisma.models import History, Job
 @dataclass
 class JobProjection:
     job_id: int | None
+    category_id: int | None
     name: str
     description: str
     imgs: list[str]
@@ -140,6 +141,7 @@ class JobGateway(BasePrismaGateway):
 
         return JobProjection(
             job_id=getattr(job, "job_id", None),
+            category_id=getattr(job, "category_id", None),
             name=getattr(job, "name", "") or "",
             description=getattr(job, "description", "") or "",
             imgs=[
@@ -211,6 +213,22 @@ class JobGateway(BasePrismaGateway):
     def list_jobs(self) -> GatewayResult[list[JobProjection]]:
         try:
             rows = run_prisma(self.prisma.job.find_many(include=self._job_include()))
+            normalized = [self._normalize_job(row) for row in rows]
+            return {"success": True, "message": ["Success"], "data": normalized}
+        except Exception as exc:
+            return {"success": False, "message": [str(exc)], "data": None}
+
+    def get_jobs_by_ids(self, job_ids: list[int]) -> GatewayResult[list[JobProjection]]:
+        """候補job_idのカテゴリ等をまとめて取得する（1件ずつ問い合わせるより効率的）。"""
+        if not job_ids:
+            return {"success": True, "message": ["Success"], "data": []}
+        try:
+            rows = run_prisma(
+                self.prisma.job.find_many(
+                    where={"job_id": {"in": [int(jid) for jid in job_ids]}},
+                    include=self._job_include(),
+                )
+            )
             normalized = [self._normalize_job(row) for row in rows]
             return {"success": True, "message": ["Success"], "data": normalized}
         except Exception as exc:
