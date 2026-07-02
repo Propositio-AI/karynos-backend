@@ -14,6 +14,20 @@
 {$API_DOMAIN:api.karynos.com} {
 	encode zstd gzip
 
+	# 末尾スラッシュ無しの /api/v1/chat (会話作成エンドポイント) を内部リライトして
+	# FastAPI の trailing-slash 307 リダイレクトを回避する。
+	#
+	# 背景: 生成 API クライアントで末尾スラッシュ付きパスは /api/v1/chat/ だけ。
+	# ブラウザがこれを叩くと Amplify(Next.js) 側で 308 により末尾スラッシュが除去され
+	# /api/v1/chat になる。すると FastAPI が 307 で /api/v1/chat/ へ戻そうとするが、
+	# その Location は Host ヘッダ由来の http://api.karynos.com/... という
+	# クロスオリジン + mixed-content の絶対 URL になる。https の www ページから
+	# プリフライトが必要な POST をこのリダイレクトで追従することはブラウザが許さず、
+	# チャットの会話作成が失敗する。Caddy 内部でスラッシュを補えば 307 が出ず、
+	# 応答は同一オリジン内で完結する。
+	@chat_collection path /api/v1/chat
+	rewrite @chat_collection /api/v1/chat/
+
 	reverse_proxy backend-app:8000 {
 		# SSE / ストリーミング対応: レスポンスを即時フラッシュし、
 		# プロキシ側のバッファリングによるチャット切断を防ぐ。
