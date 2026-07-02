@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/recommend", response_model=MatchingResponse)
-async def recommend(dreamer_id: UUID = Depends(get_current_user_id)):
+def recommend(dreamer_id: UUID = Depends(get_current_user_id)):
     try:
         return matching_service.recommend(dreamer_id)
     except HTTPException:
@@ -20,7 +20,7 @@ async def recommend(dreamer_id: UUID = Depends(get_current_user_id)):
 
 
 @router.get("/recommend/debug", response_model=MatchingDebugResponse)
-async def recommend_debug(dreamer_id: UUID = Depends(get_current_user_id)):
+def recommend_debug(dreamer_id: UUID = Depends(get_current_user_id)):
     try:
         return matching_service.recommend_debug(dreamer_id)
     except HTTPException:

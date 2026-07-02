@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/questions", response_model=GetInitQuestionsResponse)
-async def get_questions(version: int = 1):
+def get_questions(version: int = 1):
     try:
         return onboarding_service.get_questions(version)
     except HTTPException:
@@ -25,7 +25,7 @@ async def get_questions(version: int = 1):
 
 
 @router.post("/answers", response_model=InitAnswersSubmitResponse)
-async def submit_answers(
+def submit_answers(
     request: SubmitInitAnswersRequest,
     dreamer_id: UUID = Depends(get_current_user_id),
 ):
@@ -38,7 +38,7 @@ async def submit_answers(
 
 
 @router.get("/answers/history", response_model=list[InitAnswerHistoryItem])
-async def get_answer_history(
+def get_answer_history(
     dreamer_id: UUID = Depends(get_current_user_id),
 ):
     try:
